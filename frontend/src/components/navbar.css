@@ -1,0 +1,17 @@
+.navbar-bg {
+    background-color: #8c1975;
+}
+
+@media(min-width: 992px) {
+    .igi-header{
+        font-size: 3.5rem;
+        line-height: 1.2;
+    }
+}
+
+@media(max-width: 992px) {
+    .igi-header{
+        font-size: 2.0rem;
+        line-height: 1.2;
+    }
+}
