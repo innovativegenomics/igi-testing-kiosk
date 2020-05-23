@@ -6,6 +6,8 @@ import Landing from './components/landing.component';
 import Dashboard from './components/dashboard.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import $ from 'jquery';
+import Popper from 'popper.js';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import './App.css';
 

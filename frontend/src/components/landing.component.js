@@ -49,7 +49,7 @@ export default class Landing extends Component {
                         </div>
                         <div className='row p-0 m-0'>
                             <div className='col p-0 m-0'>
-                                <Link className='btn btn-primary text-light' to='/dashboard'>
+                                <Link className='btn btn-lg btn-primary text-light' to='/dashboard'>
                                     Login with CalNet ID
                                 </Link>
                             </div>
