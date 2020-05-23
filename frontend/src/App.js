@@ -4,10 +4,9 @@ import { Provider } from "react-redux";
 
 import Landing from './components/landing.component';
 import Dashboard from './components/dashboard.component';
+import Scheduler from './components/scheduler.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
-import $ from 'jquery';
-import Popper from 'popper.js';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import './App.css';
 
@@ -18,6 +17,7 @@ export default class App extends Component {
         <div className='App'>
           <Route path='/' exact component={Landing} />
           <Route path='/dashboard' component={Dashboard}/>
+          <Route path='/scheduler' component={Scheduler}/>
         </div>
       </Router>
     );
