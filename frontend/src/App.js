@@ -1,26 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Provider } from "react-redux";
+
+import Landing from './components/landing.component';
+
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.bundle';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+export default class App extends Component {
+  render() {
+    return (
+      <Router>
+        <div className='App'>
+          <Route path='/' exact component={Landing} />
+        </div>
+      </Router>
+    );
+  }
 }
-
-export default App;
