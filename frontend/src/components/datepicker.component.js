@@ -1,6 +1,15 @@
 import React, { Component } from 'react';
+import ReactDOM from 'react-dom';
+// import { Button, FormControl, InputGroup, Overlay, Popover } from 'react-bootstrap/dist/react-bootstrap';
+import Button from 'react-bootstrap/Button';
+import FormControl from 'react-bootstrap/FormControl';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Overlay from 'react-bootstrap/Overlay';
+import Popover from 'react-bootstrap/Popover';
 import PropTypes from 'prop-types';
 import './datepicker.css';
+
+let instanceCount = 0;
 
 class CalendarHeader extends Component {
     constructor(props) {
@@ -235,55 +244,27 @@ Calendar.propTypes = {
 export default class DatePicker extends Component {
     constructor(props) {
         super(props);
-    }
-    getDefaultProps = () => {
-        const language = typeof window !== 'undefined' && window.navigator ? (window.navigator.userLanguage || window.navigator.language || '').toLowerCase() : '';
-        const dateFormat = !language || language === 'en-us' ? 'MM/DD/YYYY' : 'DD/MM/YYYY';
-        return {
-            cellPadding: '5px',
-            dayLabels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-            monthLabels: ['January', 'February', 'March', 'April',
-                'May', 'June', 'July', 'August', 'September',
-                'October', 'November', 'December'],
-            clearButtonElement: '×',
-            previousButtonElement: '<',
-            nextButtonElement: '>',
-            calendarPlacement: 'bottom',
-            dateFormat: dateFormat,
-            showClearButton: true,
-            autoFocus: false,
-            disabled: false,
-            showTodayButton: false,
-            todayButtonLabel: 'Today',
-            autoComplete: 'on',
-            showWeeks: false,
-            instanceCount: instanceCount++,
-            style: {
-                width: '100%'
-            },
-            roundedCorners: false,
-            noValidate: false
-        };
-    }
-    getInitialState = () => {
         if (this.props.value && this.props.defaultValue) {
             throw new Error('Conflicting DatePicker properties \'value\' and \'defaultValue\'');
         }
-        const state = this.makeDateValues(this.props.value || this.props.defaultValue);
+        this.state = this.makeDateValues(this.props.value || this.props.defaultValue);
         if (this.props.weekStartsOn > 1) {
-            state.dayLabels = this.props.dayLabels
+            this.state.dayLabels = this.props.dayLabels
                 .slice(this.props.weekStartsOn)
                 .concat(this.props.dayLabels.slice(0, this.props.weekStartsOn));
         } else if (this.props.weekStartsOn === 1) {
-            state.dayLabels = this.props.dayLabels.slice(1).concat(this.props.dayLabels.slice(0,1));
+            this.state.dayLabels = this.props.dayLabels.slice(1).concat(this.props.dayLabels.slice(0,1));
         } else {
-            state.dayLabels = this.props.dayLabels;
+            this.state.dayLabels = this.props.dayLabels;
         }
-        state.focused = false;
-        state.inputFocused = false;
-        state.placeholder = this.props.placeholder || this.props.dateFormat;
-        state.separator = this.props.dateFormat.match(/[^A-Z]/)[0];
-        return state;
+        this.state.focused = false;
+        this.state.inputFocused = false;
+        this.state.placeholder = this.props.placeholder || this.props.dateFormat;
+        this.state.separator = this.props.dateFormat.match(/[^A-Z]/)[0];
+
+        this.hiddenInputRef = React.createRef();
+        this.overlayContainerRef = React.createRef();
+        this.inputRef = React.createRef();
     }
     makeDateValues = (isoString) => {
         let displayDate;
@@ -335,7 +316,7 @@ export default class DatePicker extends Component {
         if (this.props.onBlur) {
             const event = document.createEvent('CustomEvent');
             event.initEvent('Change Date', true, false);
-            ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
+            this.hiddenInputRef.current.dispatchEvent(event);
             this.props.onBlur(event);
         }
     }
@@ -349,7 +330,7 @@ export default class DatePicker extends Component {
             if (this.props.onBlur) {
                 const event = document.createEvent('CustomEvent');
                 event.initEvent('Change Date', true, false);
-                ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
+                this.hiddenInputRef.current.dispatchEvent(event);
                 this.props.onBlur(event);
             }
         }
@@ -371,7 +352,7 @@ export default class DatePicker extends Component {
         if (this.props.onFocus) {
             const event = document.createEvent('CustomEvent');
             event.initEvent('Change Date', true, false);
-            ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
+            this.hiddenInputRef.current.dispatchEvent(event);
             this.props.onFocus(event);
         }
     }
@@ -456,7 +437,7 @@ export default class DatePicker extends Component {
     
     handleInputChange = () => {
     
-        const originalValue = ReactDOM.findDOMNode(this.refs.input).value;
+        const originalValue = this.inputRef.current.value;
         const inputValue = originalValue.replace(/(-|\/\/)/g, this.state.separator).slice(0,10);
     
         if (!inputValue) {
@@ -535,7 +516,7 @@ export default class DatePicker extends Component {
         if (this.props.onBlur) {
             const event = document.createEvent('CustomEvent');
             event.initEvent('Change Date', true, false);
-            ReactDOM.findDOMNode(this.refs.hiddenInput).dispatchEvent(event);
+            this.hiddenInputRef.current.dispatchEvent(event);
             this.props.onBlur(event);
         }
     
@@ -567,7 +548,7 @@ export default class DatePicker extends Component {
             value: this.state.inputValue || '',
             required: this.props.required,
             placeholder: this.state.focused ? this.props.dateFormat : this.state.placeholder,
-            ref: 'input',
+            ref: this.inputRef,
             disabled: this.props.disabled,
             onFocus: this.handleFocus,
             onBlur: this.handleBlur,
@@ -582,7 +563,7 @@ export default class DatePicker extends Component {
             onKeyDown={this.handleKeyDown}
             value={this.state.inputValue || ''}
             required={this.props.required}
-            ref="input"
+            ref={this.inputRef}
             type="text"
             className={this.props.className}
             style={this.props.style}
@@ -599,7 +580,6 @@ export default class DatePicker extends Component {
 
     return (
             <InputGroup
-                ref="inputGroup"
                 bsClass={this.props.showClearButton ? this.props.bsClass : ''}
                 bsSize={this.props.bsSize}
                 id={this.props.id ? `${this.props.id}_group` : null}>
@@ -608,8 +588,8 @@ export default class DatePicker extends Component {
                     rootClose={true}
                     onHide={this.handleHide}
                     show={this.state.focused}
-                    container={() => this.props.calendarContainer || ReactDOM.findDOMNode(this.refs.overlayContainer)}
-                    target={() => ReactDOM.findDOMNode(this.refs.input)}
+                    container={() => this.props.calendarContainer || this.overlayContainerRef.current}
+                    target={() => this.inputRef.current}
                     placement={this.state.calendarPlacement}
                     delayHide={200}>
                     <Popover id={`date-picker-popover-${this.props.instanceCount}`} className="date-picker-popover" title={calendarHeader}>
@@ -629,18 +609,22 @@ export default class DatePicker extends Component {
                     />
                     </Popover>
                 </Overlay>
-                <div ref="overlayContainer" style={{position: 'relative'}} />
-                <input ref="hiddenInput" type="hidden" id={this.props.id} name={this.props.name} value={this.state.value || ''} data-formattedvalue={this.state.value ? this.state.inputValue : ''} />
-                {this.props.showClearButton && !this.props.customControl && <InputGroup.Addon
+                <div ref={this.overlayContainerRef} style={{position: 'relative'}} />
+                <input ref={this.hiddenInputRef} type="hidden" id={this.props.id} name={this.props.name} value={this.state.value || ''} data-formattedvalue={this.state.value ? this.state.inputValue : ''} />
+                {this.props.showClearButton && !this.props.customControl && <InputGroup.Append
                     onClick={this.props.disabled ? null : this.clear}
                     style={{cursor:(this.state.inputValue && !this.props.disabled) ? 'pointer' : 'not-allowed'}}>
                     <div style={{opacity: (this.state.inputValue && !this.props.disabled) ? 1 : 0.5}}>
                     {this.props.clearButtonElement}
                     </div>
-                </InputGroup.Addon>}
+                </InputGroup.Append>}
                 {this.props.children}
             </InputGroup>
         );
+        // return (
+        //     <InputGroup>
+        //     </InputGroup>
+        // );
     }
 }
 
@@ -705,4 +689,33 @@ DatePicker.propTypes = {
     ]),
     onInvalid: PropTypes.func,
     noValidate: PropTypes.bool
+};
+
+const language = typeof window !== 'undefined' && window.navigator ? (window.navigator.userLanguage || window.navigator.language || '').toLowerCase() : '';
+const dateFormat = !language || language === 'en-us' ? 'MM/DD/YYYY' : 'DD/MM/YYYY';
+
+DatePicker.defaultProps = {
+    cellPadding: '5px',
+    dayLabels: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+    monthLabels: ['January', 'February', 'March', 'April',
+        'May', 'June', 'July', 'August', 'September',
+        'October', 'November', 'December'],
+    clearButtonElement: '×',
+    previousButtonElement: '<',
+    nextButtonElement: '>',
+    calendarPlacement: 'bottom',
+    dateFormat: dateFormat,
+    showClearButton: true,
+    autoFocus: false,
+    disabled: false,
+    showTodayButton: false,
+    todayButtonLabel: 'Today',
+    autoComplete: 'on',
+    showWeeks: false,
+    instanceCount: instanceCount++,
+    style: {
+        width: '100%'
+    },
+    roundedCorners: false,
+    noValidate: false
 };
