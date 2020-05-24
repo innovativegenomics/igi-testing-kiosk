@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "description": "Backend server for IGI testing kiosk app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/innovativegenomics/igi-testing-kiosk.git"
+  },
+  "author": "Andy Cate",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/innovativegenomics/igi-testing-kiosk/issues"
+  },
+  "homepage": "https://github.com/innovativegenomics/igi-testing-kiosk#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cas-authentication": "0.0.8",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "mongoose": "^5.9.15"
+  }
+}
