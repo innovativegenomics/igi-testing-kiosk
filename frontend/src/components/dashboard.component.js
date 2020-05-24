@@ -47,6 +47,9 @@ export default class Dashboard extends Component {
     componentWillUnmount() {
         window.removeEventListener('resize', this.onResize);
     }
+    handleSchedule = () => {
+        this.props.history.push('/scheduler');
+    }
     render() {
         return (
             <div>
@@ -59,7 +62,7 @@ export default class Dashboard extends Component {
                             </button>
                         </div>
                         <div className='p-2'>
-                            <PopoverButton disabled={this.state.upcomingAppointment} color='primary' enabledContent='' buttonText='Schedule new appointment' disabledContent={'You can only have one future scheduled appointment at a time. If you would like to reschedule your current appointment, click \'View my appointments\'.'}/>
+                            <PopoverButton onClick={this.handleSchedule} disabled={this.state.upcomingAppointment} color='primary' enabledContent='' buttonText='Schedule new appointment' disabledContent={'You can only have one future scheduled appointment at a time. If you would like to reschedule your current appointment, click \'View my appointments\'.'}/>
                         </div>
                     </div>
                 </div>
