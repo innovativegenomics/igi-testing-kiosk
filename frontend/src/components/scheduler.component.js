@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 
 import Navbar from './navbar.component';
 import './scheduler.css';
-import DatePicker from './datepicker.component';
+import Calendar from './calendar.component';
 
 export default class Scheduler extends Component {
     constructor(props) {
@@ -38,12 +38,10 @@ export default class Scheduler extends Component {
         return (
             <div>
                 <Navbar heightChangeCallback={this.navHeightChange}/>
-                <div className='position-absolute overflow-hidden scheduler' style={{height: `${this.state.height}px`, top: `${this.state.navHeight}px`}}>
-                    <Form>
-                        <Form.Group>
-                            <DatePicker value={this.state.selectedDate} onChange={this.handleDateChange}/>
-                        </Form.Group>
-                    </Form>
+                <div className='position-absolute overflow-hidden scheduler' style={{minHeight: `${this.state.height}px`, top: `${this.state.navHeight}px`}}>
+                    <div className='d-flex flex-column justify-content-center h-100 align-items-center pt-3'>
+                        <Calendar/>
+                    </div>
                 </div>
             </div>
         );
