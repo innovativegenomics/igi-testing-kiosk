@@ -1,7 +1,5 @@
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
 import './landing.css';
-import axios from 'axios';
 
 import igiLogo from '../media/igi_logo.png';
 import berkeleySeal from '../media/berkeley_seal.png';

@@ -8,6 +8,7 @@ class UserRoutes {
         this.cas = cas;
         this.router = express.Router();
         this.router.get('/login', cas.bounce, this.loginRequest);
+        this.router.get('/logout', cas.logout);
         this.router.post('/user_info', cas.block, this.userInfoRequest);
     }
     loginRequest = (req, res) => {

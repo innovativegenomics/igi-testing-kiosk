@@ -15,7 +15,7 @@ var casOptions = {
     service_url     : 'https://kiosk.andycate.com',
     cas_version     : '3.0',
     renew           : false,
-    is_dev_mode     : false,
+    is_dev_mode     : true,
     dev_mode_user   : 'andycate',
     dev_mode_info   : {},
     session_name    : 'cas_user',
