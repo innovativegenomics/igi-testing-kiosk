@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import './landing.css';
+import axios from 'axios';
 
 import igiLogo from '../media/igi_logo.png';
 import berkeleySeal from '../media/berkeley_seal.png';
@@ -26,6 +27,9 @@ export default class Landing extends Component {
     componentWillUnmount() {
         window.removeEventListener('resize', this.onResize);
     }
+    handleLoginButton = () => {
+        window.open('/api/users/login', '_self');
+    }
     render() {
         return (
             <div>
@@ -49,9 +53,9 @@ export default class Landing extends Component {
                         </div>
                         <div className='row p-0 m-0'>
                             <div className='col p-0 m-0'>
-                                <Link className='btn btn-lg btn-primary text-light' to='/dashboard'>
+                                <button className='btn btn-lg btn-primary text-light' onClick={this.handleLoginButton}>
                                     Login with CalNet ID
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </div>
