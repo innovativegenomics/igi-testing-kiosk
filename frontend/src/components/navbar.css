@@ -1,5 +1,9 @@
 .navbar-bg {
-    background-color: #8c1975;
+    background-color: #003262;
+}
+
+.igi-header {
+    color: #FDB515;
 }
 
 @media(min-width: 992px) {

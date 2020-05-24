@@ -14,7 +14,7 @@ class Navbar extends Component {
         return (
             <nav className='navbar fixed-top navbar-light navbar-bg p-3' ref={this.navRef} style={{fontFamily: 'Raleway'}}>
                 <ul className='navbar-nav mx-auto'>
-                    <li className='igi-header text-white font-weight-light'>
+                    <li className='igi-header font-weight-light'>
                         IGI Testing Kiosk
                     </li>
                 </ul>
