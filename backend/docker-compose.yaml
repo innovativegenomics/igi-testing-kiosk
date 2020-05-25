@@ -11,3 +11,14 @@ services:
     ports:
       - '5000:5000'
     command: "npm start"
+  database:
+    image: 'mongo'
+    container_name: 'kioskdb'
+    environment: 
+      - MONGO_INITDB_DATABASE=kiosk
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    ports:
+      - '27017-27019:27017-27019'
