@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
+import axios from 'axios';
 import $ from 'jquery';
 import Popper from 'popper.js';
 
 import './dashboard.css';
-import Navbar from './navbar.component';
+import Navbar from '../navbar.component';
+import { connect } from 'react-redux';
+
+import { setUserLoading, setUserUnauthed, setUserData } from '../../actions/authActions';
 
 class PopoverButton extends Component {
     render() {
@@ -23,13 +27,12 @@ class PopoverButton extends Component {
     }
 }
 
-export default class Dashboard extends Component {
+class Dashboard extends Component {
     constructor(props) {
         super(props);
         this.state = {
             navHeight: 0,
             height: 0,
-            upcomingAppointment: false
         };
     }
     navHeightChange = h => {
@@ -43,6 +46,17 @@ export default class Dashboard extends Component {
         $(function () {
             $('[data-toggle="popover"]').popover()
         });
+        if(!this.props.isAuthenticated) {
+            this.props.setLoading();
+            axios.post('/api/users/user_info').then(res => {
+                console.log(res);
+                this.props.setUserData(res.data);
+            }).catch(err => {
+                console.log(err);
+                this.props.setUnauthenticated();
+                this.props.history.push('/');
+            });
+        }
     }
     componentWillUnmount() {
         window.removeEventListener('resize', this.onResize);
@@ -51,13 +65,14 @@ export default class Dashboard extends Component {
         this.props.history.push('/scheduler');
     }
     render() {
+        console.log(this.props);
         return (
             <div>
                 <Navbar heightChangeCallback={this.navHeightChange}/>
                 <div className='position-absolute overflow-hidden dashboard' style={{height: `${this.state.height}px`, top: `${this.state.navHeight}px`}}>
                     <div className='d-flex flex-column justify-content-center h-100'>
                         <div className='p-2'>
-                            <button className='btn btn-lg btn-outline-success' data-toggle='popover' data-trigger='hover' data-content={(this.state.upcomingAppointment ? 'You have an upcoming appointment' : 'You have no upcoming appointments')}>
+                            <button className='btn btn-lg btn-outline-success' data-toggle='popover' data-trigger='hover' data-content={(this.props ? 'You have an upcoming appointment' : 'You have no upcoming appointments')}>
                                 View my appointments
                             </button>
                         </div>
@@ -70,3 +85,26 @@ export default class Dashboard extends Component {
         );
     }
 }
+
+const mapStateToProps = (state, ownProps) => {
+    return {
+        isAuthenticated: state.auth.isAuthenticated,
+        user: state.auth.user
+    };
+}
+
+const mapDispatchToProps = (dispatch, ownProps) => {
+    return {
+        setLoading: () => {
+            dispatch(setUserLoading())
+        },
+        setUnauthenticated: () => {
+            dispatch(setUserUnauthed())
+        },
+        setUserData: (data) => {
+            dispatch(setUserData(data))
+        }
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);

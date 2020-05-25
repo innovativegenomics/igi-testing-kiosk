@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import './landing.css';
 
-import igiLogo from '../media/igi_logo.png';
-import berkeleySeal from '../media/berkeley_seal.png';
-import Navbar from './navbar.component';
+import igiLogo from '../../media/igi_logo.png';
+import berkeleySeal from '../../media/berkeley_seal.png';
+import Navbar from '../navbar.component';
 
 export default class Landing extends Component {
     constructor(props) {

@@ -50,6 +50,14 @@ const UserSchema = new Schema({
         type: Boolean,
         default: false
     },
+    alertEmail: {
+        type: Boolean,
+        default: true
+    },
+    alertPhone: {
+        type: Boolean,
+        default: true
+    },
     appointments: {
         next: {
             location: Number,

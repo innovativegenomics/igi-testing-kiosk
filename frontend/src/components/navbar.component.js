@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import './navbar.css';
+import { Link } from 'react-router-dom';
+
+class LogoutLink extends Component {
+    render() {
+        return (
+            <a className={'btn btn-danger ' + ((this.props.visible) ? '' : 'invisible')} href={this.props.address}>CalNet Logout</a>
+        );
+    }
+}
 
 class Navbar extends Component {
     constructor(props) {
@@ -12,15 +22,32 @@ class Navbar extends Component {
     }
     render() {
         return (
-            <nav className='navbar fixed-top navbar-light navbar-bg p-3' ref={this.navRef} style={{fontFamily: 'Raleway'}}>
-                <ul className='navbar-nav mx-auto'>
-                    <li className='igi-header font-weight-light'>
-                        IGI Testing Kiosk
-                    </li>
-                </ul>
+            <nav className='navbar navbar-expand-lg fixed-top navbar-light navbar-bg p-3' ref={this.navRef} style={{fontFamily: 'Raleway'}}>
+                <div className='navbar-brand igi-header font-weight-light mx-auto'>IGI Testing Kiosk</div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div className='collapse navbar-collapse' id='navbarCollapse'>
+                    <ul class="navbar-nav mr-auto">
+                        <li className='nav-item pl-5'>
+                            <Link className='text-white lead' to='/about'>
+                                About
+                            </Link>
+                        </li>
+                    </ul>
+                    <form className='form-inline'>
+                        <LogoutLink visible={this.props.logoutVisible} address='/api/users/logout' />
+                    </form>
+                </div>
             </nav>
         );
     }
 }
 
-export default Navbar;
+const mapStateToProps = (state, ownProps) => {
+    return {
+        logoutVisible: state.auth.isAuthenticated
+    };
+}
+
+export default connect(mapStateToProps)(Navbar);

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 import Form from 'react-bootstrap/Form';
 
-import Navbar from './navbar.component';
+import Navbar from '../navbar.component';
 import './scheduler.css';
 import Calendar from './calendar.component';
 
