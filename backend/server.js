@@ -15,8 +15,8 @@ var sess = {
     secure: false,
 };
 if(process.env.PRODUCTION === 'true') {
-    app.set('trust proxy', 1);
-    sess.cookie.secure = true;
+    // app.set('trust proxy', 1);
+    // sess.cookie.secure = true;
 }
 app.use(session(sess));
 
