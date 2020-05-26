@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const Cas = require('../../cas');
-const User = require("../../models/User");
 
 router.get('/login', Cas.bounce, (req, res) => {
     console.log('login' + req.session);

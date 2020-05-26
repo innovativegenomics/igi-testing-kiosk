@@ -1,5 +1,3 @@
-const Settings = require('./models/Settings');
-
 const settings = {
     dayQuota: 100,
     locations: [{name: 'Cafe Strada', map: 'https://goo.gl/maps/DhWBNcEZC544DS1u5'},

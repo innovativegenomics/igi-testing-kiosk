@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const Cas = require('../../cas');
-const User = require("../../models/User");
 
 // router.post('/get_month_appointments', (req, res) => {
 //     if(!req.body.month) {

@@ -1,7 +1,11 @@
 const express = require("express");
 const session = require('express-session');
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
+
+if(process.env.NODE_ENV !== 'production') {
+    require('dotenv').config({path: path.resolve(process.cwd(), '.env.dev')});
+}
+const { verifyTables } = require('./database');
 
 const users = require('./routes/api/users');
 const scheduler = require('./routes/api/scheduler');
@@ -15,8 +19,8 @@ var sess = {
     secure: false,
 };
 if(process.env.PRODUCTION === 'true') {
-    // app.set('trust proxy', 1);
-    // sess.cookie.secure = true;
+    app.set('trust proxy', 1);
+    sess.cookie.secure = true;
 }
 app.use(session(sess));
 
@@ -28,18 +32,17 @@ app.use(
 );
 app.use(bodyParser.json());
 // DB Config
-const db = require("./config/keys").mongoURI;
-// Connect to MongoDB
-mongoose
-    .connect(
-        db,
-        { useNewUrlParser: true, useUnifiedTopology: true }
-    )
-    .then(() => console.log("MongoDB successfully connected"))
-    .catch(err => console.log(err));
+// verify database
+verifyTables().then(res => {
+    console.log('database initialized successfully!');
+    // register services that rely on the database
+}).catch(err => {
+    console.log('Database initialization error!');
+    process.exit();
+});
 
 app.use("/api/users", users);
 app.use("/api/scheduler", scheduler);
 
-const port = process.env.PORT || 5000; // process.env.port is Heroku's port if you choose to deploy the app there
+const port = process.env.PORT || 5000;
 app.listen(port, () => console.log(`Server up and running on port ${port} !`));
