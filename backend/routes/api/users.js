@@ -2,57 +2,52 @@ const express = require("express");
 const router = express.Router();
 
 const Cas = require('../../cas');
+const { containsUser, insertUser, updateLastUserSignin, checkAllUserInfoPresent } = require('../../database');
 
-router.get('/login', Cas.bounce, (req, res) => {
-    console.log('login' + req.session);
-    const calnetID = req.session.cas_user;
-    User.findOne({calnetID: calnetID}, (err, doc) => {
-        if(!doc) {
-            // get the user's name from Cal LDAP
-            const firstName = 'Andy';
-            const lastName = 'Cate';
-            const dob = new Date(2002, 10, 3);
-            const email = 'and164v@gmail.com';
-            const phone = 5106121014;
-            User.countDocuments({}, (err, c) => {
-                const newUser = new User({
-                    firstName: firstName,
-                    lastName: lastName,
-                    calnetID: calnetID,
-                    queueNumber: c,
-                    dateOfBirth: dob,
-                    email: email,
-                    phone: phone
-                });
-                newUser.save((err, docs) => {
-                    if(!err) {
-                        return res.redirect('/dashboard');
-                    }
-                    return res.status(500).send('could not createn new user');
-                });
+router.get('/login', Cas.bounce, (request, response) => {
+    const calnetID = request.session.cas_user;
+    return containsUser(calnetID).then(res => {
+        if(!res) {
+            // insert new user
+            return insertUser(calnetID).then(res => {
+                response.redirect('/newuser');
+            }).catch(err => {
+                console.error(`Error inserting new user ${calnetID}`);
+                console.error(err.stack);
+                response.status(500);
+                return err;
             });
         } else {
-            User.updateOne({calnetID: calnetID}, {lastSignIn: Date.now()}, (err, doc) => {
-                console.log('redirecting');
-                return res.redirect('/dashboard');
+            // update last signin
+            return updateLastUserSignin(calnetID).then(res => {
+                // redirect to dashboard
+                return checkAllUserInfoPresent(calnetID);
+            }).then(res => {
+                if(res) {
+                    response.redirect('/dashboard');
+                } else {
+                    response.redirect('/newuser');
+                }
+            }).catch(err => {
+                console.error(`Error updating last signin date for user ${calnetID}`);
+                console.error(err.stack);
+                response.status(500);
+                return err;
             });
         }
+    }).catch(err => {
+        console.error(`error checking if user ${calnetID} exists!`);
+        console.error(err.stack);
+        response.status(500);
     });
 });
 
 router.get('/logout', Cas.logout);
 
-router.post('/user_info', Cas.block, (req, res) => {
-    // get calnetID from session
-    const calnetID = req.session.cas_user;
-    // return user data
-    console.log(req.session);
-    User.findOne({calnetID: calnetID}, (err, doc) => {
-        if(!doc) {
-            return res.status(404).json({error: 'User not found!'});
-        }
-        return res.json(doc);
-    });
+router.get('/get_user_profile', Cas.block, (request, response) => {
+});
+
+router.post('/set_user_profile', Cas.block, (request, response) => {
 });
 
 module.exports = router;
