@@ -27,6 +27,7 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "google-libphonenumber": "^3.2.10",
+    "node-cron": "^2.0.3",
     "pg": "^8.2.1"
   },
   "devDependencies": {

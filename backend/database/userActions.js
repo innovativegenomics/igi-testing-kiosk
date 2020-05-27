@@ -1,19 +1,5 @@
-const fs = require('fs');
 const { Pool } = require('pg');
 const pool = new Pool();
-
-const USER_TABLE_CREATE = `create table users(firstname text default '',
-                                           lastname text default '',
-                                           calnetid text primary key,
-                                           email text unique not null,
-                                           phone text unique null,
-                                           datejoined timestamptz not null default now(),
-                                           queuenumber serial unique not null,
-                                           lastsignin timestamptz not null default now(),
-                                           admin bool not null default 'f',
-                                           alertemail bool not null default 't',
-                                           alertphone bool not null default 'f');`;
-const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 
 const getAbort = (client) => {
     return err => {
@@ -28,10 +14,20 @@ const getAbort = (client) => {
     }
 }
 
-const SESSION_TABLE_EXISTS = 'select exists (select from information_schema.tables where table_name=\'session\')';
-const CREATE_SESSION_TABLE = fs.readFileSync('node_modules/connect-pg-simple/table.sql').toString();
-module.exports.verifyTables = () => {
-    const userTablePromise = pool.connect().then(client => {
+const USER_TABLE_CREATE = `create table users(firstname text default '',
+                                           lastname text default '',
+                                           calnetid text primary key,
+                                           email text unique not null,
+                                           phone text unique null,
+                                           datejoined timestamptz not null default now(),
+                                           queuenumber serial unique not null,
+                                           lastsignin timestamptz not null default now(),
+                                           admin bool not null default 'f',
+                                           alertemail bool not null default 't',
+                                           alertphone bool not null default 'f');`;
+const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
+module.exports.verifyUserTable = () => {
+    return pool.connect().then(client => {
         const abort = getAbort(client);
         return client.query('begin').then(res => {
             return client.query(USER_TABLE_EXISTS);
@@ -51,29 +47,6 @@ module.exports.verifyTables = () => {
             });
         });
     });
-    const sessionTablePromise = pool.connect().then(client => {
-        const abort = getAbort(client);
-        return client.query('begin').then(res => {
-            return client.query(SESSION_TABLE_EXISTS);
-        }).then(res => {
-            if(!res.rows[0].exists) {
-                console.log('session table doesn\'t exist, creating one!');
-                return true;
-            }
-            return false;
-        }).then(res => {
-            if(res) {
-                return client.query(CREATE_SESSION_TABLE);
-            }
-        }).then(res => {
-            return client.query('end transaction');
-        }).then(res => {
-            client.release();
-        }).catch(err => {
-            return abort(err);
-        });
-    });
-    return Promise.all([userTablePromise, sessionTablePromise]);
 }
 
 const GET_USER_BY_ID_QUERY = 'select * from users where calnetid=$1';

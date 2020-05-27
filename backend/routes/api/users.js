@@ -14,7 +14,7 @@ const { containsUser,
         updateEmail,
         updatePhone,
         updateAlertEmail,
-        updateAlertPhone } = require('../../database');
+        updateAlertPhone } = require('../../database/userActions');
 
 router.get('/login', Cas.bounce, (request, response) => {
     const calnetid = request.session.cas_user;

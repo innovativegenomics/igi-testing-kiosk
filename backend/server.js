@@ -7,7 +7,7 @@ const pg = require('pg');
 if(process.env.NODE_ENV !== 'production') {
     require('dotenv').config({path: path.resolve(process.cwd(), '.env.dev')});
 }
-const { verifyTables } = require('./database');
+const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
 // const scheduler = require('./routes/api/scheduler');
@@ -44,6 +44,7 @@ verifyTables().then(res => {
     const port = process.env.PORT || 5000;
     app.listen(port, () => console.log(`Server up and running on port ${port} !`));
 }).catch(err => {
-    console.log('Database initialization error!');
+    console.error('Database initialization error!');
+    console.error(err.stack);
     process.exit();
 });
