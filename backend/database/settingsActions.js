@@ -1,7 +1,7 @@
 const { Pool } = require('pg');
 const pool = new Pool();
 
-module.exports.Settings = Settings = {
+var settings = {
     onerowid: true,
     dayquota: 100,
     locations: [],
@@ -9,6 +9,11 @@ module.exports.Settings = Settings = {
     starttime: [8, 0],
     endtime: [13, 0],
     increment: 10,
+    buffer: 3,
+    currentindex: 0
+};
+module.exports.Settings = () => {
+    return settings;
 };
 
 const getAbort = (client) => {
@@ -47,12 +52,15 @@ const SETTINGS_TABLE_CREATE = `create table settings (onerowid bool primary key 
                                                       starttime integer[2] not null,
                                                       endtime integer[2] not null,
                                                       increment integer not null,
+                                                      buffer integer not null,
+                                                      currentindex integer not null,
                                                       constraint onerow_uni check (onerowid))`;
-const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6)`;
+const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6, $7, $8)`;
 const SETTINGS_UPDATE_CURRENT = `select * from settings where onerowid=true`;
 const SETTINGS_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='settings')`;
 const rowUpdate = data => {
-    Settings = {...data};
+    data = JSON.parse(data);
+    settings = {...data};
 }
 pool.connect().then(client => {
     client.on('notification', data => { rowUpdate(data.payload) });
@@ -67,16 +75,18 @@ module.exports.verifySettingsTable = () => {
             if(!res.rows[0].exists) {
                 console.log('Settings table doesn\'t exist, creating one!');
                 return client.query(SETTINGS_TABLE_CREATE).then(res => {
-                    return client.query(SETTINGS_ROW_CREATE, [Settings.dayquota,
-                                                              Settings.locations,
-                                                              Settings.days,
-                                                              Settings.starttime,
-                                                              Settings.endtime,
-                                                              Settings.increment]);
+                    return client.query(SETTINGS_ROW_CREATE, [settings.dayquota,
+                                                              settings.locations,
+                                                              settings.days,
+                                                              settings.starttime,
+                                                              settings.endtime,
+                                                              settings.increment,
+                                                              settings.buffer,
+                                                              settings.currentindex]);
                 });
             } else {
                 return client.query(SETTINGS_UPDATE_CURRENT).then(res => {
-                    rowUpdate(res.rows[0]);
+                    settings = {...res.rows[0]};
                 });
             }
         }).then(res => {

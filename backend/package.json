@@ -7,7 +7,7 @@
     "server": "nodemon server.js",
     "client": "npm start --prefix ../frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -27,11 +27,13 @@
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "google-libphonenumber": "^3.2.10",
+    "moment": "^2.26.0",
     "node-cron": "^2.0.3",
     "pg": "^8.2.1"
   },
   "devDependencies": {
     "concurrently": "^5.2.0",
+    "mocha": "^7.2.0",
     "nodemon": "^2.0.4"
   }
 }
