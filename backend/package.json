@@ -31,6 +31,8 @@
     "node-cron": "^2.0.3",
     "nodemailer": "^6.4.8",
     "pg": "^8.2.1",
+    "qrcode": "^1.4.4",
+    "short-uuid": "^3.1.1",
     "twilio": "^3.44.0"
   },
   "devDependencies": {
