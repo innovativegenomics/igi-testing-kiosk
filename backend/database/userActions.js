@@ -63,6 +63,15 @@ module.exports.getUserByID = id => {
     });
 }
 
+const GET_USERS_BY_ID_QUERY = 'select * from users where calnetid in (';
+module.exports.getUsersByID = ids => {
+    var getUsersQuery = GET_USERS_BY_ID_QUERY;
+    for(var i of ids) {
+        getUsersQuery = getUsersQuery + '\'' + i + '\','
+    }
+    return pool.query(getUsersQuery.slice(0, getUsersQuery.length-1) + ')').then(res => res.rows).catch(err => { console.log(err.stack); return [] });
+}
+
 const CONTAINS_USER_QUERY = 'select count(distinct calnetid) from users where calnetid=$1';
 module.exports.containsUser = id => {
     return pool.query(CONTAINS_USER_QUERY, [id]).then(res => {
@@ -198,7 +207,9 @@ module.exports.updateUserSchedules = date => {
                 return Settings().dayquota-res.rows[0].count;
             }).then(res => {
                 const remainingLatestDate = res;
+                var expiredCopy = [];
                 return client.query(FIND_EXPIRED_USERS, [date]).then(expired => {
+                    expiredCopy = [...expired.rows];
                     if(Math.min(expired.rowCount, remainingLatestDate) > 0) {
                         var latestUsers = SET_MUTIPLE_USER_DATES;
                         const loopTimes = Math.min(expired.rowCount, remainingLatestDate);
@@ -225,13 +236,14 @@ module.exports.updateUserSchedules = date => {
                         }
                         nextDate.add(1, 'day');
                     }
-                    return Promise.all(updatePromises);
+                    return Promise.all(updatePromises).then(r => expiredCopy);
                 });
             });
         }).then(res => {
-            return client.query('end transaction');
+            return client.query('end transaction').then(r => res);
         }).then(res => {
             client.release();
+            return res;
         }).catch(err => {
             return abort(err);
         });

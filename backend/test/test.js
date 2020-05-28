@@ -7,7 +7,7 @@ const moment = require('moment');
 
 const { Settings } = require('../database/settingsActions');
 const { verifyTables } = require('../database/database');
-const { insertUser, updateUserSchedules } = require('../database/userActions');
+const { insertUser, updateUserSchedules, getUsersByID } = require('../database/userActions');
 
 describe('database', () => { describe('#verifyTables()', () => {
     before((done) => {
@@ -46,11 +46,11 @@ describe('Settings', () => {
 });
 
 describe('userActions', () => {
-    describe('#insertUser', function(done) {
+    describe('#insertUser', function() {
         this.timeout(15000);
         it('should not throw error', done => {
             var promiseChain = Promise.resolve(0);
-            for(var i = 0;i < 18;i++) {
+            for(var i = 0;i < 20;i++) {
                 promiseChain = promiseChain.then(res => {
                     const now = Date.now();
                     return insertUser(`user${res}`).then(r => {
@@ -62,10 +62,16 @@ describe('userActions', () => {
             promiseChain.then(r => done()).catch(e => {done(e)});
         });
     });
-    describe('#updateUserSchedules', function(done) {
+    describe('#updateUserSchedules', function() {
         it('should not throw error', done => {
             const date = moment().add(1, 'day');
-            updateUserSchedules(date.toDate()).then(r => done()).catch(e => done(e));
+            updateUserSchedules(date.toDate()).then(r => {console.log(r);done()}).catch(e => done(e));
+        });
+    });
+    describe('#getUsersByID', function() {
+        it('should return users 1-5', done => {
+            const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+            getUsersByID(users).then(res => {console.log(res.map(x => x.calnetid));done()}).catch(err => done(err));
         });
     });
 });
