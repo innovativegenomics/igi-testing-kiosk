@@ -5,7 +5,9 @@ import { USER_LOADING_ACTION,
 const initialState = {
     isAuthenticated: false,
     user: {},
-    loading: false
+    loading: false,
+    fullUser: false,
+    hasSlot: false
 };
 export default (state = initialState, action) => {
     console.log(action);
@@ -13,20 +15,36 @@ export default (state = initialState, action) => {
         case USER_LOADING_ACTION:
             return {
                 ...state,
-                loading: true
+                loading: true,
+                isAuthenticated: false,
+                user: {}
             };
         case USER_NOT_AUTHED:
             return {
                 ...state,
                 loading: false,
-                isAuthenticated: false
+                isAuthenticated: false,
+                user: {}
             };
         case USER_LOADED_ACTION:
+            const updates = {};
+            if(((action.data.firstname && action.data.firstname !== '') || (state.user.firstname && state.user.firstname !== '')) &&
+                ((action.data.lastname && action.data.lastname !== '') || (state.user.lastname && state.user.lastname !== ''))) {
+                updates.fullUser = true;
+            } else {
+                updates.fullUser = false;
+            }
+            if(action.data.appointmentslot || state.user.appointmentslot) {
+                updates.hasSlot = true;
+            } else {
+                updates.hasSlot = false;
+            }
             return {
                 ...state,
                 isAuthenticated: true,
                 loading: false,
-                user: action.data
+                user: {...state.user, ...action.data},
+                ...updates
             };
         default:
             return state;
