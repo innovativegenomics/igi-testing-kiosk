@@ -21,7 +21,7 @@ const USERS_COUNT = `select count(*) from users`;
 const DATE_COUNT_QUERY = `select count(*) from users where nextappointment=$1`;
 const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
 const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 order by datejoined asc`;
-const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, appointmentuid=null, location=null, appointmentslot=null where calnetid in (`;
+const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, appointmentuid=null, location=null, appointmentslot=null, reschedulecount=0 where calnetid in (`;
 /**
  * @param {Date} date - current date
  */
@@ -122,7 +122,7 @@ module.exports.getOpenSlots = (year, month, day) => {
 
 const GET_SLOT_COUNT = `select count(*) from users where nextappointment=$1 and location=$2 and appointmentslot=$3`;
 const GET_USER_BY_ID = `select * from users where calnetid=$1`;
-const SET_USER_SLOT = `update users set location=$1, appointmentslot=$2, appointmentuid=$3 where calnetid=$4`;
+const SET_USER_SLOT = `update users set location=$1, appointmentslot=$2, appointmentuid=$3, reschedulecount=reschedulecount+1 where calnetid=$4`;
 /**
  * @param {string} user - calnetid of user requesting schedule
  * @param {string} location - name of location user is requesting
@@ -144,7 +144,8 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
             const nextAppointmentEnd = moment(res.rows[0].nextappointment).hour(Settings().endtime);
             return querySlot.isBetween(nextAppointmentStart, nextAppointmentEnd, undefined, '[)') &&
                 querySlot.diff(nextAppointmentStart, 'minutes') % Settings().increment === 0 &&
-                Settings().locations.includes(location);
+                Settings().locations.includes(location) &&
+                res.rows[0].reschedulecount < Settings().maxreschedules;
         }).then(res => {
             if(res) {
                 return client.query(GET_SLOT_COUNT, [querySlot.toDate(), location, querySlot.toDate()]);

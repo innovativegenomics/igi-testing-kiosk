@@ -26,7 +26,7 @@ const schedule = () => {
                 promises.push(sendOpenSlotEmail(u.email, day.format('dddd, MMMM DD')));
             }
             if(u.alertphone && u.phone) {
-                promises.push(sendConfirmText(u.phone, day.format('dddd, MMMM DD')));
+                promises.push(sendOpenSlotText(u.phone, day.format('dddd, MMMM DD')));
             }
         }
         return Promise.all(promises);

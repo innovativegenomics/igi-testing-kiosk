@@ -4,7 +4,10 @@ const moment = require('moment');
 const short = require('short-uuid');
 
 const Cas = require('../../cas');
+const { Settings } = require('../../database/settingsActions');
 const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot } = require('../../database/scheduleActions');
+const { getUserByID } = require('../../database/userActions');
+const { sendConfirmEmail, sendConfirmText } = require('../../messager');
 
 router.post('/get_time_slots', Cas.block, (request, response) => {
     // for a given day, verify user is scheduled for that day
@@ -48,7 +51,29 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
     const uid = short('0123456789').new();
     assignSlot(calnetid, request.body.location, requestMoment.year(), requestMoment.month(), requestMoment.day(), requestMoment.hour(), requestMoment.minute(), uid).then(res => {
         if(res) {
-            response.json({uid: uid});
+            // send messages
+            return getUserByID(calnetid).then(res => {
+                response.json({uid: uid});
+                if(res.alertemail) {
+                    sendConfirmEmail(res.email, uid, requestMoment.format('dddd, MMMM DD'),
+                                                        requestMoment.format('h:mmA'),
+                                                        requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
+                                                        request.body.location,
+                                                        Settings().locationlinks[request.body.location]).catch(err => {
+                        console.error(`failed sending confirmation email to ${calnetid}`);
+                    });
+                }
+                if(res.alertphone && res.phone) {
+                    sendConfirmText(res.phone, requestMoment.format('dddd, MMMM DD'),
+                                                requestMoment.format('h:mmA'),
+                                                requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
+                                                request.body.location,
+                                                Settings().locationlinks[request.body.location]).catch(err => {
+                        console.error(`failed sending confirmation text to ${calnetid}`);
+                        console.error(err.stack);
+                    });
+                }
+            });
         } else {
             response.status(400).json({error: 'couldnt assign slot'});
         }

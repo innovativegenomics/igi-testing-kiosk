@@ -29,7 +29,8 @@ const USER_TABLE_CREATE = `create table users(firstname text default '',
                                            nextappointment date not null,
                                            appointmentslot timestamptz null,
                                            location text null,
-                                           appointmentuid text null);`;
+                                           appointmentuid text null,
+                                           reschedulecount integer not null default 0);`;
 const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 module.exports.verifyUserTable = () => {
     return pool.connect().then(client => {

@@ -11,6 +11,7 @@ var settings = {
     endtime: 13, // end time hour
     increment: 10, // time slot increment in minutes
     buffer: 3, // number of people per time slot
+    maxreschedules: 10,
 };
 module.exports.Settings = () => {
     return settings;
@@ -54,8 +55,9 @@ const SETTINGS_TABLE_CREATE = `create table settings (onerowid bool primary key 
                                                       endtime integer not null,
                                                       increment integer not null,
                                                       buffer integer not null,
+                                                      maxreschedules integer not null,
                                                       constraint onerow_uni check (onerowid))`;
-const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6, $7, $8)`;
+const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6, $7, $8, $9)`;
 const SETTINGS_UPDATE_CURRENT = `select * from settings where onerowid=true`;
 const SETTINGS_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='settings')`;
 const rowUpdate = data => {
@@ -82,7 +84,8 @@ module.exports.verifySettingsTable = () => {
                                                               settings.starttime,
                                                               settings.endtime,
                                                               settings.increment,
-                                                              settings.buffer]);
+                                                              settings.buffer,
+                                                              settings.maxreschedules]);
                 });
             } else {
                 return client.query(SETTINGS_UPDATE_CURRENT).then(res => {
