@@ -59,7 +59,7 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
                                                         requestMoment.format('h:mmA'),
                                                         requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
                                                         request.body.location,
-                                                        Settings().locationlinks[request.body.location]).catch(err => {
+                                                        Settings().locationlinks[Settings().locations.indexOf(request.body.location)]).catch(err => {
                         console.error(`failed sending confirmation email to ${calnetid}`);
                     });
                 }
@@ -68,7 +68,7 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
                                                 requestMoment.format('h:mmA'),
                                                 requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
                                                 request.body.location,
-                                                Settings().locationlinks[request.body.location]).catch(err => {
+                                                Settings().locationlinks[Settings().locations.indexOf(request.body.location)]).catch(err => {
                         console.error(`failed sending confirmation text to ${calnetid}`);
                         console.error(err.stack);
                     });
