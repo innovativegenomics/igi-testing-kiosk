@@ -6,6 +6,8 @@ import store from './store';
 
 import Landing from './components/public/landing.component';
 import About from './components/public/about.component';
+import PrivateRoute from './components/private/privateRoute.component';
+import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
 
@@ -21,8 +23,9 @@ export default class App extends Component {
           <div className='App'>
             <Route path='/' exact component={Landing} />
             <Route path='/about' component={About} />
-            <Route path='/dashboard' component={Dashboard}/>
-            <Route path='/scheduler' component={Scheduler}/>
+            <PrivateRoute path='/newuser' component={NewUser}/>
+            <PrivateRoute path='/dashboard' component={Dashboard}/>
+            <PrivateRoute path='/scheduler' component={Scheduler}/>
           </div>
         </Router>
       </Provider>

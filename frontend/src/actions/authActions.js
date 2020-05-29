@@ -5,7 +5,7 @@ import axios from 'axios';
 
 export const loadUser = () => dispatch => {
     dispatch(setUserLoading());
-    return axios.post('/api/users/get/profile').then(res => {
+    return axios.get('/api/users/get/profile').then(res => {
         if(res.status === 200) {
             dispatch(setUserData(res.data));
         } else {
@@ -27,19 +27,6 @@ export const setFirstName = firstname => dispatch => {
         }
     }).catch(err => {
         console.error('could not set first name');
-        console.error(err);
-    });
-}
-
-export const setLastName = lastname => dispatch => {
-    return axios.post('/api/users/set/lastname', {lastname: lastname}).then(res => {
-        if(res.status === 200) {
-            dispatch(setUserData({lastname: lastname}));
-        } else {
-            console.error('could not set last name: ' + res.status);
-        }
-    }).catch(err => {
-        console.error('could not set last name');
         console.error(err);
     });
 }

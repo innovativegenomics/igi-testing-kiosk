@@ -24,11 +24,11 @@ class Navbar extends Component {
         return (
             <nav className='navbar navbar-expand-lg fixed-top navbar-light navbar-bg p-3' ref={this.navRef} style={{fontFamily: 'Raleway'}}>
                 <div className='navbar-brand igi-header font-weight-light mx-auto'>IGI Testing Kiosk</div>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span className="navbar-toggler-icon"></span>
                 </button>
                 <div className='collapse navbar-collapse' id='navbarCollapse'>
-                    <ul class="navbar-nav mr-auto">
+                    <ul className="navbar-nav mr-auto">
                         <li className='nav-item pl-5'>
                             <Link className='text-white lead' to='/about'>
                                 About

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import './landing.css';
 
 import igiLogo from '../../media/igi_logo.png';
 import berkeleySeal from '../../media/berkeley_seal.png';
 import Navbar from '../navbar.component';
 
-export default class Landing extends Component {
+class Landing extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -26,7 +27,11 @@ export default class Landing extends Component {
         window.removeEventListener('resize', this.onResize);
     }
     handleLoginButton = () => {
-        window.open('/api/users/login', '_self');
+        if(this.props.isAuthenticated) {
+            this.props.history.push('/dashboard');
+        } else {
+            window.open('/api/users/login', '_self');
+        }
     }
     render() {
         return (
@@ -62,3 +67,9 @@ export default class Landing extends Component {
         );
     }
 }
+
+const mapStateToProps = state => ({
+    isAuthenticated: state.auth.isAuthenticated
+});
+
+export default connect(mapStateToProps)(Landing);

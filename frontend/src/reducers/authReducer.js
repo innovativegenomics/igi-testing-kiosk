@@ -6,16 +6,18 @@ const initialState = {
     isAuthenticated: false,
     user: {},
     loading: false,
+    failed: false,
     fullUser: false,
     hasSlot: false
 };
 export default (state = initialState, action) => {
-    console.log(action);
     switch(action.type) {
         case USER_LOADING_ACTION:
+            console.log('set loading');
             return {
                 ...state,
                 loading: true,
+                failed: false,
                 isAuthenticated: false,
                 user: {}
             };
@@ -24,6 +26,7 @@ export default (state = initialState, action) => {
                 ...state,
                 loading: false,
                 isAuthenticated: false,
+                failed: true,
                 user: {}
             };
         case USER_LOADED_ACTION:
@@ -43,6 +46,7 @@ export default (state = initialState, action) => {
                 ...state,
                 isAuthenticated: true,
                 loading: false,
+                failed: false,
                 user: {...state.user, ...action.data},
                 ...updates
             };

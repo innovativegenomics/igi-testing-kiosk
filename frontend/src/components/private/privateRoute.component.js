@@ -1,0 +1,49 @@
+import React from 'react';
+import { Route, Redirect } from 'react-router-dom';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
+
+import { loadUser } from '../../actions/authActions';
+
+const PrivateRoute = ({ component: Component, auth, loadUser, ...rest }) => (
+    <Route
+        {...rest}
+        render={props => {
+            if(!auth.isAuthenticated && !auth.loading) {
+                loadUser();
+                console.log('here');
+            }
+            if(auth.isAuthenticated) {
+                if(!auth.user.fullUser && rest.path !== '/newuser') {
+                    return <Redirect to='/newuser' />;
+                } else {
+                    return <Component {...props} />;
+                }
+            } else if(auth.loading) {
+                return <div>Authenticating...</div>;
+            } else if(auth.failed) {
+                return <Redirect to='/' />;
+            }
+            return <div>Authenticating...</div>;
+        }}
+    />
+);
+
+// class PrivateRoute extends Route {
+//   render() {
+//     if(this.props.auth === true) {
+//       return (this.props.children);
+//     } else {
+//       return (<Redirect to='/login' />);
+//     }
+//   }
+// }
+
+PrivateRoute.propTypes = {
+    auth: PropTypes.object.isRequired,
+    loadUser: PropTypes.func.isRequired,
+};
+const mapStateToProps = state => ({
+    auth: state.auth
+});
+export default connect(mapStateToProps, { loadUser })(PrivateRoute);

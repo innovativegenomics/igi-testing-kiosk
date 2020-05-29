@@ -46,17 +46,6 @@ class Dashboard extends Component {
         $(function () {
             $('[data-toggle="popover"]').popover()
         });
-        if(!this.props.isAuthenticated) {
-            this.props.setLoading();
-            axios.post('/api/users/user_info').then(res => {
-                console.log(res);
-                this.props.setUserData(res.data);
-            }).catch(err => {
-                console.log(err);
-                this.props.setUnauthenticated();
-                this.props.history.push('/');
-            });
-        }
     }
     componentWillUnmount() {
         window.removeEventListener('resize', this.onResize);
@@ -65,7 +54,7 @@ class Dashboard extends Component {
         this.props.history.push('/scheduler');
     }
     render() {
-        console.log(this.props);
+        console.log(this.props.auth);
         return (
             <div>
                 <Navbar heightChangeCallback={this.navHeightChange}/>
@@ -86,25 +75,8 @@ class Dashboard extends Component {
     }
 }
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        isAuthenticated: state.auth.isAuthenticated,
-        user: state.auth.user
-    };
-}
+const mapStateToProps = state => ({
+    auth: state.auth
+});
 
-const mapDispatchToProps = (dispatch, ownProps) => {
-    return {
-        setLoading: () => {
-            dispatch(setUserLoading())
-        },
-        setUnauthenticated: () => {
-            dispatch(setUserUnauthed())
-        },
-        setUserData: (data) => {
-            dispatch(setUserData(data))
-        }
-    };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(Dashboard);
+export default connect(mapStateToProps)(Dashboard);
