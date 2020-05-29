@@ -4,6 +4,7 @@ const session = require('express-session');
 const bodyParser = require("body-parser");
 const pg = require('pg');
 
+process.env.TZ = 'America/Los_Angeles';
 if(process.env.NODE_ENV !== 'production') {
     require('dotenv').config({path: path.resolve(process.cwd(), '.env.dev')});
 }

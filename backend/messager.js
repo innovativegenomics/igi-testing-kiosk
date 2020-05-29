@@ -14,6 +14,25 @@ const transport = nodemailer.createTransport({
     }
 });
 
+module.exports.sendOpenSlotText = (number, day) => {
+    return client.messages.create({
+        body: `The next open testing day is ${day}. You can sign up for a time slot in your testing account.`,
+        to: number,
+        from: config.twilio.sender
+    });
+}
+
+module.exports.sendOpenSlotEmail = (email, day) => {
+    return transport.sendMail({
+        from: config.email.user,
+        to: email,
+        subject: `Next Open Testing day ${day}`,
+        // text: 'Please enable html messages to view this email',
+        html: `<h1>Next Open Testing day ${day}</h1>
+               <h2>The next open testing day is ${day}. Please sign up for a time slot and location in your testing account.</h2>`,
+    });
+}
+
 module.exports.sendConfirmText = (number, day, timeStart, timeEnd, location, locationLink) => {
     return client.messages.create({
         body: `Testing Appointment Confirmation for ${day}

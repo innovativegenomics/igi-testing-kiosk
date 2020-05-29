@@ -16,7 +16,6 @@ const getAbort = (client) => {
     }
 }
 
-const USERS_COUNT = `select count(*) from users`;
 const USER_TABLE_CREATE = `create table users(firstname text default '',
                                            lastname text default '',
                                            calnetid text primary key,
@@ -28,7 +27,9 @@ const USER_TABLE_CREATE = `create table users(firstname text default '',
                                            alertemail bool not null default 't',
                                            alertphone bool not null default 'f',
                                            nextappointment date not null,
-                                           appointmentslot integer[2] null);`;
+                                           appointmentslot timestamptz null,
+                                           location text null,
+                                           appointmentuid text null);`;
 const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 module.exports.verifyUserTable = () => {
     return pool.connect().then(client => {
@@ -182,73 +183,6 @@ module.exports.insertUser = id => {
         });
     }).catch(err => {
         console.error('Error connecting to insert user');
-        console.error(err.stack);
-    });
-}
-
-const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 order by datejoined asc`;
-const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1 where calnetid in (`;
-/**
- * @param {Date} date - current date
- */
-module.exports.updateUserSchedules = date => {
-    // find all users whos appointments are expired
-    // assign them in order of join date
-    if(!date instanceof Date) {
-        return Promise.reject('date is not of type Date');
-    }
-    return pool.connect().then(client => {
-        const abort = getAbort(client);
-        return client.query('begin').then(res => {
-            return client.query(LATEST_DATE_QUERY);
-        }).then(res => {
-            const latestDate = moment(res.rows[0].max);
-            return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(res => {
-                return Settings().dayquota-res.rows[0].count;
-            }).then(res => {
-                const remainingLatestDate = res;
-                var expiredCopy = [];
-                return client.query(FIND_EXPIRED_USERS, [date]).then(expired => {
-                    expiredCopy = [...expired.rows];
-                    if(Math.min(expired.rowCount, remainingLatestDate) > 0) {
-                        var latestUsers = SET_MUTIPLE_USER_DATES;
-                        const loopTimes = Math.min(expired.rowCount, remainingLatestDate);
-                        for(var i = 0;i < loopTimes;i++) {
-                            latestUsers = latestUsers + '\'' + expired.rows.shift().calnetid + '\',';
-                        }
-                        return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]).then(res => { return expired });
-                    }
-                    return expired;
-                }).then(expired => {
-                    var nextDate = latestDate.add(1, 'day');
-                    var updatePromises = [];
-                    for(var i = 0;i<=Math.floor(expired.rows.length/Settings().dayquota);i++) {
-                        while(!Settings().days.includes(nextDate.day())) {
-                            nextDate = nextDate.add(1, 'day');
-                        }
-                        var latestUsers = SET_MUTIPLE_USER_DATES;
-                        if(expired.rows.length > 0) {
-                            const loopTimes = Math.min(expired.rows.length, Settings().dayquota);
-                            for(var x = 0;x < loopTimes;x++) {
-                                latestUsers = latestUsers + '\'' + expired.rows.shift().calnetid + '\',';
-                            }
-                            updatePromises.push(client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]));
-                        }
-                        nextDate.add(1, 'day');
-                    }
-                    return Promise.all(updatePromises).then(r => expiredCopy);
-                });
-            });
-        }).then(res => {
-            return client.query('end transaction').then(r => res);
-        }).then(res => {
-            client.release();
-            return res;
-        }).catch(err => {
-            return abort(err);
-        });
-    }).catch(err => {
-        console.error('Error connecting to update user schedules');
         console.error(err.stack);
     });
 }

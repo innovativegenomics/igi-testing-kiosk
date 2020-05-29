@@ -7,7 +7,8 @@ const moment = require('moment');
 
 const { Settings } = require('../database/settingsActions');
 const { verifyTables } = require('../database/database');
-const { insertUser, updateUserSchedules, getUsersByID } = require('../database/userActions');
+const { insertUser, getUsersByID } = require('../database/userActions');
+const { updateUserSchedules, getOpenSlots, assignSlot } = require('../database/scheduleActions');
 
 describe('database', () => { describe('#verifyTables()', () => {
     before((done) => {
@@ -50,7 +51,7 @@ describe('userActions', () => {
         this.timeout(15000);
         it('should not throw error', done => {
             var promiseChain = Promise.resolve(0);
-            for(var i = 0;i < 20;i++) {
+            for(var i = 0;i < 18;i++) {
                 promiseChain = promiseChain.then(res => {
                     const now = Date.now();
                     return insertUser(`user${res}`).then(r => {
@@ -62,16 +63,40 @@ describe('userActions', () => {
             promiseChain.then(r => done()).catch(e => {done(e)});
         });
     });
+    describe('#getUsersByID', function() {
+        it('should return users 1-5', done => {
+            const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
+            getUsersByID(users).then(res => {console.log(res.map(x => x.calnetid));done()}).catch(err => done(err));
+        });
+    });
+});
+
+describe('userActions', () => {
     describe('#updateUserSchedules', function() {
         it('should not throw error', done => {
             const date = moment().add(1, 'day');
             updateUserSchedules(date.toDate()).then(r => {console.log(r);done()}).catch(e => done(e));
         });
     });
-    describe('#getUsersByID', function() {
-        it('should return users 1-5', done => {
-            const users = ['user1', 'user2', 'user3', 'user4', 'user5'];
-            getUsersByID(users).then(res => {console.log(res.map(x => x.calnetid));done()}).catch(err => done(err));
+    describe('#getOpenSlots', function() {
+        it('should return open slots', done => {
+            getOpenSlots(2020, 5, 3).then(r => done()).catch(e => done(e));
+        });
+    });
+    describe('#assignSlot', function() {
+        it('should assign correct slot', done => {
+            const promises = [];
+            promises.push(assignSlot('user15', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user16', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user17', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user0', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user1', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            Promise.all(promises).then(res => done());
+        });
+    });
+    describe('#getOpenSlots', function() {
+        it('should return open slots', done => {
+            getOpenSlots(2020, 5, 2).then(r => done()).catch(e => done(e));
         });
     });
 });

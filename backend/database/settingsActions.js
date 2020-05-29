@@ -3,14 +3,14 @@ const pool = new Pool();
 
 var settings = {
     onerowid: true,
-    dayquota: 100,
-    locations: [],
-    days: [1, 2, 3, 4, 5],
-    starttime: [8, 0],
-    endtime: [13, 0],
-    increment: 10,
-    buffer: 3,
-    currentindex: 0
+    dayquota: 100, // people per day
+    locations: [], // location names
+    locationlinks: [], // google maps links of locations
+    days: [1, 2, 3, 4, 5], // days of the week that testing happens on, monday is 1
+    starttime: 8, // start time hour
+    endtime: 13, // end time hour
+    increment: 10, // time slot increment in minutes
+    buffer: 3, // number of people per time slot
 };
 module.exports.Settings = () => {
     return settings;
@@ -47,13 +47,13 @@ const SETTINGS_NOTIFY = `create or replace function notify_settings() returns tr
 const SETTINGS_LISTEN = `listen settings_update`;
 const SETTINGS_TABLE_CREATE = `create table settings (onerowid bool primary key default true,
                                                       dayquota integer not null,
-                                                      locations text[2][] not null,
+                                                      locations text[] not null,
+                                                      locationlinks text[] not null,
                                                       days integer[] not null,
-                                                      starttime integer[2] not null,
-                                                      endtime integer[2] not null,
+                                                      starttime integer not null,
+                                                      endtime integer not null,
                                                       increment integer not null,
                                                       buffer integer not null,
-                                                      currentindex integer not null,
                                                       constraint onerow_uni check (onerowid))`;
 const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6, $7, $8)`;
 const SETTINGS_UPDATE_CURRENT = `select * from settings where onerowid=true`;
@@ -77,12 +77,12 @@ module.exports.verifySettingsTable = () => {
                 return client.query(SETTINGS_TABLE_CREATE).then(res => {
                     return client.query(SETTINGS_ROW_CREATE, [settings.dayquota,
                                                               settings.locations,
+                                                              settings.locationlinks,
                                                               settings.days,
                                                               settings.starttime,
                                                               settings.endtime,
                                                               settings.increment,
-                                                              settings.buffer,
-                                                              settings.currentindex]);
+                                                              settings.buffer]);
                 });
             } else {
                 return client.query(SETTINGS_UPDATE_CURRENT).then(res => {
