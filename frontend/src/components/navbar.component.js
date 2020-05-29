@@ -14,15 +14,12 @@ class LogoutLink extends Component {
 class Navbar extends Component {
     constructor(props) {
         super(props);
-        this.navRef = React.createRef();
     }
     componentDidMount() {
-        let h = this.navRef.current.offsetHeight;
-        this.props.heightChangeCallback(h);
     }
     render() {
         return (
-            <nav className='navbar navbar-expand-lg fixed-top navbar-light navbar-bg p-3' ref={this.navRef} style={{fontFamily: 'Raleway'}}>
+            <nav className='navbar navbar-expand-lg navbar-light navbar-bg p-3' style={{fontFamily: 'Raleway'}}>
                 <div className='navbar-brand igi-header font-weight-light mx-auto'>IGI Testing Kiosk</div>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>

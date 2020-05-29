@@ -1,6 +1,8 @@
 import { USER_LOADING_ACTION,
          USER_LOADED_ACTION,
-         USER_NOT_AUTHED } from '../actions/actionTypes';
+         USER_NOT_AUTHED, 
+         USER_UPDATING_ACTION,
+         USER_UPDATE_FAILED } from '../actions/actionTypes';
 
 const initialState = {
     isAuthenticated: false,
@@ -8,7 +10,8 @@ const initialState = {
     loading: false,
     failed: false,
     fullUser: false,
-    hasSlot: false
+    hasSlot: false,
+    updating: false,
 };
 export default (state = initialState, action) => {
     switch(action.type) {
@@ -47,8 +50,19 @@ export default (state = initialState, action) => {
                 isAuthenticated: true,
                 loading: false,
                 failed: false,
+                updating: false,
                 user: {...state.user, ...action.data},
                 ...updates
+            };
+        case USER_UPDATING_ACTION:
+            return {
+                ...state,
+                updating: true,
+            };
+        case USER_UPDATE_FAILED:
+            return {
+                ...state,
+                updating: false,
             };
         default:
             return state;
