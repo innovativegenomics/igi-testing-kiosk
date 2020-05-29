@@ -98,7 +98,6 @@ module.exports.getOpenSlots = (year, month, day) => {
     return pool.query(GET_USERS_BY_DATE, [moment({year: year, month: month, day: day}).toDate()]).then(res => {
         const taken = res.rows.map(e => {return {location: e.location, appointmentslot: moment(e.appointmentslot)}});
         const available = {};
-        const increment = Settings().increment;
         const momentIncrement = moment({year: year, month: month, day: day, hour: Settings().starttime});
         for(var location of Settings().locations) {
             available[location] = [];
@@ -107,14 +106,13 @@ module.exports.getOpenSlots = (year, month, day) => {
                 momentIncrement.add(Settings().increment, 'minute');
             }
         }
-        console.log(taken);
         for(var t of taken) {
             const index = available[t.location].findIndex(e => e.time.isSame(t.appointmentslot));
             if(index > -1) {
                 available[t.location][index].open--;
             }
         }
-        console.log(available);
+        return available;
     }).catch(err => {
         console.error('error querying for open slots');
         console.error(err.stack);
@@ -167,6 +165,19 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
         });
     }).catch(err => {
         console.error('Error assigning slot');
+        console.error(err.stack);
+        return err;
+    });
+}
+
+const USER_ASSIGNED_DAY = `select count(*) from users where calnetid=$1 and nextappointment=$2`;
+module.exports.userAssignedDay = (user, year, month, day) => {
+    return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
+}
+
+const USER_CANCEL_SLOT = `update users set location=null, appointmentslot=null, appointmentuid=null where calnetid=$1`;
+module.exports.cancelSlot = id => {
+    return pool.query(USER_CANCEL_SLOT, [id]).then(res => res.rowCount > 0).catch(err => {
         console.error(err.stack);
         return err;
     });

@@ -7,6 +7,7 @@ const { updateUserSchedules } = require('./database/scheduleActions');
 const { sendOpenSlotEmail, sendOpenSlotText } = require('./messager');
 
 const task = cron.schedule('1 0 * * *', () => { // run at 12:01 AM every day
+    console.log('running scheduler!');
     schedule();
 }, {
     timezone: 'America/Los_Angeles',
@@ -24,7 +25,7 @@ const schedule = () => {
             if(u.alertemail) {
                 promises.push(sendOpenSlotEmail(u.email, day.format('dddd, MMMM DD')));
             }
-            if(u.alertphone) {
+            if(u.alertphone && u.phone) {
                 promises.push(sendConfirmText(u.phone, day.format('dddd, MMMM DD')));
             }
         }
