@@ -10,6 +10,7 @@ import PrivateRoute from './components/private/privateRoute.component';
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
+import Screening from './components/private/screening.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
@@ -23,6 +24,7 @@ export default class App extends Component {
           <div className='App'>
             <Route path='/' exact component={Landing} />
             <Route path='/about' component={About} />
+            <Route path='/screening' component={Screening} />
             <PrivateRoute path='/newuser' component={NewUser}/>
             <PrivateRoute path='/dashboard' component={Dashboard}/>
             <PrivateRoute path='/scheduler' component={Scheduler}/>

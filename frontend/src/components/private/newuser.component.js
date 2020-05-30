@@ -7,6 +7,58 @@ import { connect } from 'react-redux';
 
 import { updateUser } from '../../actions/authActions';
 
+class UserInfo extends Component {
+    render() {
+        return (
+            <div className='card'>
+                <div className='card-body'>
+                    <h5 className='card-title text-center'>New User Info</h5>
+                    <form>
+                        <div className='form-group row'>
+                            <label htmlFor='firstname' className='col-3 col-form-label'>First Name</label>
+                            <div className='col-9'>
+                                <input type='text' className='form-control' id='firstname' placeholder='firstname' onChange={this.props.updateFirstName} value={this.props.firstname}/>
+                            </div>
+                        </div>
+                        <div className='form-group row'>
+                            <label htmlFor='lastname' className='col-3 col-form-label'>Last Name</label>
+                            <div className='col-9'>
+                                <input type='text' className='form-control' id='lastname' placeholder='lastname' onChange={this.props.updateLastName} value={this.props.lastname}/>
+                            </div>
+                        </div>
+                        <div className='form-group row'>
+                            <label htmlFor='email' className='col-3 col-form-label'>Email</label>
+                            <div className='col-9'>
+                                <input type='email' className='form-control' id='email' placeholder='email' onChange={this.props.updateEmail} value={this.props.email}/>
+                            </div>
+                        </div>
+                        <div className='form-group row'>
+                            <label htmlFor='phone' className='col-3 col-form-label'>Phone(mobile)</label>
+                            <div className='col-9'>
+                                <input type='text' className='form-control' id='phone' placeholder='(123) 456 7891' onChange={this.props.updatePhone} value={this.props.phone}/>
+                            </div>
+                        </div>
+                        <div className='form-group row'>
+                            <label htmlFor='confirmCleared' className='col-8 col-form-label'>Have you been cleared to return to the campus?</label>
+                            <div className='col-1 p-2'>
+                                <input type='checkbox' className='form-check-input' id='confirmCleared'/>
+                            </div>
+                        </div>
+                    </form>
+                    <div className='row'>
+                        <div className='col-2'>
+                            <button className='btn btn-primary' onClick={this.props.saveUserData} disabled={!this.props.isValid}>Save</button>
+                        </div>
+                        <div className='col-9'>
+                            <p className='m-0'>By clicking 'Save' you agree to having your information stored in a secure server, and that it will be provided to UHS upon request.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
 class NewUser extends Component {
     constructor(props) {
         super(props);
@@ -68,38 +120,18 @@ class NewUser extends Component {
                     <div className='container'>
                         <div className='row justify-content-center'>
                             <div className='col-8 p-3'>
-                                <div className='card'>
-                                    <div className='card-body'>
-                                        <h5 className='card-title text-center'>User Info</h5>
-                                        <form>
-                                            <div className='form-group row'>
-                                                <label htmlFor='firstname' className='col-3 col-form-label'>First Name</label>
-                                                <div className='col-9'>
-                                                    <input type='text' className='form-control' id='firstname' placeholder='firstname' onChange={this.updateFirstName} value={this.state.firstname}/>
-                                                </div>
-                                            </div>
-                                            <div className='form-group row'>
-                                                <label htmlFor='lastname' className='col-3 col-form-label'>Last Name</label>
-                                                <div className='col-9'>
-                                                    <input type='text' className='form-control' id='lastname' placeholder='lastname' onChange={this.updateLastName} value={this.state.lastname}/>
-                                                </div>
-                                            </div>
-                                            <div className='form-group row'>
-                                                <label htmlFor='email' className='col-3 col-form-label'>Email</label>
-                                                <div className='col-9'>
-                                                    <input type='email' className='form-control' id='email' placeholder='email' onChange={this.updateEmail} value={this.state.email}/>
-                                                </div>
-                                            </div>
-                                            <div className='form-group row'>
-                                                <label htmlFor='phone' className='col-3 col-form-label'>Phone(mobile)</label>
-                                                <div className='col-9'>
-                                                    <input type='text' className='form-control' id='phone' placeholder='(123) 456 7891' onChange={this.updatePhone} value={this.state.phone}/>
-                                                </div>
-                                            </div>
-                                        </form>
-                                        <button className='btn btn-primary' onClick={this.saveUserData} disabled={!this.state.isValid}>Save</button>
-                                    </div>
-                                </div>
+                                <UserInfo firstname={this.state.firstname}
+                                            lastname={this.state.lastname}
+                                            email={this.state.email}
+                                            phone={this.state.phone}
+                                            alertemail={this.state.alertemail}
+                                            alertphone={this.state.alertphone}
+                                            isValid={this.state.isValid}
+                                            updateFirstName={this.updateFirstName}
+                                            updateLastName={this.updateLastName}
+                                            updateEmail={this.updateEmail}
+                                            updatePhone={this.updatePhone}
+                                            saveUserData={this.saveUserData}/>
                             </div>
                         </div>
                     </div>
