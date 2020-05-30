@@ -6,6 +6,8 @@ import './dashboard.css';
 import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
 
+import { cancelAppointment } from '../../actions/authActions';
+
 class Dashboard extends Component {
     constructor(props) {
         super(props);
@@ -73,7 +75,7 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-                                <button className='btn btn-outline-warning btn-lg'>Cancel appointment</button>
+                                <button className='btn btn-outline-warning btn-lg' onClick={this.props.cancelAppointment}>Cancel appointment</button>
                             </div>
                         </div>
                         <div className='row justify-content-center'>
@@ -92,4 +94,4 @@ const mapStateToProps = state => ({
     auth: state.auth
 });
 
-export default connect(mapStateToProps)(Dashboard);
+export default connect(mapStateToProps, { cancelAppointment })(Dashboard);

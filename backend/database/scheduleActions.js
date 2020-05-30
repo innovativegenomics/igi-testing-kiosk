@@ -98,8 +98,8 @@ module.exports.getOpenSlots = (year, month, day) => {
     return pool.query(GET_USERS_BY_DATE, [moment({year: year, month: month, day: day}).toDate()]).then(res => {
         const taken = res.rows.map(e => {return {location: e.location, appointmentslot: moment(e.appointmentslot)}});
         const available = {};
-        const momentIncrement = moment({year: year, month: month, day: day, hour: Settings().starttime});
         for(var location of Settings().locations) {
+            const momentIncrement = moment({year: year, month: month, day: day, hour: Settings().starttime});
             available[location] = [];
             for(var i = 0; i < Math.floor((Settings().endtime-Settings().starttime)*60/Settings().increment);i++) {
                 available[location].push({time: momentIncrement.clone(), open: Settings().buffer});
@@ -173,6 +173,7 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
 
 const USER_ASSIGNED_DAY = `select count(*) from users where calnetid=$1 and nextappointment=$2`;
 module.exports.userAssignedDay = (user, year, month, day) => {
+    console.log(`${year}, ${month}, ${day}`);
     return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
 }
 

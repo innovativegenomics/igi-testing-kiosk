@@ -15,15 +15,19 @@ router.post('/get_time_slots', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     const requestMoment = moment(request.body.moment);
     if(!requestMoment.isValid()) {
+        console.error('no valid moment');
         response.status(400).json({error: 'no valid moment provided'});
         return;
     }
-    userAssignedDay(calnetid, requestMoment.year(), requestMoment.month(), requestMoment.day()).then(res => {
+    userAssignedDay(calnetid, requestMoment.year(), requestMoment.month(), requestMoment.date()).then(res => {
+        console.error(requestMoment);
         if(res) {
-            return getOpenSlots(requestMoment.year(), requestMoment.month(), requestMoment.day()).then(res => {
+            console.error(requestMoment);
+            return getOpenSlots(requestMoment.year(), requestMoment.month(), requestMoment.date()).then(res => {
                 response.json(res);
             });
         } else {
+            console.error('not authorized');
             response.status(400).json({error: 'user not authorized to view status for this day'});
         }
     }).catch(err => {
@@ -49,7 +53,7 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
         return;
     }
     const uid = short('0123456789').new();
-    assignSlot(calnetid, request.body.location, requestMoment.year(), requestMoment.month(), requestMoment.day(), requestMoment.hour(), requestMoment.minute(), uid).then(res => {
+    assignSlot(calnetid, request.body.location, requestMoment.year(), requestMoment.month(), requestMoment.date(), requestMoment.hour(), requestMoment.minute(), uid).then(res => {
         if(res) {
             // send messages
             return getUserByID(calnetid).then(res => {

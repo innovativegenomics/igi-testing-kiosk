@@ -2,7 +2,11 @@ import { USER_LOADING_ACTION,
          USER_LOADED_ACTION,
          USER_NOT_AUTHED, 
          USER_UPDATING_ACTION,
-         USER_UPDATE_FAILED } from '../actions/actionTypes';
+         USER_UPDATE_FAILED,
+         USER_REQUESTING_SLOT,
+         USER_SET_SLOT,
+         USER_SLOT_REQUEST_FAILED,
+         USER_CANCEL_APPOINTMENT } from '../actions/actionTypes';
 
 const initialState = {
     isAuthenticated: false,
@@ -12,11 +16,11 @@ const initialState = {
     fullUser: false,
     hasSlot: false,
     updating: false,
+    requestingSlot: false,
 };
 export default (state = initialState, action) => {
     switch(action.type) {
         case USER_LOADING_ACTION:
-            console.log('set loading');
             return {
                 ...state,
                 loading: true,
@@ -29,6 +33,7 @@ export default (state = initialState, action) => {
                 ...state,
                 loading: false,
                 isAuthenticated: false,
+                requestingSlot: false,
                 failed: true,
                 user: {}
             };
@@ -63,6 +68,37 @@ export default (state = initialState, action) => {
             return {
                 ...state,
                 updating: false,
+            };
+        case USER_REQUESTING_SLOT:
+            return {
+                ...state,
+                requestingSlot: true,
+            };
+        case USER_SET_SLOT:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    location: action.location,
+                    appointmentslot: action.slot,
+                    appointmentuid: action.uid,
+                },
+                requestingSlot: false,
+            };
+        case USER_SLOT_REQUEST_FAILED:
+            return {
+                ...state,
+                requestingSlot: false,
+            };
+        case USER_CANCEL_APPOINTMENT:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    location: null,
+                    appointmentslot: null,
+                    appointmentuid: null,
+                }
             };
         default:
             return state;
