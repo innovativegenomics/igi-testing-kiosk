@@ -55,7 +55,7 @@ export const updateUser = data => dispatch => {
 export const requestSlot = (location, slot) => dispatch => {
     dispatch(setRequestingSlot());
     axios.post('/api/schedule/request_time_slot', {location: location, moment: slot}).then(res => {
-        if(res.status == 200) {
+        if(res.status === 200) {
             dispatch(setRequestSlot(location, slot, res.data.uid));
         } else {
             console.error('Error requesting time slot');
@@ -71,7 +71,7 @@ export const requestSlot = (location, slot) => dispatch => {
 
 export const cancelAppointment = () => dispatch => {
     axios.post('/api/schedule/request_cancel_appointment').then(res => {
-        if(res.status == 200) {
+        if(res.status === 200) {
             dispatch(setAppointmentCanceled());
         } else {
             console.error('Error canceling appointment');

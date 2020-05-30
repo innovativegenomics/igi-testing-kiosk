@@ -6,10 +6,7 @@ import { USER_LOADING_ACTION,
          USER_REQUESTING_SLOT,
          USER_SET_SLOT,
          USER_SLOT_REQUEST_FAILED,
-         USER_CANCEL_APPOINTMENT,
-         USER_SCREENING_LOADING,
-         USER_SCREENING_DONE,
-         USER_SCREENING_FAILED } from '../actions/actionTypes';
+         USER_CANCEL_APPOINTMENT } from '../actions/actionTypes';
 
 const initialState = {
     isAuthenticated: false,

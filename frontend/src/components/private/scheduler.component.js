@@ -8,9 +8,6 @@ import { loadSchedule } from '../../actions/scheduleActions';
 import { requestSlot } from '../../actions/authActions';
 
 class AppointmentTable extends Component {
-    constructor(props) {
-        super(props);
-    }
     render() {
         const slots = this.props.slots;
         if(Object.keys(slots).length === 0) {
@@ -18,8 +15,8 @@ class AppointmentTable extends Component {
         }
         const head = [];
         const body = [];
-        for(var k in slots) {
-            head.push(<th scope='col' key={k}>{k}</th>);
+        for(var ki in slots) {
+            head.push(<th scope='col' key={ki}>{ki}</th>);
         }
         for(var i in slots[Object.keys(slots)[0]]) {
             const row = [];
