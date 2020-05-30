@@ -15,7 +15,7 @@ class Question extends Component {
         }
         return (
             <div className='row pt-2 pb-2'>
-                <div className='col-9'>
+                <div className='col-md-9'>
                     <p className='m-0'>{this.props.question}</p>
                     <ul>
                         {listItems}
@@ -71,7 +71,7 @@ class Screening extends Component {
             <div style={{backgroundColor: '#eeeeee'}}>
             <div className='container'>
                 <div className='row justify-content-center'>
-                    <div className='col-8 p-3'>
+                    <div className='col-md-8 p-3'>
                         <div className='card'>
                             <div className='card-body'>
                                 <h5 className='card-title text-center'>Daily COVID-19 Screening Questionnaire</h5>
@@ -135,7 +135,7 @@ class Screening extends Component {
                                     <div className='col-2'>
                                         <button className='btn btn-primary' onClick={e => this.submit()} disabled={!isComplete}>Submit</button>
                                     </div>
-                                    <div className='col-9'>
+                                    <div className='col-md-9'>
                                         <p className='m-0'>By clicking 'Submit' you agree that you have answered the above questions truthfully.</p>
                                     </div>
                                 </div>
