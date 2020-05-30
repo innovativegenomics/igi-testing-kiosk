@@ -27,6 +27,7 @@ jobs:
   
   deploy:
     name: deploy
+    runs-on: ubuntu-latest
     if: ${{ github.ref == 'master' }}
     needs: build
     steps:
