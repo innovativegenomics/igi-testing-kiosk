@@ -19,7 +19,6 @@ const initialState = {
     fullUser: false,
     hasSlot: false,
     updating: false,
-    requestingSlot: false,
 };
 export default (state = initialState, action) => {
     switch(action.type) {
@@ -102,29 +101,6 @@ export default (state = initialState, action) => {
                     appointmentslot: null,
                     appointmentuid: null,
                 }
-            };
-        case USER_SCREENING_LOADING:
-            return {
-                ...state,
-                updating: true,
-            };
-        case USER_SCREENING_DONE:
-            return {
-                ...state,
-                user: {
-                    ...state.user,
-                    screened: true,
-                },
-                updating: false
-            };
-        case USER_SCREENING_FAILED:
-            return {
-                ...state,
-                user: {
-                    ...state.user,
-                    screened: false,
-                },
-                updating: false
             };
         default:
             return state;

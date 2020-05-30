@@ -14,7 +14,7 @@ const getAbort = (client) => {
     }
 }
 
-const CREATE_SCREENING_TABLE = `create table screening(calnetid text primary key,
+const CREATE_SCREENING_TABLE = `create table screening(calnetid text not null,
                                                        completed timestamptz not null default now(),
                                                        question0 bool not null default false,
                                                        question1 bool not null default false,
@@ -49,7 +49,6 @@ module.exports.verifyScreeningTable = () => {
     });
 }
 
-const CHECK_USER_SCREENED = 'select count(*) from screening where calnetid=$1';
 const INSERT_SCREENING = `insert into screening(calnetid, question0, 
                                                           question1, 
                                                           question2, 
@@ -58,27 +57,11 @@ const INSERT_SCREENING = `insert into screening(calnetid, question0,
                                                           question5, 
                                                           question6) values ($1, $2, $3, $4, $5, $6, $7, $8)`;
 module.exports.insertScreening = (id, questions) => {
-    return pool.connect().then(client => {
-        const abort = getAbort(client);
-        return client.query('begin').then(r => {
-            return client.query(CHECK_USER_SCREENED, [id]);
-        }).then(res => {
-            if(res.rows[0].count > 0) {
-                return false;
-            } else {
-                return client.query(INSERT_SCREENING, [id, questions.question0,
-                                                           questions.question1,
-                                                           questions.question2,
-                                                           questions.question3,
-                                                           questions.question4,
-                                                           questions.question5,
-                                                           questions.question6,]).then(r => true);
-            }
-        }).then(res => {
-            return client.query('end transaction').then(r => client.release()).then(r => res);
-        }).catch(err => abort(client).then(r => err));
-    }).catch(err => {
-        console.error('unable to connect with pool');
-        return err;
-    });
+    return pool.query(INSERT_SCREENING, [id, questions.question0,
+                                             questions.question1,
+                                             questions.question2,
+                                             questions.question3,
+                                             questions.question4,
+                                             questions.question5,
+                                             questions.question6,]).then(r => true);
 }

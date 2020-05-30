@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
 
 import Navbar from '../navbar.component';
 
@@ -43,15 +43,21 @@ class Screening extends Component {
             question4: undefined,
             question5: undefined,
             question6: undefined,
+            isSubmitted: false,
         };
     }
     submit = () => {
-        this.props.submitScreening(this.state);
+        const {isSubmitted, ...questions} = this.state;
+        submitScreening(questions).then(res => {
+            if(res) {
+                this.setState({isSubmitted: true});
+            } else {
+                // do something to let user know submission failed
+            }
+        });
     }
     render() {
-        if(this.props.auth.screened) {
-            this.props.history.push('/dashboard');
-        }
+        if(this.state.isSubmitted) return <Redirect to='/dashboard' />;
         var isComplete = true;
         for(var k in this.state) {
             if(this.state[k] === undefined) {
@@ -144,8 +150,4 @@ class Screening extends Component {
     }
 }
 
-const mapStateToProps = state => ({
-    auth: state.auth
-});
-
-export default connect(mapStateToProps, { submitScreening })(Screening);
+export default Screening;

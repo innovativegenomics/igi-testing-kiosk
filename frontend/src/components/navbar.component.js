@@ -27,9 +27,10 @@ class Navbar extends Component {
                 <div className='collapse navbar-collapse' id='navbarCollapse'>
                     <ul className="navbar-nav mr-auto">
                         <li className='nav-item pl-5'>
-                            <Link className='text-white lead' to='/about'>
-                                About
-                            </Link>
+                            <Link className='text-white lead' to='/about'>About</Link>
+                        </li>
+                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'invisible'}`}>
+                            <Link className='text-white lead' to='/screening'>Screening</Link>
                         </li>
                     </ul>
                     <form className='form-inline'>
@@ -43,7 +44,8 @@ class Navbar extends Component {
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        logoutVisible: state.auth.isAuthenticated
+        logoutVisible: state.auth.isAuthenticated,
+        fullUser: state.auth.fullUser
     };
 }
 

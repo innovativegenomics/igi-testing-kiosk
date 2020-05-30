@@ -9,19 +9,24 @@ const PrivateRoute = ({ component: Component, auth, loadUser, ...rest }) => (
     <Route
         {...rest}
         render={props => {
-            console.log('loop');
             if(!auth.isAuthenticated && !auth.loading) {
                 loadUser();
             }
             if(auth.isAuthenticated) {
-                if(auth.user.updating) {
+                console.log(auth);
+                console.log(rest.path);
+                // if(auth.user.updating) {
+                //     return <div>Updating...</div>;
+                // } else if(!auth.fullUser) {
+                //     if(rest.path === '/newuser') return <Component {...props} />;
+                //     else return <Redirect to='/newuser' />;
+                // } else {
+                //     return <Component {...props} />;
+                // }
+                if(!auth.fullUser && rest.path !== '/newuser' && !auth.updating) {
+                    return <Redirect to='/newuser' />;
+                } else if(auth.user.updating) {
                     return <div>Updating...</div>;
-                } else if(!auth.fullUser) {
-                    if(rest.path === '/newuser') return <Component {...props} />;
-                    else return <Redirect to='/newuser' />;
-                } else if(!auth.user.screened) {
-                    if(rest.path === '/screening') return <Component {...props} />;
-                    else return <Redirect to='/screening' />;
                 } else {
                     return <Component {...props} />;
                 }
