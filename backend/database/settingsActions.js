@@ -11,7 +11,8 @@ var settings = {
     endtime: 13, // end time hour
     increment: 10, // time slot increment in minutes
     buffer: 3, // number of people per time slot
-    maxreschedules: 10,
+    maxreschedules: 10, // number of times a person can reschedule an appointment
+    maxscreenings: 3, // number of screening submissions a person can do per day
 };
 module.exports.Settings = () => {
     return settings;
@@ -56,8 +57,9 @@ const SETTINGS_TABLE_CREATE = `create table settings (onerowid bool primary key 
                                                       increment integer not null,
                                                       buffer integer not null,
                                                       maxreschedules integer not null,
+                                                      maxscreenings integer not null,
                                                       constraint onerow_uni check (onerowid))`;
-const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+const SETTINGS_ROW_CREATE = `insert into settings values (true, $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`;
 const SETTINGS_UPDATE_CURRENT = `select * from settings where onerowid=true`;
 const SETTINGS_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='settings')`;
 const rowUpdate = data => {
@@ -85,7 +87,8 @@ module.exports.verifySettingsTable = () => {
                                                               settings.endtime,
                                                               settings.increment,
                                                               settings.buffer,
-                                                              settings.maxreschedules]);
+                                                              settings.maxreschedules,
+                                                              settings.maxscreenings,]);
                 });
             } else {
                 return client.query(SETTINGS_UPDATE_CURRENT).then(res => {

@@ -1,6 +1,9 @@
 const { Pool } = require('pg');
 const pool = new Pool();
 
+const moment = require('moment');
+const { Settings } = require('./settingsActions');
+
 const getAbort = (client) => {
     return err => {
         console.error('Error in transaction', err.stack);
@@ -49,7 +52,8 @@ module.exports.verifyScreeningTable = () => {
     });
 }
 
-const INSERT_SCREENING = `insert into screening(calnetid, question0, 
+const GET_SCREEN_COUNT = `select count(calnetid)::integer from screening where calnetid=$1 and completed>=$2`;
+const INSERT_SCREENING = `insert into screening (calnetid, question0, 
                                                           question1, 
                                                           question2, 
                                                           question3, 
@@ -57,11 +61,27 @@ const INSERT_SCREENING = `insert into screening(calnetid, question0,
                                                           question5, 
                                                           question6) values ($1, $2, $3, $4, $5, $6, $7, $8)`;
 module.exports.insertScreening = (id, questions) => {
-    return pool.query(INSERT_SCREENING, [id, questions.question0,
-                                             questions.question1,
-                                             questions.question2,
-                                             questions.question3,
-                                             questions.question4,
-                                             questions.question5,
-                                             questions.question6,]).then(r => true);
+    return pool.connect().then(client => {
+        const abort = getAbort(client);
+        return client.query('begin').then(r => {
+            return client.query(GET_SCREEN_COUNT, [id, moment().startOf('day').toDate()]);
+        }).then(res => {
+            if(res.rows[0].count >= Settings().maxscreenings) {
+                return false;
+            } else {
+                return client.query(INSERT_SCREENING, [id, questions.question0,
+                                                           questions.question1,
+                                                           questions.question2,
+                                                           questions.question3,
+                                                           questions.question4,
+                                                           questions.question5,
+                                                           questions.question6,]).then(r => true);
+            }
+        }).then(res => {
+            return client.query('end transaction').then(r => client.release()).then(r => res);
+        }).catch(err => abort(client).then(r => err));
+    }).catch(err => {
+        console.error('unable to connect with pool');
+        return err;
+    });
 }

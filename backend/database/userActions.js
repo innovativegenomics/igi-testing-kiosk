@@ -74,7 +74,7 @@ module.exports.getUsersByID = ids => {
     return pool.query(getUsersQuery.slice(0, getUsersQuery.length-1) + ')').then(res => res.rows).catch(err => { console.log(err.stack); return [] });
 }
 
-const CONTAINS_USER_QUERY = 'select count(distinct calnetid) from users where calnetid=$1';
+const CONTAINS_USER_QUERY = 'select count(distinct calnetid)::integer from users where calnetid=$1';
 module.exports.containsUser = id => {
     return pool.query(CONTAINS_USER_QUERY, [id]).then(res => {
         return res.rows[0].count > 0;
@@ -143,7 +143,7 @@ module.exports.updateAlertPhone = (id, alertphone) => {
 
 // schedule
 const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
-const DATE_COUNT_QUERY = `select count(*) from users where nextappointment=$1`;
+const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
 const INSERT_USER_QUERY = `insert into users (calnetid, email, nextappointment) values ($1, $2, $3)`;
 module.exports.insertUser = id => {
     //////////////////////////////////////

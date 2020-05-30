@@ -17,8 +17,8 @@ const getAbort = (client) => {
     }
 }
 
-const USERS_COUNT = `select count(*) from users`;
-const DATE_COUNT_QUERY = `select count(*) from users where nextappointment=$1`;
+const USERS_COUNT = `select count(*)::integer from users`;
+const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
 const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
 const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 order by datejoined asc`;
 const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, appointmentuid=null, location=null, appointmentslot=null, reschedulecount=0 where calnetid in (`;
@@ -120,7 +120,7 @@ module.exports.getOpenSlots = (year, month, day) => {
     });
 }
 
-const GET_SLOT_COUNT = `select count(*) from users where nextappointment=$1 and location=$2 and appointmentslot=$3`;
+const GET_SLOT_COUNT = `select count(*)::integer from users where nextappointment=$1 and location=$2 and appointmentslot=$3`;
 const GET_USER_BY_ID = `select * from users where calnetid=$1`;
 const SET_USER_SLOT = `update users set location=$1, appointmentslot=$2, appointmentuid=$3, reschedulecount=reschedulecount+1 where calnetid=$4`;
 /**
@@ -171,7 +171,7 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
     });
 }
 
-const USER_ASSIGNED_DAY = `select count(*) from users where calnetid=$1 and nextappointment=$2`;
+const USER_ASSIGNED_DAY = `select count(*)::integer from users where calnetid=$1 and nextappointment=$2`;
 module.exports.userAssignedDay = (user, year, month, day) => {
     console.log(`${year}, ${month}, ${day}`);
     return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
