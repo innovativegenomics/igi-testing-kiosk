@@ -1,49 +1,34 @@
 import React, { Component } from 'react';
-
-import Form from 'react-bootstrap/Form';
-
+import { connect } from 'react-redux';
 import Navbar from '../navbar.component';
-import './scheduler.css';
-import Calendar from './calendar.component';
 
-export default class Scheduler extends Component {
+import { loadSchedule } from '../../actions/scheduleActions';
+
+class Scheduler extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            navHeight: 0,
-            height: 0,
-            selectedDate: new Date().toISOString(),
-            formattedValue: '',
-        };
-    }
-    navHeightChange = h => {
-        this.setState({navHeight: h, height: window.innerHeight - h});
-    }
-    onResize = () => {
-        this.setState({height: window.innerHeight - this.state.navHeight});
     }
     componentDidMount() {
-        window.addEventListener('resize', this.onResize);
-    }
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.onResize);
-    }
-    handleChange = (value, formattedValue) => {
-        this.setState({
-            selectedDate: value,
-            formattedValue: formattedValue
-        });
+        if(!this.props.schedule.loaded) {
+            this.props.loadSchedule(this.props.auth.user.nextappointment);
+        }
     }
     render() {
+        console.log(this.props.schedule.slotsAvailable);
         return (
-            <div>
+            <div style={{backgroundColor: '#eeeeee'}}>
                 <Navbar heightChangeCallback={this.navHeightChange}/>
-                <div className='position-absolute overflow-hidden scheduler' style={{minHeight: `${this.state.height}px`, top: `${this.state.navHeight}px`}}>
-                    <div className='d-flex flex-column justify-content-center h-100 align-items-center pt-3'>
-                        <Calendar/>
-                    </div>
+                <div className='container'>
+
                 </div>
             </div>
         );
     }
 }
+
+const mapStateToProps = state => ({
+    auth: state.auth,
+    schedule: state.schedule
+});
+
+export default connect(mapStateToProps, { loadSchedule })(Scheduler);

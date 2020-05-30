@@ -4,7 +4,6 @@ import { PhoneNumberUtil } from 'google-libphonenumber';
 
 import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
-import './newuser.css';
 
 import { updateUser } from '../../actions/authActions';
 
@@ -65,7 +64,7 @@ class NewUser extends Component {
         return (
             <div>
                 <Navbar/>
-                <div className='newuser'>
+                <div style={{backgroundColor: '#eeeeee'}}>
                     <div className='container'>
                         <div className='row justify-content-center'>
                             <div className='col-8 p-3'>

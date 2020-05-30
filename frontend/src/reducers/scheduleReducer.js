@@ -4,7 +4,8 @@ import { SCHEDULE_LOADING,
 
 const initialState = {
     slotsAvailable: {},
-    loading: true
+    loading: false,
+    loaded: false,
 };
 
 export default (state = initialState, action) => {
@@ -12,19 +13,22 @@ export default (state = initialState, action) => {
         case SCHEDULE_LOADING:
             return {
                 ...state,
-                loading: true
+                loading: true,
+                loaded: false
             };
         case SCHEDULE_LOADED:
             return {
                 ...state,
                 slotsAvailable: {...action.data},
-                loading: false
+                loading: false,
+                loaded: true
             };
         case SCHEDULE_EMPTY:
             return {
                 ...state,
                 slotsAvailable: {},
-                loading: false
+                loading: false,
+                loaded: false
             };
         default:
             return state;

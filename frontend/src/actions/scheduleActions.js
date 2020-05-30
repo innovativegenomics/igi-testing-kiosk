@@ -10,6 +10,7 @@ import axios from 'axios';
 export const loadSchedule = day => dispatch => {
     dispatch(setScheduleLoading());
     return axios.post('/api/schedule/get_time_slots', {moment: day}).then(res => {
+        console.log(res);
         if(res.status === 200) {
             // for(var loc in res.data) {
             //     for(var m in res.data[key]) {

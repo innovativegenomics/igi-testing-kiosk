@@ -1,31 +1,10 @@
 import React, { Component } from 'react';
-import axios from 'axios';
-import $ from 'jquery';
-import Popper from 'popper.js';
+import { Link } from 'react-router-dom';
+import moment from 'moment';
 
 import './dashboard.css';
 import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
-
-import { setUserLoading, setUserUnauthed, setUserData } from '../../actions/authActions';
-
-class PopoverButton extends Component {
-    render() {
-        if(this.props.disabled) {
-            return (
-                <span className='d-inline-block' data-toggle='popover' data-trigger='hover' data-content={this.props.disabledContent}>
-                    <button className={`btn btn-lg btn-outline-${this.props.color}`} style={{pointerEvents: 'none'}} type='button' disabled>{this.props.buttonText}</button>
-                </span>
-            );
-        } else {
-            return (
-                <span className='d-inline-block' data-toggle='popover' data-trigger='hover' data-content={this.props.enabledContent}>
-                    <button onClick={this.props.onClick} className={`btn btn-lg btn-outline-${this.props.color}`} type='button'>{this.props.buttonText}</button>
-                </span>
-            );
-        }
-    }
-}
 
 class Dashboard extends Component {
     constructor(props) {
@@ -35,43 +14,77 @@ class Dashboard extends Component {
             height: 0,
         };
     }
-    navHeightChange = h => {
-        this.setState({navHeight: h, height: window.innerHeight - h});
-    }
-    onResize = () => {
-        this.setState({height: window.innerHeight - this.state.navHeight});
-    }
-    componentDidMount() {
-        window.addEventListener('resize', this.onResize);
-        $(function () {
-            $('[data-toggle="popover"]').popover()
-        });
-    }
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.onResize);
-    }
     handleSchedule = () => {
         this.props.history.push('/scheduler');
     }
     render() {
-        console.log(this.props.auth);
-        return (
-            <div>
-                <Navbar heightChangeCallback={this.navHeightChange}/>
-                <div className='position-absolute overflow-hidden dashboard' style={{height: `${this.state.height}px`, top: `${this.state.navHeight}px`}}>
-                    <div className='d-flex flex-column justify-content-center h-100'>
-                        <div className='p-2'>
-                            <button className='btn btn-lg btn-outline-success' data-toggle='popover' data-trigger='hover' data-content={(this.props ? 'You have an upcoming appointment' : 'You have no upcoming appointments')}>
-                                View my appointments
-                            </button>
+        if (!this.props.auth.user.appointmentslot) {
+            return (
+                <div style={{backgroundColor: '#eeeeee'}}>
+                    <Navbar/>
+                    <div className='container'>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <p className='display-4'>Next Available Appointment</p>
+                            </div>
                         </div>
-                        <div className='p-2'>
-                            <PopoverButton onClick={this.handleSchedule} disabled={this.state.upcomingAppointment} color='primary' enabledContent='' buttonText='Schedule new appointment' disabledContent={'You can only have one future scheduled appointment at a time. If you would like to reschedule your current appointment, click \'View my appointments\'.'}/>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <p className='h1 font-weight-light'>{moment(this.props.auth.user.nextappointment).format('dddd, MMMM D')}</p>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center p-4'>
+                                <Link className='btn btn-outline-success btn-lg' to='/scheduler'>Select time and location</Link>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <Link className='btn btn-outline-primary btn-lg' to='/newuser'>Account settings</Link>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        );
+            );
+        } else {
+            return (
+                <div style={{backgroundColor: '#eeeeee'}}>
+                    <Navbar/>
+                    <div className='container'>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <p className='display-4'>Next Scheduled Appointment</p>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <p className='h1 font-weight-light'>{moment(this.props.auth.user.nextappointment).format('dddd, MMMM D')}</p>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+            <p className='h1 font-weight-light'>{moment(this.props.auth.user.appointmentslot).format('h:mm A')} at {this.props.auth.user.location}</p>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center p-4'>
+                                <Link className='btn btn-outline-success btn-lg' to='/scheduler'>Change appointment time or location</Link>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <button className='btn btn-outline-warning btn-lg'>Cancel appointment</button>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center p-4'>
+                                <Link className='btn btn-outline-primary btn-lg' to='/newuser'>Account settings</Link>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
     }
 }
 
