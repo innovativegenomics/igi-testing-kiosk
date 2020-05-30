@@ -7,9 +7,6 @@ import berkeleySeal from '../../media/berkeley_seal.png';
 import Navbar from '../navbar.component';
 
 class Landing extends Component {
-    constructor(props) {
-        super(props);
-    }
     handleLoginButton = () => {
         if(this.props.isAuthenticated) {
             this.props.history.push('/dashboard');
@@ -25,12 +22,12 @@ class Landing extends Component {
                     <div className='row justify-content-center'>
                         <div className='col-5'>
                             <div className='pl-0 pr-4 mt-3 mb-5 ml-0 mr-0 border-right border-dark text-right'>
-                                <img src={igiLogo} className='logo-image'/>
+                                <img src={igiLogo} className='logo-image' alt=''/>
                             </div>
                         </div>
                         <div className='col-5'>
                             <div className='pl-5 pr-0 mt-3 mb-5 ml-0 mr-0'>
-                                <img src={berkeleySeal} className='logo-image'/>
+                                <img src={berkeleySeal} className='logo-image' alt=''/>
                             </div>
                         </div>
                     </div>

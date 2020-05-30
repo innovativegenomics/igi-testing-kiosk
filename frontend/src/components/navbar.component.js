@@ -12,11 +12,6 @@ class LogoutLink extends Component {
 }
 
 class Navbar extends Component {
-    constructor(props) {
-        super(props);
-    }
-    componentDidMount() {
-    }
     render() {
         return (
             <nav className='navbar navbar-expand-lg navbar-light navbar-bg p-3' style={{fontFamily: 'Raleway'}}>

@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { PhoneNumberFormat as PNF } from 'google-libphonenumber';
 import { PhoneNumberUtil } from 'google-libphonenumber';
 
 import Navbar from '../navbar.component';
@@ -88,7 +87,7 @@ class NewUser extends Component {
         }
         const valid = stateCopy.firstname !== '' &&
                 stateCopy.lastname !== '' &&
-                /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(stateCopy.email) &&
+                /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(stateCopy.email) &&
                 isValidNumber;
         return valid;
     }
