@@ -14,10 +14,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Frontend build
+    - name: Use Node.js
       uses: actions/setup-node@v1
       with:
         node-version: '14.x'
-    - working-directory: ./frontend
-    - run: npm ci
-    - run: npm run build
+    - name: Build frontend
+      working-directory: ./frontend
+      run: |
+        npm ci
+        npm run build
