@@ -24,7 +24,7 @@ export default class App extends Component {
           <div className='App'>
             <Route path='/' exact component={Landing} />
             <Route path='/about' component={About} />
-            <Route path='/screening' component={Screening} />
+            <PrivateRoute path='/screening' component={Screening} />
             <PrivateRoute path='/newuser' component={NewUser}/>
             <PrivateRoute path='/dashboard' component={Dashboard}/>
             <PrivateRoute path='/scheduler' component={Scheduler}/>

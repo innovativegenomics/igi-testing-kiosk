@@ -15,6 +15,7 @@ const { containsUser,
         updatePhone,
         updateAlertEmail,
         updateAlertPhone } = require('../../database/userActions');
+const { insertScreening } = require('../../database/screeningActions');
 
 router.get('/login', Cas.bounce, (request, response) => {
     const calnetid = request.session.cas_user;
@@ -167,6 +168,19 @@ router.post('/set/alertphone', Cas.block, (request, response) => {
     }).catch(err => {
         console.error(`Error setting alertphone for ${calnetid}`);
         console.error(err.stack);
+        return response.status(500);
+    });
+});
+router.post('/submit_screening', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+    insertScreening(calnetid, request.body).then(res => {
+        if(res) {
+            response.json({});
+        } else {
+            response.status(400).json({error: 'could not insert screening'});
+        }
+    }).catch(err => {
+        response.status(500);
     });
 });
 

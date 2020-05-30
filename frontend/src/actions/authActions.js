@@ -6,7 +6,10 @@ import { USER_LOADING_ACTION,
          USER_REQUESTING_SLOT,
          USER_SET_SLOT,
          USER_SLOT_REQUEST_FAILED,
-         USER_CANCEL_APPOINTMENT } from '../actions/actionTypes';
+         USER_CANCEL_APPOINTMENT,
+         USER_SCREENING_LOADING,
+         USER_SCREENING_DONE,
+         USER_SCREENING_FAILED } from '../actions/actionTypes';
 import axios from 'axios';
 
 export const loadUser = () => dispatch => {
@@ -83,6 +86,24 @@ export const cancelAppointment = () => dispatch => {
     });
 }
 
+export const submitScreening = data => dispatch => {
+    dispatch(setScreeningLoading());
+    axios.post('/api/users/submit_screening', data).then(res => {
+        if(res.status === 200) {
+            dispatch(setScreeningDone());
+            return true;
+        } else {
+            dispatch(setScreeningFailed());
+            throw Error('error submitting screen questions');
+        }
+    }).catch(err => {
+        console.error(err);
+        return false;
+    });
+}
+
+
+
 export const setUserLoading = () => {
     return {
         type: USER_LOADING_ACTION,
@@ -141,5 +162,21 @@ export const setSlotRequestFailed = () => {
 export const setAppointmentCanceled = () => {
     return {
         type: USER_CANCEL_APPOINTMENT,
+    };
+}
+
+export const setScreeningLoading = () => {
+    return {
+        type: USER_SCREENING_LOADING
+    };
+}
+export const setScreeningDone = () => {
+    return {
+        type: USER_SCREENING_DONE
+    };
+}
+export const setScreeningFailed = () => {
+    return {
+        type: USER_SCREENING_FAILED
     };
 }

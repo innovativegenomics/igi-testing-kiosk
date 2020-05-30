@@ -75,7 +75,7 @@ class NewUser extends Component {
     saveUserData = () => {
         if(this.validateState()) {
             this.props.updateUser({...this.state, phone: (this.state.phone === '') ? null : this.state.phone});
-            this.props.history.push('/dashboard');
+            this.props.history.push('/screening');
         }
     }
     validateState = update => {

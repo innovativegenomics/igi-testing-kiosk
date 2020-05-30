@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 
-import './dashboard.css';
 import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
 
@@ -42,7 +41,7 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-                                <Link className='btn btn-outline-primary btn-lg' to='/newuser'>Account settings</Link>
+                                <Link className='btn btn-outline-primary btn-lg' to='/'>Account settings</Link>
                             </div>
                         </div>
                     </div>

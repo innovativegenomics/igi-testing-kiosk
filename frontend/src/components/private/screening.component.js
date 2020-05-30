@@ -1,11 +1,9 @@
 import React, { Component } from 'react';
-import { PhoneNumberFormat as PNF } from 'google-libphonenumber';
-import { PhoneNumberUtil } from 'google-libphonenumber';
-
-import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
 
-import { updateUser } from '../../actions/authActions';
+import Navbar from '../navbar.component';
+
+import { submitScreening } from '../../actions/authActions';
 
 class Question extends Component {
     render() {
@@ -47,7 +45,13 @@ class Screening extends Component {
             question6: undefined,
         };
     }
+    submit = () => {
+        this.props.submitScreening(this.state);
+    }
     render() {
+        if(this.props.auth.screened) {
+            this.props.history.push('/dashboard');
+        }
         var isComplete = true;
         for(var k in this.state) {
             if(this.state[k] === undefined) {
@@ -64,7 +68,7 @@ class Screening extends Component {
                     <div className='col-8 p-3'>
                         <div className='card'>
                             <div className='card-body'>
-                                <h5 className='card-title text-center'>New User Covid 19 Screening Questions</h5>
+                                <h5 className='card-title text-center'>Daily COVID-19 Screening Questionnaire</h5>
                                 <Question question='Have you been diagnosed with Covid 19 in the past 30 days?'
                                           selected={this.state.question0}
                                           option1='Yes'
@@ -123,7 +127,7 @@ class Screening extends Component {
                                                  'Diarrhea?']}/>
                                 <div className='row mt-4 pt-3 border-top'>
                                     <div className='col-2'>
-                                        <button className='btn btn-primary' onClick={e => console.log(this.state)} disabled={!isComplete}>Submit</button>
+                                        <button className='btn btn-primary' onClick={e => this.submit()} disabled={!isComplete}>Submit</button>
                                     </div>
                                     <div className='col-9'>
                                         <p className='m-0'>By clicking 'Submit' you agree that you have answered the above questions truthfully.</p>
@@ -140,4 +144,8 @@ class Screening extends Component {
     }
 }
 
-export default Screening;
+const mapStateToProps = state => ({
+    auth: state.auth
+});
+
+export default connect(mapStateToProps, { submitScreening })(Screening);

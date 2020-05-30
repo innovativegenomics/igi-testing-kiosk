@@ -6,7 +6,10 @@ import { USER_LOADING_ACTION,
          USER_REQUESTING_SLOT,
          USER_SET_SLOT,
          USER_SLOT_REQUEST_FAILED,
-         USER_CANCEL_APPOINTMENT } from '../actions/actionTypes';
+         USER_CANCEL_APPOINTMENT,
+         USER_SCREENING_LOADING,
+         USER_SCREENING_DONE,
+         USER_SCREENING_FAILED } from '../actions/actionTypes';
 
 const initialState = {
     isAuthenticated: false,
@@ -99,6 +102,29 @@ export default (state = initialState, action) => {
                     appointmentslot: null,
                     appointmentuid: null,
                 }
+            };
+        case USER_SCREENING_LOADING:
+            return {
+                ...state,
+                updating: true,
+            };
+        case USER_SCREENING_DONE:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    screened: true,
+                },
+                updating: false
+            };
+        case USER_SCREENING_FAILED:
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    screened: false,
+                },
+                updating: false
             };
         default:
             return state;
