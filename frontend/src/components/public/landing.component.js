@@ -11,7 +11,8 @@ class Landing extends Component {
         if(this.props.isAuthenticated) {
             this.props.history.push('/dashboard');
         } else {
-            window.open('/api/users/login', '_self');
+            this.props.history.push('/devlogin');
+            // window.open('/api/users/login', '_self');
         }
     }
     render() {
