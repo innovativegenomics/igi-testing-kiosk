@@ -67,6 +67,10 @@ router.get('/get/profile', Cas.block, (request, response) => {
     });
 });
 
+router.post('/get/is_dev_mode', (request, response) => {
+    response.json({devmode: (process.env.NODE_ENV !== 'production')});
+});
+
 // sets any of the following parameters:
 // - first or last name
 // - email

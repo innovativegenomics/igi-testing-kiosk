@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import axios from 'axios';
 import './landing.css';
 
 import igiLogo from '../../media/igi_logo.png';
@@ -7,13 +8,30 @@ import berkeleySeal from '../../media/berkeley_seal.png';
 import Navbar from '../navbar.component';
 
 class Landing extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            devmode: false,
+            devuser: ''
+        };
+    }
     handleLoginButton = () => {
         if(this.props.isAuthenticated) {
             this.props.history.push('/dashboard');
         } else {
-            this.props.history.push('/devlogin');
-            // window.open('/api/users/login', '_self');
+            if(this.state.devmode) {
+                window.open('/api/users/login?devuser='+escape(this.state.devuser), '_self');
+            } else {
+                window.open('/api/users/login', '_self');
+            }
         }
+    }
+    componentDidMount() {
+        axios.post('/api/users/get/is_dev_mode').then(res => {
+            this.setState({devmode: res.data.devmode});
+        }).catch(err => {
+            console.error('could not determine if dev mode is active');
+        });
     }
     render() {
         return (
@@ -37,6 +55,11 @@ class Landing extends Component {
                             <p className='display-4 font-weight-light text-center'>
                                 IGI Testing Kiosk Signup | Berkeley
                             </p>
+                        </div>
+                    </div>
+                    <div className={`row justify-content-center ${(this.state.devmode)?'':'invisible'}`}>
+                        <div className='col-4 text-center pb-2'>
+                            <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({devuser: e.target.value})} />
                         </div>
                     </div>
                     <div className='row justify-content-center'>
