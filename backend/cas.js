@@ -1,4 +1,4 @@
-const CASAuthentication = require('cas-authentication');
+const CASAuthentication = require('./thirdparty/casauth');
 
 const casOptions = {
     cas_url         : ((process.env.NODE_ENV === 'production') ? 'https://auth.berkeley.edu/cas' : 'https://auth-test.berkeley.edu/cas'),
