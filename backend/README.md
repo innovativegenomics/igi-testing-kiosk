@@ -24,3 +24,6 @@ module.exports = {
     }
 };
 ```
+
+### Timezone
+Make sure the environment variable `TZ` is set to the proper timezone. In our case, `America/Los_Angeles` works fine.
