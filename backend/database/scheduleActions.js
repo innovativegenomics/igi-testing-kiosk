@@ -24,7 +24,7 @@ const getAbort = (client) => {
 }
 
 const SCHEDULE_TABLE_CREATE = `create table schedule(calnetid text not null,
-                                                     appointmentslot timetstamptz not null,
+                                                     appointmentslot timestamptz not null,
                                                      location text not null,
                                                      appointmentuid text not null,
                                                      created timestamptz not null default now(),
@@ -99,7 +99,7 @@ module.exports.updateUserSchedules = date => {
                     }
                     return expired;
                 }).then(expired => {
-                    var nextDate = latestDate.add(1, 'day');
+                    var nextDate = latestDate.clone().add(1, 'day');
                     var updatePromises = [];
                     for(var i = 0;i<=Math.floor(expired.rows.length/Settings().dayquota);i++) {
                         while(!Settings().days.includes(nextDate.day())) {
@@ -115,13 +115,10 @@ module.exports.updateUserSchedules = date => {
                                 latestUsers = latestUsers + '\'' + next + '\',';
                             }
 
-
-
-                            //////////////////////
-                            // Update his promises function
+                            const tempDate = nextDate.clone();
                             updatePromises.push(
                                 client.query(inactivateSlots.slice(0, inactivateSlots.length-1)+')').then(r => {
-                                    return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]);
+                                    return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [tempDate.toDate()]);
                                 }));
                         }
                         nextDate.add(1, 'day');

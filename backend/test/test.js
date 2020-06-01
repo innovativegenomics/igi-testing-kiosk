@@ -84,25 +84,25 @@ describe('userActions', () => {
             updateUserSchedules(date.toDate()).then(r => {console.log(r);done()}).catch(e => done(e));
         });
     });
-    describe('#getOpenSlots', function() {
-        it('should return open slots', done => {
-            getOpenSlots(2020, 5, 3).then(r => done()).catch(e => done(e));
-        });
-    });
-    describe('#assignSlot', function() {
-        it('should assign correct slot', done => {
-            const promises = [];
-            promises.push(assignSlot('user15', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-            promises.push(assignSlot('user16', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-            promises.push(assignSlot('user17', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-            promises.push(assignSlot('user0', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-            promises.push(assignSlot('user1', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-            Promise.all(promises).then(res => done());
-        });
-    });
-    describe('#getOpenSlots', function() {
-        it('should return open slots', done => {
-            getOpenSlots(2020, 5, 2).then(r => done()).catch(e => done(e));
-        });
-    });
+    // describe('#getOpenSlots', function() {
+    //     it('should return open slots', done => {
+    //         getOpenSlots(2020, 5, 3).then(r => done()).catch(e => done(e));
+    //     });
+    // });
+    // describe('#assignSlot', function() {
+    //     it('should assign correct slot', done => {
+    //         const promises = [];
+    //         promises.push(assignSlot('user15', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+    //         promises.push(assignSlot('user16', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+    //         promises.push(assignSlot('user17', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+    //         promises.push(assignSlot('user0', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+    //         promises.push(assignSlot('user1', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+    //         Promise.all(promises).then(res => done());
+    //     });
+    // });
+    // describe('#getOpenSlots', function() {
+    //     it('should return open slots', done => {
+    //         getOpenSlots(2020, 5, 2).then(r => done()).catch(e => done(e));
+    //     });
+    // });
 });

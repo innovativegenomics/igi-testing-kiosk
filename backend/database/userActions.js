@@ -163,8 +163,8 @@ module.exports.insertUser = id => {
             return client.query(LATEST_DATE_QUERY);
         }).then(res => {
             var latestDate = moment(res.rows[0].max);
-            if(!res.rows[0].max) {
-                latestDate = moment();
+            if(!res.rows[0].max || latestDate.isBefore(moment().startOf('day').add(1, 'day'))) {
+                latestDate = moment().startOf('day').add(1, 'day');
             }
             return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(res => {
                 if(res.rows[0].count < Settings().dayquota) {
