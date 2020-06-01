@@ -28,7 +28,8 @@ const SCHEDULE_TABLE_CREATE = `create table schedule(calnetid text not null,
                                                      location text not null,
                                                      appointmentuid text not null,
                                                      created timestamptz not null default now(),
-                                                     completed timestamptz null)`;
+                                                     completed timestamptz null,
+                                                     active bool not null default true)`;
 const SCHEDULE_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='schedule')`;
 module.exports.verifyScheduleTable = () => {
     return pool.connect().then(client => {
@@ -126,7 +127,7 @@ module.exports.updateUserSchedules = date => {
     });
 }
 
-const GET_USERS_BY_DATE = `select appointmentslot,location from users where nextappointment=$1 and appointmentslot is not null and location is not null`;
+const GET_USERS_BY_DATE = `select appointmentslot,location from schedule where appointmentslot >= $1::date and appointmentslot < $1::date + interval '1 day' and active=true`;
 /**
  * @param {Number} year - year to check
  * @param {Number} month - month to check
