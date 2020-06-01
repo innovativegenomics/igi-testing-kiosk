@@ -225,7 +225,7 @@ module.exports.userAssignedDay = (user, year, month, day) => {
     return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
 }
 
-const USER_CANCEL_SLOT = `update users set location=null, appointmentslot=null, appointmentuid=null where calnetid=$1`;
+const USER_CANCEL_SLOT = `update schedule set active=false where calnetid=$1`;
 module.exports.cancelSlot = id => {
     return pool.query(USER_CANCEL_SLOT, [id]).then(res => res.rowCount > 0).catch(err => {
         console.error(err.stack);
