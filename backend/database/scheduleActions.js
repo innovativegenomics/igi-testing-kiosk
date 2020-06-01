@@ -159,9 +159,14 @@ module.exports.getOpenSlots = (year, month, day) => {
     });
 }
 
-const GET_SLOT_COUNT = `select count(*)::integer from users where nextappointment=$1 and location=$2 and appointmentslot=$3`;
+const GET_SLOT_COUNT = `select count(*)::integer from schedule where location=$1 and appointmentslot=$2 and active=true`;
 const GET_USER_BY_ID = `select * from users where calnetid=$1`;
-const SET_USER_SLOT = `update users set location=$1, appointmentslot=$2, appointmentuid=$3, reschedulecount=reschedulecount+1 where calnetid=$4`;
+const UPDATE_RESCHEDULE_COUNT = `update users set reschedulecount=reschedulecount+1 where calnetid=$1`;
+const SET_PREVIOUS_SLOTS_INACTIVE = `update schedule set active=false where calnetid=$1`;
+const SET_USER_SLOT = `insert into schedule(calnetid,
+                                            appointmentslot,
+                                            location,
+                                            appointmentuid) values ($1, $2, $3, $4)`;
 /**
  * @param {string} user - calnetid of user requesting schedule
  * @param {string} location - name of location user is requesting
@@ -187,14 +192,18 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
                 res.rows[0].reschedulecount < Settings().maxreschedules;
         }).then(res => {
             if(res) {
-                return client.query(GET_SLOT_COUNT, [querySlot.toDate(), location, querySlot.toDate()]);
+                return client.query(GET_SLOT_COUNT, [location, querySlot.toDate()]);
             } else {
                 return {rows: [{count: Number.MAX_SAFE_INTEGER}]};
             }
         }).then(res => {
             const count = res.rows[0].count;
             if(count < Settings().buffer) {
-                return client.query(SET_USER_SLOT, [location, querySlot.toDate(), uid, user]).then(r => r.rowCount > 0);
+                return client.query(UPDATE_RESCHEDULE_COUNT, [user]).then(r => {
+                    return client.query(SET_PREVIOUS_SLOTS_INACTIVE, [user]);
+                }).then(r => {
+                    return client.query(SET_USER_SLOT, [user, querySlot.toDate(), location, uid]).then(r => r.rowCount > 0);
+                });
             } else {
                 return false;
             }
