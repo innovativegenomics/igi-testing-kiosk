@@ -57,6 +57,7 @@ module.exports.verifyScheduleTable = () => {
 const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
 const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
 const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 order by datejoined asc`;
+const INACTIVATE_MULTIPLE_SLOTS = `update schedule set active=false where calnetid in (`;
 const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, reschedulecount=0 where calnetid in (`;
 /**
  * @param {Date} date - current date
@@ -84,12 +85,17 @@ module.exports.updateUserSchedules = date => {
                 return client.query(FIND_EXPIRED_USERS, [date]).then(expired => {
                     expiredCopy = [...expired.rows];
                     if(Math.min(expired.rows.length, remainingLatestDate) > 0) {
+                        var inactivateSlots = INACTIVATE_MULTIPLE_SLOTS;
                         var latestUsers = SET_MUTIPLE_USER_DATES;
                         const loopTimes = Math.min(expired.rowCount, remainingLatestDate);
                         for(var i = 0;i < loopTimes;i++) {
-                            latestUsers = latestUsers + '\'' + expired.rows.shift().calnetid + '\',';
+                            const next = expired.rows.shift().calnetid;
+                            inactivateSlots = inactivateSlots + '\'' + next + '\',';
+                            latestUsers = latestUsers + '\'' + next + '\',';
                         }
-                        return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]).then(res => { return expired });
+                        return client.query(inactivateSlots.slice(0, inactivateSlots.length-1)+')').then(r => {
+                            return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]).then(r => { return expired });
+                        });
                     }
                     return expired;
                 }).then(expired => {
@@ -99,13 +105,24 @@ module.exports.updateUserSchedules = date => {
                         while(!Settings().days.includes(nextDate.day())) {
                             nextDate = nextDate.add(1, 'day');
                         }
+                        var inactivateSlots = INACTIVATE_MULTIPLE_SLOTS;
                         var latestUsers = SET_MUTIPLE_USER_DATES;
                         if(expired.rows.length > 0) {
                             const loopTimes = Math.min(expired.rows.length, Settings().dayquota);
                             for(var x = 0;x < loopTimes;x++) {
-                                latestUsers = latestUsers + '\'' + expired.rows.shift().calnetid + '\',';
+                                const next = expired.rows.shift().calnetid;
+                                inactivateSlots = inactivateSlots + '\'' + next + '\',';
+                                latestUsers = latestUsers + '\'' + next + '\',';
                             }
-                            updatePromises.push(client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]));
+
+
+
+                            //////////////////////
+                            // Update his promises function
+                            updatePromises.push(
+                                client.query(inactivateSlots.slice(0, inactivateSlots.length-1)+')').then(r => {
+                                    return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]);
+                                }));
                         }
                         nextDate.add(1, 'day');
                     }
