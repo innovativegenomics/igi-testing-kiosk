@@ -23,11 +23,40 @@ const getAbort = (client) => {
     }
 }
 
-const USERS_COUNT = `select count(*)::integer from users`;
+const SCHEDULE_TABLE_CREATE = `create table schedule(calnetid text not null,
+                                                     appointmentslot timetstamptz not null,
+                                                     location text not null,
+                                                     appointmentuid text not null,
+                                                     created timestamptz not null default now(),
+                                                     completed timestamptz null)`;
+const SCHEDULE_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='schedule')`;
+module.exports.verifyScheduleTable = () => {
+    return pool.connect().then(client => {
+        const abort = getAbort(client);
+        return client.query('begin').then(res => {
+            return client.query(SCHEDULE_TABLE_EXISTS);
+        }).then(res => {
+            if(!res.rows[0].exists) {
+                console.log('Schedule table doesn\'t exit, creating one!');
+                return client.query(SCHEDULE_TABLE_CREATE);
+            }
+            return;
+        }).then(res => {
+            return client.query('end transaction');
+        }).then(res => {
+            client.release(); // release client!!!
+        }).catch(err => {
+            return abort(err).then((err, res) => {
+                return err;
+            });
+        });
+    });
+}
+
 const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
 const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
 const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 order by datejoined asc`;
-const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, appointmentuid=null, location=null, appointmentslot=null, reschedulecount=0 where calnetid in (`;
+const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, reschedulecount=0 where calnetid in (`;
 /**
  * @param {Date} date - current date
  */
@@ -42,7 +71,10 @@ module.exports.updateUserSchedules = date => {
         return client.query('begin').then(res => {
             return client.query(LATEST_DATE_QUERY);
         }).then(res => {
-            const latestDate = moment(res.rows[0].max);
+            var latestDate = moment(res.rows[0].max);
+            if(latestDate.isBefore(moment(date).startOf('day'))) {
+                latestDate = moment(date).startOf('day');
+            }
             return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(res => {
                 return Settings().dayquota-res.rows[0].count;
             }).then(res => {
