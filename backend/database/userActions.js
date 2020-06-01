@@ -33,9 +33,7 @@ const USER_TABLE_CREATE = `create table users(firstname text default '',
                                            alertemail bool not null default 't',
                                            alertphone bool not null default 'f',
                                            nextappointment date not null,
-                                           appointmentslot timestamptz null,
-                                           location text null,
-                                           appointmentuid text null,
+                                           testverified bool not null default false,
                                            reschedulecount integer not null default 0);`;
 const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 module.exports.verifyUserTable = () => {
