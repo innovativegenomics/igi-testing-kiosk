@@ -5,7 +5,7 @@ const short = require('short-uuid');
 
 const Cas = require('../../cas');
 const { Settings } = require('../../database/settingsActions');
-const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot } = require('../../database/scheduleActions');
+const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot, getUserSlot } = require('../../database/scheduleActions');
 const { getUserByID } = require('../../database/userActions');
 const { sendConfirmEmail, sendConfirmText } = require('../../messager');
 
@@ -34,6 +34,15 @@ router.post('/get_time_slots', Cas.block, (request, response) => {
         console.error('Error checking if user assigned day');
         console.error(err.stack);
         response.status(500);
+    });
+});
+
+router.post('/get_current_slot', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+    getUserSlot(calnetid).then(res => {
+        response.json({...res});
+    }).catch(e => {
+        response.status(500).send('Internal error');
     });
 });
 

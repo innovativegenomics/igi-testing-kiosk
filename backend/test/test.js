@@ -1,6 +1,9 @@
-const assert = require('assert');
-const path = require('path');
-require('dotenv').config({path: path.resolve(process.cwd(), '.env.dev')});
+process.env.TZ = 'America/Los_Angeles';
+process.env.PGUSER = require('../config/keys').pg.pguser;
+process.env.PGHOST = require('../config/keys').pg.pghost;
+process.env.PGPASSWORD = require('../config/keys').pg.pgpassword;
+process.env.PGDATABASE = require('../config/keys').pg.pgdatabase;
+process.env.PGPORT = require('../config/keys').pg.pgport;
 const { Pool } = require('pg');
 const pool = new Pool();
 const moment = require('moment');
@@ -13,8 +16,10 @@ const { updateUserSchedules, getOpenSlots, assignSlot } = require('../database/s
 describe('database', () => { describe('#verifyTables()', () => {
     before((done) => {
         pool.connect().then(client => {
-            return client.query('drop table users');
+            return client.query('drop table users').then(r => client.query('drop table schedule'));
         }).then(r => done()).catch(e => done(e));
+        // console.log('here');
+        // done();
     });
     it('should not throw error', done => {
         verifyTables().then(r => done()).catch(e => done(e));
@@ -78,25 +83,27 @@ describe('userActions', () => {
             updateUserSchedules(date.toDate()).then(r => {console.log(r);done()}).catch(e => done(e));
         });
     });
-    // describe('#getOpenSlots', function() {
-    //     it('should return open slots', done => {
-    //         getOpenSlots(2020, 5, 3).then(r => done()).catch(e => done(e));
-    //     });
-    // });
-    // describe('#assignSlot', function() {
-    //     it('should assign correct slot', done => {
-    //         const promises = [];
-    //         promises.push(assignSlot('user15', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-    //         promises.push(assignSlot('user16', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-    //         promises.push(assignSlot('user17', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-    //         promises.push(assignSlot('user0', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-    //         promises.push(assignSlot('user1', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
-    //         Promise.all(promises).then(res => done());
-    //     });
-    // });
-    // describe('#getOpenSlots', function() {
-    //     it('should return open slots', done => {
-    //         getOpenSlots(2020, 5, 2).then(r => done()).catch(e => done(e));
-    //     });
-    // });
+    describe('#getOpenSlots', function() {
+        it('should return open slots', done => {
+            getOpenSlots(2020, 5, 3).then(r => done()).catch(e => done(e));
+        });
+    });
+    describe('#assignSlot', function() {
+        it('should assign correct slot', done => {
+            const promises = [];
+            promises.push(assignSlot('user15', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user16', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user17', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user0', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            promises.push(assignSlot('user1', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            Promise.all(promises).then(r => {
+                return promises.push(assignSlot('user0', 'Cafe Strada', 2020, 5, 2, 12, 30, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
+            }).then(res => done());
+        });
+    });
+    describe('#getOpenSlots', function() {
+        it('should return open slots', done => {
+            getOpenSlots(2020, 5, 2).then(r => {console.log(r); return done()}).catch(e => done(e));
+        });
+    });
 });
