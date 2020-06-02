@@ -304,6 +304,7 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
 
     if (['1.0', '2.0', '3.0'].indexOf(this.cas_version) >= 0){
         requestOptions.method = 'GET';
+        console.log(this.service_url + url.parse(req.originalUrl).pathname);
         requestOptions.path = url.format({
             pathname: this.cas_path + this._validateUri,
             query: {
