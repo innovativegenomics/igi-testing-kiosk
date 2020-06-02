@@ -244,11 +244,11 @@ CASAuthentication.prototype._login = function(req, res, next) {
 
     // Save the return URL in the session. If an explicit return URL is set as a
     // query parameter, use that. Otherwise, just use the URL from the request.
-    req.session.cas_return_to = req.query.returnTo || url.parse(req.url).path;
+    req.session.cas_return_to = req.query.returnTo || url.parse(req.originalUrl).path;
 
     // Set up the query parameters.
     var query = {
-        service: this.service_url + url.parse(req.url).pathname,
+        service: this.service_url + url.parse(req.originalUrl).pathname,
         renew: this.renew
     };
 
@@ -299,7 +299,7 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
         requestOptions.path = url.format({
             pathname: this.cas_path + this._validateUri,
             query: {
-                service: this.service_url + url.parse(req.url).pathname,
+                service: this.service_url + url.parse(req.originalUrl).pathname,
                 ticket: req.query.ticket
             }
         });
@@ -324,7 +324,7 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
         requestOptions.path = url.format({
             pathname: this.cas_path + this._validateUri,
             query : {
-                TARGET : this.service_url + url.parse(req.url).pathname,
+                TARGET : this.service_url + url.parse(req.originalUrl).pathname,
                 ticket: ''
             }
         });
@@ -333,7 +333,6 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
             'Content-Length': Buffer.byteLength(post_data)
         };
     }
-
     var request = this.request_client.request(requestOptions, function(response) {
         response.setEncoding( 'utf8' );
         var body = '';

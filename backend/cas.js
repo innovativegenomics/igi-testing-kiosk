@@ -10,7 +10,7 @@ const casOptions = {
     dev_mode_info   : {},
     session_name    : 'cas_user',
     session_info    : 'cas_userinfo',
-    destroy_session : false
+    destroy_session : true
 };
 
 const Cas = new CASAuthentication(casOptions);

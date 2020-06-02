@@ -5,9 +5,11 @@ const bodyParser = require("body-parser");
 const pg = require('pg');
 
 process.env.TZ = 'America/Los_Angeles';
-if(process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({path: path.resolve(process.cwd(), '.env.dev')});
-}
+process.env.PGUSER = require('./config/keys').pg.pguser;
+process.env.PGHOST = require('./config/keys').pg.pghost;
+process.env.PGPASSWORD = require('./config/keys').pg.pgpassword;
+process.env.PGDATABASE = require('./config/keys').pg.pgdatabase;
+process.env.PGPORT = require('./config/keys').pg.pgport;
 const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
