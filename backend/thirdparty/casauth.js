@@ -74,6 +74,7 @@ function CASAuthentication(options) {
                     return callback(new Error('Response from CAS server was bad.'));
                 }
                 try {
+                    console.log(result);
                     var failure = result.serviceresponse.authenticationfailure;
                     if (failure) {
                         return callback(new Error('CAS authentication failed (' + failure.$.code + ').'));
