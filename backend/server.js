@@ -5,9 +5,6 @@ const bodyParser = require("body-parser");
 const pg = require('pg');
 
 process.env.TZ = 'America/Los_Angeles';
-if(process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({path: path.resolve(process.cwd(), '.env.dev')});
-}
 const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
