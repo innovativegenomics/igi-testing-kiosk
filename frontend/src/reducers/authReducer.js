@@ -3,10 +3,8 @@ import { USER_LOADING_ACTION,
          USER_NOT_AUTHED, 
          USER_UPDATING_ACTION,
          USER_UPDATE_FAILED,
-         USER_REQUESTING_SLOT,
-         USER_SET_SLOT,
-         USER_SLOT_REQUEST_FAILED,
-         USER_CANCEL_APPOINTMENT } from '../actions/actionTypes';
+         USER_VERIFIED } from '../actions/actionTypes';
+import moment from 'moment';
 
 const initialState = {
     isAuthenticated: false,
@@ -14,7 +12,6 @@ const initialState = {
     loading: false,
     failed: false,
     fullUser: false,
-    hasSlot: false,
     updating: false,
 };
 export default (state = initialState, action) => {
@@ -39,15 +36,11 @@ export default (state = initialState, action) => {
         case USER_LOADED_ACTION:
             const updates = {};
             if(((action.data.firstname && action.data.firstname !== '') || (state.user.firstname && state.user.firstname !== '')) &&
-                ((action.data.lastname && action.data.lastname !== '') || (state.user.lastname && state.user.lastname !== ''))) {
+                ((action.data.lastname && action.data.lastname !== '') || (state.user.lastname && state.user.lastname !== '')) && 
+                (action.data.email || state.user.email)) {
                 updates.fullUser = true;
             } else {
                 updates.fullUser = false;
-            }
-            if(action.data.appointmentslot || state.user.appointmentslot) {
-                updates.hasSlot = true;
-            } else {
-                updates.hasSlot = false;
             }
             return {
                 ...state,
@@ -68,36 +61,10 @@ export default (state = initialState, action) => {
                 ...state,
                 updating: false,
             };
-        case USER_REQUESTING_SLOT:
+        case USER_VERIFIED:
             return {
                 ...state,
-                requestingSlot: true,
-            };
-        case USER_SET_SLOT:
-            return {
-                ...state,
-                user: {
-                    ...state.user,
-                    location: action.location,
-                    appointmentslot: action.slot,
-                    appointmentuid: action.uid,
-                },
-                requestingSlot: false,
-            };
-        case USER_SLOT_REQUEST_FAILED:
-            return {
-                ...state,
-                requestingSlot: false,
-            };
-        case USER_CANCEL_APPOINTMENT:
-            return {
-                ...state,
-                user: {
-                    ...state.user,
-                    location: null,
-                    appointmentslot: null,
-                    appointmentuid: null,
-                }
+                user: {...state.user, nextappointment: action.nextappointment, testverified: moment()}
             };
         default:
             return state;

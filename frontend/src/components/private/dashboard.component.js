@@ -5,7 +5,34 @@ import moment from 'moment';
 import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
 
-import { cancelAppointment } from '../../actions/authActions';
+import { cancelSlot, loadSlot } from '../../actions/scheduleActions';
+import { testVerifyUser } from '../../actions/authActions';
+
+class ToSModal extends Component {
+    render() {
+        return (
+            <div className='modal fade' id='ToSModal' tabIndex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true'>
+                <div className='modal-dialog' role='document'>
+                    <div className='modal-content'>
+                        <div className='modal-header'>
+                            <h5 className='modal-title' id='exampleModalLabel'>Testing Terms of Service</h5>
+                            <button type='button' className='close' data-dismiss='modal' aria-label='Close'>
+                                <span aria-hidden='true'>&times;</span>
+                            </button>
+                        </div>
+                        <div className='modal-body'>
+                            ...
+                        </div>
+                        <div className='modal-footer'>
+                            <button type='button' className='btn btn-secondary' data-dismiss='modal'>Disagree</button>
+                            <button type='button' className='btn btn-primary' data-dismiss='modal' onClick={e => this.props.agree()}>I Agree</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
 
 class Dashboard extends Component {
     constructor(props) {
@@ -19,7 +46,40 @@ class Dashboard extends Component {
         this.props.history.push('/scheduler');
     }
     render() {
-        if (!this.props.auth.user.appointmentslot) {
+        console.log(this.props.schedule);
+        if(!this.props.auth.user.testverified) {
+            return (
+                <div style={{backgroundColor: '#eeeeee'}}>
+                    <Navbar/>
+                    <div className='container'>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <p className='display-4'>Dashboard</p>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center p-4'>
+                                <button className='btn btn-outline-success btn-lg' data-toggle='modal' data-target='#ToSModal'>Sign up for testing</button>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Get screened</Link>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center p-4'>
+                                <Link className='btn btn-outline-primary btn-lg' to='/settings'>Account settings</Link>
+                            </div>
+                        </div>
+                    </div>
+                    <ToSModal agree={r => this.props.testVerifyUser()} />
+                </div>
+            );
+        } else if (!this.props.schedule.slot.slot) {
+            if(!this.props.schedule.slotLoading && !this.props.schedule.slotLoaded) {
+                this.props.loadSlot();
+            }
             return (
                 <div style={{backgroundColor: '#eeeeee'}}>
                     <Navbar/>
@@ -41,7 +101,12 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-                                <Link className='btn btn-outline-primary btn-lg' to='/'>Account settings</Link>
+                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Get screened</Link>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center p-4'>
+                                <Link className='btn btn-outline-primary btn-lg' to='/settings'>Account settings</Link>
                             </div>
                         </div>
                     </div>
@@ -64,7 +129,7 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-            <p className='h1 font-weight-light'>{moment(this.props.auth.user.appointmentslot).format('h:mm A')} at {this.props.auth.user.location}</p>
+            <p className='h1 font-weight-light'>{moment(this.props.schedule.slot.slot).format('h:mm A')} at {this.props.schedule.slot.location}</p>
                             </div>
                         </div>
                         <div className='row justify-content-center'>
@@ -74,12 +139,17 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-                                <button className='btn btn-outline-warning btn-lg' onClick={this.props.cancelAppointment}>Cancel appointment</button>
+                                <button className='btn btn-outline-warning btn-lg' onClick={this.props.cancelSlot}>Cancel appointment</button>
                             </div>
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center p-4'>
-                                <Link className='btn btn-outline-primary btn-lg' to='/newuser'>Account settings</Link>
+                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Get screened</Link>
+                            </div>
+                        </div>
+                        <div className='row justify-content-center'>
+                            <div className='col text-center'>
+                                <Link className='btn btn-outline-primary btn-lg' to='/settings'>Account settings</Link>
                             </div>
                         </div>
                     </div>
@@ -90,7 +160,8 @@ class Dashboard extends Component {
 }
 
 const mapStateToProps = state => ({
-    auth: state.auth
+    auth: state.auth,
+    schedule: state.schedule
 });
 
-export default connect(mapStateToProps, { cancelAppointment })(Dashboard);
+export default connect(mapStateToProps, { cancelSlot, loadSlot, testVerifyUser })(Dashboard);

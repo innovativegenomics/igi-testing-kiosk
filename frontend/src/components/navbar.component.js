@@ -25,6 +25,9 @@ class Navbar extends Component {
                             <Link className='text-white lead' to='/about'>About</Link>
                         </li>
                         <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'invisible'}`}>
+                            <Link className='text-white lead' to='/dashboard'>Dashboard</Link>
+                        </li>
+                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'invisible'}`}>
                             <Link className='text-white lead' to='/screening'>Screening</Link>
                         </li>
                     </ul>
