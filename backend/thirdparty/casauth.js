@@ -208,6 +208,7 @@ CASAuthentication.prototype.block = function(req, res, next) {
 CASAuthentication.prototype._handle = function(req, res, next, authType) {
     // If the session has been validated with CAS, no action is required.
     console.log('handle');
+    console.log(req);
     if (req.session[ this.session_name ]) {
         console.log('session');
         // If this is a bounce redirect, redirect the authenticated user.
@@ -231,7 +232,6 @@ CASAuthentication.prototype._handle = function(req, res, next, authType) {
         console.log('block');
         res.sendStatus(401);
     }
-    console.log(req);
     // If there is a CAS ticket in the query string, validate it with the CAS server.
     else if (req.query && req.query.ticket) {
         console.log('query ticket!');
