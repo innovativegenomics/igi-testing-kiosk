@@ -18,6 +18,7 @@ const { containsUser,
 const { insertScreening } = require('../../database/screeningActions');
 
 router.get('/login', Cas.bounce, (request, response) => {
+    console.log('login success!!!');
     const calnetid = request.session.cas_user;
     return containsUser(calnetid).then(res => {
         if(!res) {
