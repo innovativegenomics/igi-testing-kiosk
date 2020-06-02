@@ -10,7 +10,7 @@ process.env.PGHOST = require('./config/keys').pg.pghost;
 process.env.PGPASSWORD = require('./config/keys').pg.pgpassword;
 process.env.PGDATABASE = require('./config/keys').pg.pgdatabase;
 process.env.PGPORT = require('./config/keys').pg.pgport;
-console.log(proces.env.NODE_ENV);
+console.log(process.env.NODE_ENV);
 const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
