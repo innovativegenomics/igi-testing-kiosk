@@ -231,6 +231,7 @@ CASAuthentication.prototype._handle = function(req, res, next, authType) {
         console.log('block');
         res.sendStatus(401);
     }
+    console.log(req);
     // If there is a CAS ticket in the query string, validate it with the CAS server.
     else if (req.query && req.query.ticket) {
         console.log('query ticket!');
