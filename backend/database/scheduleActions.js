@@ -283,10 +283,10 @@ module.exports.testVerifyUser = id => {
                         return nextDate;
                     }
                 });
-            }).then(r => {
-                return client.query(VERIFY_USER_QUERY, [id, r.toDate()]);
-            }).then(r => {
-                return client.query('end transaction').then(r => client.release()).then(r => true);
+            }).then(date => {
+                return client.query(VERIFY_USER_QUERY, [id, date.toDate()]).then(r => date);
+            }).then(date => {
+                return client.query('end transaction').then(r => client.release()).then(r => date);
             });
         }).catch(err => abort(err));
     }).catch(err => {

@@ -5,7 +5,7 @@ const short = require('short-uuid');
 
 const Cas = require('../../cas');
 const { Settings } = require('../../database/settingsActions');
-const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot, getUserSlot } = require('../../database/scheduleActions');
+const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot, getUserSlot, testVerifyUser } = require('../../database/scheduleActions');
 const { getUserByID } = require('../../database/userActions');
 const { sendConfirmEmail, sendConfirmText } = require('../../messager');
 
@@ -14,7 +14,7 @@ router.post('/get_time_slots', Cas.block, (request, response) => {
     // if so, return open slots
     const calnetid = request.session.cas_user;
     const requestMoment = moment(request.body.moment);
-    if(!requestMoment.isValid()) {
+    if(!requestMoment.isValid() || !request.body.moment) {
         console.error('no valid moment');
         response.status(400).json({error: 'no valid moment provided'});
         return;
@@ -111,6 +111,21 @@ router.post('/request_cancel_appointment', Cas.block, (request, response) => {
         console.error(err.stack);
         response.status(500);
     });
+});
+
+router.post('/verify_user', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+    testVerifyUser(calnetid).then(res => {
+        if(res) {
+            response.json({nextappointment: res});
+        } else {
+            response.status(400).json({error: 'could not verify user'});
+        }
+    }).catch(err => {
+        console.error('could not verify user');
+        console.error(err);
+        response.status(500).send('error verifying user');
+    })
 });
 
 module.exports = router;
