@@ -1,13 +1,7 @@
 const fs = require('fs');
 const CREATE_SESSION_TABLE = fs.readFileSync('node_modules/connect-pg-simple/table.sql').toString();
 const { Pool } = require('pg');
-const pool = new Pool({
-    user: require('../config/keys').pg.pguser,
-    host: require('../config/keys').pg.pghost,
-    database: require('../config/keys').pg.pgdatabase,
-    password: require('../config/keys').pg.pgpassword,
-    port: require('../config/keys').pg.pgport,
-});
+const pool = new Pool();
 
 const getAbort = (client) => {
     return err => {
