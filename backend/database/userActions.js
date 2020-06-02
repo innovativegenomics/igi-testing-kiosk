@@ -19,15 +19,15 @@ const getAbort = (client) => {
 const USER_TABLE_CREATE = `create table users(firstname text default '',
                                            lastname text default '',
                                            calnetid text primary key,
-                                           email text unique not null,
+                                           email text unique null,
                                            phone text unique null,
                                            datejoined timestamptz not null default now(),
                                            lastsignin timestamptz not null default now(),
                                            admin bool not null default 'f',
                                            alertemail bool not null default 't',
                                            alertphone bool not null default 'f',
-                                           nextappointment date not null,
-                                           testverified bool not null default false,
+                                           nextappointment date null,
+                                           testverified timestamptz null,
                                            reschedulecount integer not null default 0);`;
 const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 module.exports.verifyUserTable = () => {
@@ -94,7 +94,8 @@ const CHECK_ALL_USER_INFO = 'select firstname, lastname from users where calneti
 module.exports.checkAllUserInfoPresent = id => {
     return pool.query(CHECK_ALL_USER_INFO, [id]).then(res => {
         return res.rows[0].firstname !== '' &&
-               res.rows[0].lastname !== '';
+               res.rows[0].lastname !== '' &&
+               res.rows[0].email;
     }).catch(err => {
         return err;
     });
@@ -140,48 +141,15 @@ module.exports.updateAlertPhone = (id, alertphone) => {
 
 
 // schedule
-const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
-const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
-const INSERT_USER_QUERY = `insert into users (calnetid, email, nextappointment) values ($1, $2, $3)`;
+// const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
+// const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
+const INSERT_USER_QUERY = `insert into users (calnetid) values ($1)`;
 module.exports.insertUser = id => {
-    //////////////////////////////////////
-    // search users for most recent day
-    // find number of users with that day
-    // if < max
-    //   set user to most current day
-    // else
-    //   set user to next day
-    return pool.connect().then(client => {
-        const abort = getAbort(client);
-        return client.query('begin').then(res => {
-            return client.query(LATEST_DATE_QUERY);
-        }).then(res => {
-            var latestDate = moment(res.rows[0].max);
-            if(!res.rows[0].max || latestDate.isBefore(moment().startOf('day').add(1, 'day'))) {
-                latestDate = moment().startOf('day').add(1, 'day');
-            }
-            return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(res => {
-                if(res.rows[0].count < Settings().dayquota) {
-                    return latestDate;
-                } else {
-                    var nextDate = latestDate.add(1, 'day');
-                    while(!Settings().days.includes(nextDate.day())) {
-                        nextDate = nextDate.add(1, 'day');
-                    }
-                    return nextDate;
-                }
-            });
-        }).then(res => {
-            return client.query(INSERT_USER_QUERY, [id, `${id}@berkeley.edu`, res.toDate()]);
-        }).then(res => {
-            return client.query('end transaction');
-        }).then(res => {
-            client.release();
-        }).catch(err => {
-            return abort(err);
-        });
+    return pool.query(INSERT_USER_QUERY, [id]).then(res => {
+        return res.rowCount > 0;
     }).catch(err => {
-        console.error('Error connecting to insert user');
-        console.error(err.stack);
+        console.error('Error creating user');
+        console.error(err);
+        return err;
     });
 }
