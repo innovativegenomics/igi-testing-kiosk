@@ -48,9 +48,9 @@ module.exports.verifyScheduleTable = () => {
     });
 }
 
-const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1`;
-const LATEST_DATE_QUERY = `select max(nextappointment) from users`;
-const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 order by datejoined asc`;
+const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1 and testverified is not null`;
+const LATEST_DATE_QUERY = `select max(nextappointment) from users where testverified is not null`;
+const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 and testverified is not null order by testverified asc`;
 const INACTIVATE_MULTIPLE_SLOTS = `update schedule set active=false where calnetid in (`;
 const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, reschedulecount=0 where calnetid in (`;
 /**
@@ -65,7 +65,7 @@ module.exports.updateUserSchedules = date => {
     return pool.connect().then(client => {
         const abort = getAbort(client);
         return client.query('begin').then(res => {
-            return client.query(LATEST_DATE_QUERY);
+            return client.query(LATEST_DATE_QUERY); // find the farthest ahead scheduled date
         }).then(res => {
             var latestDate = moment(res.rows[0].max);
             if(latestDate.isBefore(moment(date).startOf('day'))) {
@@ -192,6 +192,9 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
         return client.query('begin').then(r => {
             return client.query(GET_USER_BY_ID, [user]);
         }).then(res => {
+            if(!res.rows[0].testverified) {
+                return false;
+            }
             const nextAppointmentStart = moment(res.rows[0].nextappointment).hour(Settings().starttime);
             const nextAppointmentEnd = moment(res.rows[0].nextappointment).hour(Settings().endtime);
             return querySlot.isBetween(nextAppointmentStart, nextAppointmentEnd, undefined, '[)') &&
@@ -227,7 +230,7 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
     });
 }
 
-const USER_ASSIGNED_DAY = `select count(*)::integer from users where calnetid=$1 and nextappointment=$2`;
+const USER_ASSIGNED_DAY = `select count(*)::integer from users where calnetid=$1 and nextappointment=$2 and testverified is not null`;
 module.exports.userAssignedDay = (user, year, month, day) => {
     return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
 }
@@ -250,6 +253,42 @@ module.exports.getUserSlot = id => {
         }
     }).catch(err => {
         console.error('error getting current user slot');
+        console.error(err);
+        return err;
+    });
+}
+
+const USER_IS_VERIFIED = 'select testverified is not null from users where calnetid=$1';
+const VERIFY_USER_QUERY = 'update users set testverified=now(), nextappointment=$2 where calnetid=$1';
+module.exports.testVerifyUser = id => {
+    return pool.connect().then(client => {
+        const abort = getAbort();
+        return client.query('begin').then(res => {
+            return client.query(USER_IS_VERIFIED, [id]);
+        }).then(res => {
+            if(res.rows.length > 0) return false; // user is already verified
+            return client.query(LATEST_DATE_QUERY).then(r => {
+                var latestDate = moment(r.rows[0].max);
+                if(!r.rows[0].max || latestDate.isBefore(moment().startOf('day').add(1, 'day'))) {
+                    latestDate = moment().startOf('day').add(1, 'day');
+                }
+                return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(r => {
+                    if(r.rows[0].count < Settings().dayquota) {
+                        return latestDate;
+                    } else {
+                        var nextDate = latestDate.add(1, 'day');
+                        while(!Settings().days.includes(nextDate.day())) {
+                            nextDate = nextDate.add(1, 'day');
+                        }
+                        return nextDate;
+                    }
+                });
+            }).then(r => {
+                return client.query(VERIFY_USER_QUERY, [id, r.toDate()]).then(r => true);
+            });
+        }).catch(err => abort(err));
+    }).catch(err => {
+        console.error('cannot test verify user');
         console.error(err);
         return err;
     });
