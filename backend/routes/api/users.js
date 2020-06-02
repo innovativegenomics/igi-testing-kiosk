@@ -59,6 +59,7 @@ router.get('/logout', Cas.logout);
 
 router.get('/get/profile', Cas.block, (request, response) => {
     // returns a single row from the database
+    console.log(request.session);
     const calnetid = request.session.cas_user;
     getUserByID(calnetid).then(res => {
         response.json(res);
