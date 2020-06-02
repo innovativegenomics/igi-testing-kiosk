@@ -209,6 +209,7 @@ CASAuthentication.prototype._handle = function(req, res, next, authType) {
     // If the session has been validated with CAS, no action is required.
     console.log('handle');
     if (req.session[ this.session_name ]) {
+        console.log('session');
         // If this is a bounce redirect, redirect the authenticated user.
         if (authType === AUTH_TYPE.BOUNCE_REDIRECT) {
             res.redirect(req.session.cas_return_to);
@@ -220,12 +221,14 @@ CASAuthentication.prototype._handle = function(req, res, next, authType) {
     }
     // If dev mode is active, set the CAS user to the specified dev user.
     else if (this.is_dev_mode && authType !== AUTH_TYPE.BLOCK && req.query.devuser && req.query.devuser !== '') {
+        console.log('dev mode');
         req.session[ this.session_name ] = req.query.devuser;
         req.session[ this.session_info ] = this.dev_mode_info;
         next();
     }
     // If the authentication type is BLOCK, simply send a 401 response.
     else if (authType === AUTH_TYPE.BLOCK) {
+        console.log('block');
         res.sendStatus(401);
     }
     // If there is a CAS ticket in the query string, validate it with the CAS server.
@@ -235,6 +238,7 @@ CASAuthentication.prototype._handle = function(req, res, next, authType) {
     }
     // Otherwise, redirect the user to the CAS login.
     else {
+        console.log('login');
         this._login(req, res, next);
     }
 };
