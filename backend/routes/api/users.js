@@ -18,7 +18,6 @@ const { containsUser,
 const { insertScreening } = require('../../database/screeningActions');
 
 router.get('/login', Cas.bounce, (request, response) => {
-    console.log('login success!!!');
     const calnetid = request.session.cas_user;
     return containsUser(calnetid).then(res => {
         if(!res) {
@@ -60,7 +59,6 @@ router.get('/logout', Cas.logout);
 
 router.get('/get/profile', Cas.block, (request, response) => {
     // returns a single row from the database
-    console.log(request.session);
     const calnetid = request.session.cas_user;
     getUserByID(calnetid).then(res => {
         response.json(res);
