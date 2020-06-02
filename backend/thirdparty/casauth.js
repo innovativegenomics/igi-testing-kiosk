@@ -207,6 +207,7 @@ CASAuthentication.prototype.block = function(req, res, next) {
  */
 CASAuthentication.prototype._handle = function(req, res, next, authType) {
     // If the session has been validated with CAS, no action is required.
+    console.log('handle');
     if (req.session[ this.session_name ]) {
         // If this is a bounce redirect, redirect the authenticated user.
         if (authType === AUTH_TYPE.BOUNCE_REDIRECT) {
