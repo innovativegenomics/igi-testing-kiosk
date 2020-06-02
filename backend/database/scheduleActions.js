@@ -68,7 +68,7 @@ module.exports.updateUserSchedules = date => {
             return client.query(LATEST_DATE_QUERY); // find the farthest ahead scheduled date
         }).then(res => {
             var latestDate = moment(res.rows[0].max);
-            if(latestDate.isBefore(moment(date).startOf('day'))) {
+            if(latestDate.isBefore(moment(date).startOf('day')) || !latestDate.isValid()) {
                 latestDate = moment(date).startOf('day');
             }
             return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(res => {
@@ -258,7 +258,7 @@ module.exports.getUserSlot = id => {
     });
 }
 
-const USER_IS_VERIFIED = 'select testverified is not null from users where calnetid=$1';
+const USER_IS_VERIFIED = 'select testverified from users where calnetid=$1 and testverified is not null';
 const VERIFY_USER_QUERY = 'update users set testverified=now(), nextappointment=$2 where calnetid=$1';
 module.exports.testVerifyUser = id => {
     return pool.connect().then(client => {
@@ -284,7 +284,9 @@ module.exports.testVerifyUser = id => {
                     }
                 });
             }).then(r => {
-                return client.query(VERIFY_USER_QUERY, [id, r.toDate()]).then(r => true);
+                return client.query(VERIFY_USER_QUERY, [id, r.toDate()]);
+            }).then(r => {
+                return client.query('end transaction').then(r => client.release()).then(r => true);
             });
         }).catch(err => abort(err));
     }).catch(err => {

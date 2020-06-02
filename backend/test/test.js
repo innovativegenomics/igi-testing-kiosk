@@ -11,7 +11,7 @@ const moment = require('moment');
 const { Settings } = require('../database/settingsActions');
 const { verifyTables } = require('../database/database');
 const { insertUser, getUsersByID } = require('../database/userActions');
-const { updateUserSchedules, getOpenSlots, assignSlot } = require('../database/scheduleActions');
+const { updateUserSchedules, getOpenSlots, assignSlot, testVerifyUser } = require('../database/scheduleActions');
 
 describe('database', () => { describe('#verifyTables()', () => {
     before((done) => {
@@ -89,7 +89,7 @@ describe('userActions', () => {
         });
     });
     describe('#assignSlot', function() {
-        it('should assign correct slot', done => {
+        it('should not assign correct slot', done => {
             const promises = [];
             promises.push(assignSlot('user15', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
             promises.push(assignSlot('user16', 'Cafe Strada', 2020, 5, 2, 12, 50, 'UNIQUEID').then(r => console.log(r)).catch(e => done(e)));
@@ -101,9 +101,43 @@ describe('userActions', () => {
             }).then(res => done());
         });
     });
-    describe('#getOpenSlots', function() {
-        it('should return open slots', done => {
-            getOpenSlots(2020, 5, 2).then(r => {console.log(r); return done()}).catch(e => done(e));
+    describe('#testVerifyUser', function() {
+        it('should verify some users', done => {
+            var promiseChain = Promise.resolve(0);
+            for(var i = 0;i < 7;i++) {
+                promiseChain = promiseChain.then(res => {
+                    return testVerifyUser(`user${res}`).then(r => {
+                        console.log(`user${res} : ${r}`);
+                        return res+1;
+                    });
+                });
+            }
+            promiseChain.then(r => done()).catch(e => {done(e)});
         });
     });
+    describe('#updateUserSchedules', function() {
+        it('should not throw error', done => {
+            const date = moment().add(2, 'day');
+            updateUserSchedules(date.toDate()).then(r => {console.log(r);done()}).catch(e => done(e));
+        });
+    });
+    describe('#testVerifyUser', function() {
+        it('should verify some users', done => {
+            var promiseChain = Promise.resolve(10);
+            for(var i = 0;i < 7;i++) {
+                promiseChain = promiseChain.then(res => {
+                    return testVerifyUser(`user${res}`).then(r => {
+                        console.log(`user${res} : ${r}`);
+                        return res+1;
+                    });
+                });
+            }
+            promiseChain.then(r => done()).catch(e => {done(e)});
+        });
+    });
+    // describe('#getOpenSlots', function() {
+    //     it('should return open slots', done => {
+    //         getOpenSlots(2020, 5, 2).then(r => {console.log(r); return done()}).catch(e => done(e));
+    //     });
+    // });
 });
