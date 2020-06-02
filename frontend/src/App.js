@@ -6,7 +6,7 @@ import store from './store';
 
 import Landing from './components/public/landing.component';
 import About from './components/public/about.component';
-import DevLogin from './components/public/devlogin.component';
+import QRCode from './components/public/qrcode.component';
 import PrivateRoute from './components/private/privateRoute.component';
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
@@ -25,7 +25,7 @@ export default class App extends Component {
           <div className='App'>
             <Route path='/' exact component={Landing} />
             <Route path='/about' component={About} />
-            <Route path='/devlogin' component={DevLogin}/>
+            <Route path='/qrcode' component={QRCode}/>
             <PrivateRoute path='/screening' component={Screening} />
             <PrivateRoute path='/newuser' component={NewUser}/>
             <PrivateRoute path='/dashboard' component={Dashboard}/>
