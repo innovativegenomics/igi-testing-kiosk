@@ -229,6 +229,7 @@ CASAuthentication.prototype._handle = function(req, res, next, authType) {
     }
     // If there is a CAS ticket in the query string, validate it with the CAS server.
     else if (req.query && req.query.ticket) {
+        console.log('query ticket!');
         this._handleTicket(req, res, next);
     }
     // Otherwise, redirect the user to the CAS login.
@@ -333,7 +334,7 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
             'Content-Length': Buffer.byteLength(post_data)
         };
     }
-
+    console.log(requestOptions);
     var request = this.request_client.request(requestOptions, function(response) {
         response.setEncoding( 'utf8' );
         var body = '';
