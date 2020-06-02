@@ -4,8 +4,7 @@ import { connect } from 'react-redux';
 import Navbar from '../navbar.component';
 import moment from 'moment';
 
-import { loadSchedule } from '../../actions/scheduleActions';
-import { requestSlot } from '../../actions/authActions';
+import { loadSchedule, requestSlot } from '../../actions/scheduleActions';
 
 class AppointmentTable extends Component {
     render() {
@@ -51,20 +50,21 @@ class Scheduler extends Component {
         };
     }
     componentDidMount() {
-        if(!this.props.schedule.loaded) {
-            this.props.loadSchedule(this.props.auth.user.nextappointment);
-        }
+        console.log('mount load');
+        this.props.loadSchedule(this.props.auth.user.nextappointment);
     }
     requestTimeSlot = (location, slot) => {
-        console.log(`${location} ${slot}`);
         this.setState({requestedLocation: location, requestedSlot: slot});
         this.props.requestSlot(location, slot);
     }
     render() {
-        console.log(`${this.state.requestedLocation} ${this.props.auth.user.location}`);
-        console.log(`${this.state.requestedSlot} ${this.props.auth.user.appointmentslot}`);
-        if(this.state.requestedLocation === this.props.auth.user.location && this.props.auth.user.appointmentslot === this.state.requestedSlot) {
+        if(!this.props.auth.user.testverified) return <Redirect to='/dashboard' />;
+        if(this.state.requestedLocation === this.props.schedule.slot.location && this.props.schedule.slot.slot === this.state.requestedSlot) {
             return <Redirect to='/dashboard'/>;
+        }
+        if(this.props.schedule.scheduleLoading) {
+            console.log('loading');
+            return <div>loading</div>;
         }
         return (
             <div style={{backgroundColor: '#eeeeee'}}>
@@ -82,7 +82,7 @@ class Scheduler extends Component {
                     </div>
                     <div className='row justify-content-center'>
                         <div className='col'>
-                            <AppointmentTable slots={this.props.schedule.slotsAvailable} request={this.requestTimeSlot}/>
+                            <AppointmentTable slots={this.props.schedule.schedule} request={this.requestTimeSlot}/>
                         </div>
                     </div>
                 </div>

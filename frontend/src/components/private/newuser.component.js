@@ -5,6 +5,7 @@ import Navbar from '../navbar.component';
 import { connect } from 'react-redux';
 
 import { updateUser } from '../../actions/authActions';
+import { Redirect } from 'react-router-dom';
 
 class UserInfo extends Component {
     render() {
@@ -64,7 +65,7 @@ class NewUser extends Component {
         this.state = {
             firstname: props.auth.user.firstname || '',
             lastname: props.auth.user.lastname || '',
-            email: props.auth.user.email,
+            email: props.auth.user.email || '',
             phone: props.auth.user.phone || '',
             alertemail: props.auth.user.alertemail,
             alertphone: props.auth.user.alertphone,
@@ -112,6 +113,7 @@ class NewUser extends Component {
         this.setState(update);
     }
     render() {
+        if(this.props.auth.fullUser) return <Redirect to='/dashboard' />;
         return (
             <div>
                 <Navbar/>
