@@ -229,7 +229,6 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
 
 const USER_ASSIGNED_DAY = `select count(*)::integer from users where calnetid=$1 and nextappointment=$2`;
 module.exports.userAssignedDay = (user, year, month, day) => {
-    console.log(`${year}, ${month}, ${day}`);
     return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
 }
 
@@ -237,6 +236,21 @@ const USER_CANCEL_SLOT = `update schedule set active=false where calnetid=$1`;
 module.exports.cancelSlot = id => {
     return pool.query(USER_CANCEL_SLOT, [id]).then(res => res.rowCount > 0).catch(err => {
         console.error(err.stack);
+        return err;
+    });
+}
+
+const USER_SLOT_QUERY = `select * from schedule where calnetid=$1 and active=true`;
+module.exports.getUserSlot = id => {
+    return pool.query(USER_SLOT_QUERY, [id]).then(res => {
+        if(res.rowCount > 0) {
+            return res.rows[0];
+        } else {
+            return null;
+        }
+    }).catch(err => {
+        console.error('error getting current user slot');
+        console.error(err);
         return err;
     });
 }
