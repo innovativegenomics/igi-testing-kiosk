@@ -4,7 +4,7 @@ import { Redirect } from 'react-router-dom';
 import qs from 'qs';
 import moment from 'moment';
 
-import { getSlotInfo } from '../../actions/adminActions';
+import { getSlotInfo, finishAppointment } from '../../actions/adminActions';
 
 import Navbar from '../navbar.component';
 
@@ -17,15 +17,21 @@ class Scanner extends Component {
             location: '',
             firstname: '',
             lastname: '',
-            loaded: false
+            loaded: false,
+            processed: false,
         };
     }
+    processUser = uid => {
+        finishAppointment(uid).then(r => {
+            this.setState({processed: r});
+        });
+    }
     render() {
+        const uid = qs.parse(this.props.location.search, {ignoreQueryPrefix: true}).uid;
         if(this.props.auth.user.admin < 1) {
             return <Redirect to='/dashboard' />;
         }
         if(!this.state.loaded) {
-            const uid = qs.parse(this.props.location.search, {ignoreQueryPrefix: true}).uid;
             console.log('begin load');
             if(uid) {
                 getSlotInfo(uid).then(res => {
@@ -87,6 +93,12 @@ class Scanner extends Component {
                     <div className='row justify-content-center'>
                         <div className={`col-md-6 text-center ${hasErrors ? 'd-none' : ''}`}>
                             <div className='h3 font-weight-light alert alert-success'>Clear to proceed</div>
+                        </div>
+                    </div>
+                    <div className='row justify-content-center'>
+                        <div className={`col-md-6 text-center ${(this.props.auth.user.admin > 1 && !hasErrors) ? '' : 'd-none'}`}>
+                            <button className='btn btn-lg btn-primary' onClick={e => this.processUser(uid)} disabled={this.state.processed}>User Processed</button>
+                            <div className={`alert alert-success ${this.state.processed ? '' : 'd-none'}`}>Done!</div>
                         </div>
                     </div>
                     <div className={`row justify-content-center ${hasErrors?'':'d-none'}`}>
