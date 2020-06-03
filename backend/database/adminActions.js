@@ -41,7 +41,6 @@ module.exports.getSlotInfo = uid => {
     return pool.connect().then(client => {
         const abort = getAbort(client);
         return client.query('begin').then(r => {
-            console.log(uid);
             return client.query(GET_SLOT, [uid]);
         }).then(slot => {
             if(slot.rows.length < 1) return {errors: ['INVALID_UID']};
@@ -85,4 +84,15 @@ module.exports.getSlotInfo = uid => {
         console.error(err);
         return err;
     });
+}
+
+const FINISH_APPOINTMENT = 'update schedule set active=false, completed=now() where appointmentuid=$1';
+module.exports.finishAppointment = uid => {
+    return pool.query(FINISH_APPOINTMENT, [uid]).then(res => {
+        return res.rowCount > 0;
+    }).catch(err => {
+        console.error(`Error finishing appointment ${uid}`);
+        console.error(err);
+        return err;
+    })
 }
