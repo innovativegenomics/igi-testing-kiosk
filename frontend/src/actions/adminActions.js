@@ -14,3 +14,18 @@ export const getSlotInfo = uid => {
         return err;
     });
 }
+
+export const finishAppointment = uid => {
+    return axios.post('/api/admin/finish_appointment', {uid: uid}).then(res => {
+        if(res.status === 200) {
+            return true;
+        } else {
+            console.error('could not finish appointment');
+            return false;
+        }
+    }).catch(err => {
+        console.error('could not finish appointment');
+        console.error(err);
+        return false;
+    });
+}
