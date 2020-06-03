@@ -53,7 +53,7 @@ class Landing extends Component {
                     <div className='row justify-content-center'>
                         <div className='col'>
                             <p className='display-4 font-weight-light text-center'>
-                                IGI Testing Kiosk Signup | Berkeley
+                                IGI Healthy Campus | Berkeley
                             </p>
                         </div>
                     </div>

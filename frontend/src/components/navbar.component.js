@@ -15,7 +15,7 @@ class Navbar extends Component {
     render() {
         return (
             <nav className='navbar navbar-expand-lg navbar-light navbar-bg p-3' style={{fontFamily: 'Raleway'}}>
-                <div className='navbar-brand igi-header font-weight-light mx-auto'>IGI Testing Kiosk</div>
+                <div className='navbar-brand igi-header font-weight-light mx-auto'>IGI Healthy Campus App</div>
                 <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span className="navbar-toggler-icon"></span>
                 </button>
@@ -24,10 +24,10 @@ class Navbar extends Component {
                         <li className='nav-item pl-5'>
                             <Link className='text-white lead' to='/about'>About</Link>
                         </li>
-                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'invisible'}`}>
+                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'d-none'}`}>
                             <Link className='text-white lead' to='/dashboard'>Dashboard</Link>
                         </li>
-                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'invisible'}`}>
+                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'d-none'}`}>
                             <Link className='text-white lead' to='/screening'>Screening</Link>
                         </li>
                     </ul>
