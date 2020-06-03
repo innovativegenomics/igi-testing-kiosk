@@ -64,7 +64,7 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Get screened</Link>
+                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Screening Questionaire</Link>
                             </div>
                         </div>
                         <div className='row justify-content-center'>
@@ -101,7 +101,7 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center'>
-                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Get screened</Link>
+                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Screening Questionaire</Link>
                             </div>
                         </div>
                         <div className='row justify-content-center'>
@@ -144,7 +144,7 @@ class Dashboard extends Component {
                         </div>
                         <div className='row justify-content-center'>
                             <div className='col text-center p-4'>
-                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Get screened</Link>
+                                <Link className='btn btn-outline-danger btn-lg' to='/screening'>Screening Questionaire</Link>
                             </div>
                         </div>
                         <div className='row justify-content-center'>

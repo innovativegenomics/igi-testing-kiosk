@@ -57,9 +57,9 @@ class Landing extends Component {
                             </p>
                         </div>
                     </div>
-                    <div className={`row justify-content-center ${(this.state.devmode)?'':'invisible'}`}>
+                    <div className={`row justify-content-center ${(this.state.devmode)?'':'d-none'}`}>
                         <div className='col-4 text-center pb-2'>
-                            <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({devuser: e.target.value})} />
+                            <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({devuser: e.target.value})} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
                         </div>
                     </div>
                     <div className='row justify-content-center'>
