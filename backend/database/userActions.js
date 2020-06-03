@@ -90,12 +90,12 @@ module.exports.updateLastUserSignin = id => {
     });
 }
 
-const CHECK_ALL_USER_INFO = 'select firstname, lastname from users where calnetid=$1';
+const CHECK_ALL_USER_INFO = 'select firstname, lastname, email from users where calnetid=$1';
 module.exports.checkAllUserInfoPresent = id => {
     return pool.query(CHECK_ALL_USER_INFO, [id]).then(res => {
-        return res.rows[0].firstname !== '' &&
+        return (res.rows[0].firstname !== '' &&
                res.rows[0].lastname !== '' &&
-               res.rows[0].email;
+               !!res.rows[0].email);
     }).catch(err => {
         return err;
     });
