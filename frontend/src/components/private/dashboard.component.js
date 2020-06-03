@@ -21,7 +21,7 @@ class ToSModal extends Component {
                             </button>
                         </div>
                         <div className='modal-body'>
-                            ...
+                            There are no terms of service yet. Just click <b>I Agree</b>
                         </div>
                         <div className='modal-footer'>
                             <button type='button' className='btn btn-secondary' data-dismiss='modal'>Disagree</button>

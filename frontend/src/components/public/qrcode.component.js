@@ -15,7 +15,9 @@ class QRCode extends Component {
         if(this.state.img === '') {
             const query = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
             if(query.uid) {
-                qrcode.toDataURL(query.uid, { errorCorrectionLevel: 'H' }).then(res => {
+                const scanUrl = window.location.protocol + '//' + window.location.host + '/scanner?uid=' + query.uid;
+                console.log(scanUrl);
+                qrcode.toDataURL(scanUrl, { errorCorrectionLevel: 'H' }).then(res => {
                     this.setState({img: res});
                 });
             }
