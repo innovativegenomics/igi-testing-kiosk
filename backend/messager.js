@@ -33,11 +33,14 @@ module.exports.sendOpenSlotEmail = (email, day) => {
     });
 }
 
-module.exports.sendConfirmText = (number, day, timeStart, timeEnd, location, locationLink) => {
+module.exports.sendConfirmText = (number, uid, day, timeStart, timeEnd, location, locationLink) => {
+    const qrUrl = require('./config/keys').host + '/qrcode?uid=' + uid;
     return client.messages.create({
         body: `Testing Appointment Confirmation for ${day}
 Please arrive between ${timeStart} and ${timeEnd} at location ${location}.
 To view a map to this location, visit the following link ${locationLink}.
+When you arrive, please present the QR code at the following link: ${qrUrl}.
+Make sure to complete the screening questionaire 4 or less hours before your appointment.
 To change or cancel this appointment, log into your testing account.`,
         to: number,
         from: config.twilio.sender
@@ -45,7 +48,9 @@ To change or cancel this appointment, log into your testing account.`,
 }
 
 module.exports.sendConfirmEmail = (email, uid, day, timeStart, timeEnd, location, locationLink) => {
-    return qrcode.toDataURL(uid).then(res => {
+    const scanUrl = require('./config/keys').host + '/scanner?uid=' + uid;
+    const qrUrl = require('./config/keys').host + '/qrcode?uid=' + uid;
+    return qrcode.toDataURL(scanUrl).then(res => {
         return transport.sendMail({
             from: config.email.user,
             to: email,
@@ -54,9 +59,10 @@ module.exports.sendConfirmEmail = (email, uid, day, timeStart, timeEnd, location
             html: `<h1>Appointment Confirmation for ${day}</h1>
                    <h2>Please arrive at <a href='${locationLink}'>${location}</a> between ${timeStart} and ${timeEnd}</h2>
                    <h2>Bring your phone or another device to display the QR Code below</h2>
-                   <b><img src="cid:qrcode" width="300" height="300"/></b>
+                   <h2>Make sure to complete the screening questionaire 4 or less hours before your appointment.</h2>
+                   <b><img src="cid:qrcode" style='width: 100%; max-width: 450px;'/></b>
                    <br />
-                   <b>If the above image doesn't show correctly, provide this reference number at the kiosk: ${uid}</b>`,
+                   <h3>If the above QR code doesn't show correctly, go to <a href='${qrUrl}'>this</a> link</h3>`,
             attachments: [
                 {
                     filename: 'qrcode.png',

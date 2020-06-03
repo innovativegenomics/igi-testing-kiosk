@@ -23,7 +23,7 @@ const USER_TABLE_CREATE = `create table users(firstname text default '',
                                            phone text unique null,
                                            datejoined timestamptz not null default now(),
                                            lastsignin timestamptz not null default now(),
-                                           admin bool not null default 'f',
+                                           admin integer not null default 0,
                                            alertemail bool not null default 't',
                                            alertphone bool not null default 'f',
                                            nextappointment date null,
@@ -149,6 +149,17 @@ module.exports.insertUser = id => {
         return res.rowCount > 0;
     }).catch(err => {
         console.error('Error creating user');
+        console.error(err);
+        return err;
+    });
+}
+
+const GET_USER_ADMIN = 'select admin from users where calnetid=$1';
+module.exports.getUserAdmin = id => {
+    return pool.query(GET_USER_ADMIN, [id]).then(res => {
+        return res.rows[0].admin;
+    }).catch(err => {
+        console.error('cannot get user admin');
         console.error(err);
         return err;
     });

@@ -61,7 +61,7 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
         response.status(400).json({error: 'no valid location provided'});
         return;
     }
-    const uid = short('0123456789').new();
+    const uid = short().new();
     assignSlot(calnetid, request.body.location, requestMoment.year(), requestMoment.month(), requestMoment.date(), requestMoment.hour(), requestMoment.minute(), uid).then(res => {
         if(res) {
             // send messages
@@ -74,10 +74,11 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
                                                         request.body.location,
                                                         Settings().locationlinks[Settings().locations.indexOf(request.body.location)]).catch(err => {
                         console.error(`failed sending confirmation email to ${calnetid}`);
+                        console.error(err);
                     });
                 }
                 if(res.alertphone && res.phone) {
-                    sendConfirmText(res.phone, requestMoment.format('dddd, MMMM DD'),
+                    sendConfirmText(res.phone, uid, requestMoment.format('dddd, MMMM DD'),
                                                 requestMoment.format('h:mmA'),
                                                 requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
                                                 request.body.location,
