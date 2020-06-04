@@ -16,7 +16,7 @@ const users = require('./routes/api/users');
 const schedule = require('./routes/api/schedule');
 const admin = require('./routes/api/admin');
 
-const { startScheduler } = require('./scheduler');
+const { verifyScheduler, setUpdateSchedulesTask } = require('./scheduler');
 
 const app = express();
 // Bodyparser middleware
@@ -29,6 +29,8 @@ app.use(bodyParser.json());
 // DB Config
 // verify database
 verifyTables().then(res => {
+    return verifyScheduler().then(r => setUpdateSchedulesTask());
+}).then(res => {
     console.log('database initialized successfully!');
     // register services that rely on the database
     var sess = {

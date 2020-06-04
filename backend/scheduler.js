@@ -1,38 +1,57 @@
-// contains all the logic for scheduling people
-const cron = require('node-cron');
-const moment = require('moment');
-const { Settings } = require('./database/settingsActions');
-const { getUsersByID } = require('./database/userActions');
-const { updateUserSchedules } = require('./database/scheduleActions');
-const { sendOpenSlotEmail, sendOpenSlotText } = require('./messager');
-
-const task = cron.schedule('1 0 * * *', () => { // run at 12:01 AM every day
-    console.log('running scheduler!');
-    schedule();
-}, {
-    timezone: 'America/Los_Angeles',
-    scheduled: false
+const { Pool } = require('pg');
+const pool = new Pool({
+    user: require('./config/keys').pg.pguser,
+    host: require('./config/keys').pg.pghost,
+    database: require('./config/keys').pg.pgdatabase,
+    password: require('./config/keys').pg.pgpassword,
+    port: require('./config/keys').pg.pgport,
 });
+const { makeWorkerUtils } = require('graphile-worker');
 
-const schedule = () => {
-    const currentDate = moment();
-    return updateUserSchedules(currentDate.toDate()).then(res => getUsersByID(res.map(x => x.calnetid))).then(users => {
-        // result is list of users
-        // send out emails based on preferences
-        const promises = [];
-        for(var u of users) {
-            const day = moment(u.nextappointment);
-            if(u.alertemail) {
-                promises.push(sendOpenSlotEmail(u.email, day.format('dddd, MMMM DD')));
-            }
-            if(u.alertphone && u.phone) {
-                promises.push(sendOpenSlotText(u.phone, day.format('dddd, MMMM DD')));
-            }
-        }
-        return Promise.all(promises);
+var workerUtils = undefined;
+
+module.exports.verifyScheduler = () => {
+    return makeWorkerUtils({pgPool: pool}).then(r => (workerUtils=r)).then(r => {
+        return workerUtils.migrate();
     });
 }
 
-module.exports.startScheduler = () => {
-    task.start();
+module.exports.setUpdateSchedulesTask = () => {
+    return workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('day').add(1, 'day').add(1, 'minute').toDate(), jobKey: 'rescheduleJob', queueName: 'rescheduleQueue'});
+}
+
+module.exports.scheduleConfirmText = (number, uid, day, timeStart, timeEnd, location, locationLink) => {
+    return workerUtils.addJob('confirmText', {number: number,
+                                              uid: uid,
+                                              day: day,
+                                              timeStart: timeStart,
+                                              timeEnd: timeEnd,
+                                              location: location,
+                                              locationLink: locationLink});
+}
+
+module.exports.scheduleConfirmEmail = (email, uid, day, timeStart, timeEnd, location, locationLink) => {
+    return workerUtils.addJob('confirmEmail', {email: email,
+                                               uid: uid,
+                                               day: day,
+                                               timeStart: timeStart,
+                                               timeEnd: timeEnd,
+                                               location: location,
+                                               locationLink: locationLink});
+}
+
+module.exports.scheduleOpenSlotText = (number, day) => {
+    return workerUtils.addJob('openSlotText', {number: number, day: day});
+}
+
+module.exports.scheduleOpenSlotEmail = (email, day) => {
+    return workerUtils.addJob('openSlotEmail', {email: email, day: day});
+}
+
+module.exports.scheduleSurveyReminderEmail = (phone, calnetid, when) => {
+    return workerUtils.addJob('surveyReminderText', {phone: phone}, {jobKey: calnetid+'surveyReminderText', runAt: when});
+}
+
+module.exports.scheduleSurveyReminderEmail = (email, calnetid, when) => {
+    return workerUtils.addJob('surveyReminderEmail', {email: email}, {jobKey: calnetid+'surveyReminderEmail', runAt: when});
 }
