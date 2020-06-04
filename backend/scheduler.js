@@ -7,6 +7,7 @@ const pool = new Pool({
     port: require('./config/keys').pg.pgport,
 });
 const { makeWorkerUtils } = require('graphile-worker');
+const moment = require('moment');
 
 var workerUtils = undefined;
 
@@ -48,10 +49,18 @@ module.exports.scheduleOpenSlotEmail = (email, day) => {
     return workerUtils.addJob('openSlotEmail', {email: email, day: day});
 }
 
-module.exports.scheduleSurveyReminderEmail = (phone, calnetid, when) => {
-    return workerUtils.addJob('surveyReminderText', {phone: phone}, {jobKey: calnetid+'surveyReminderText', runAt: when});
+module.exports.scheduleSurveyReminderText = (calnetid, when) => {
+    return workerUtils.addJob('surveyReminderText', {calnetid: calnetid}, {jobKey: calnetid+'surveyReminderText', runAt: when});
 }
 
-module.exports.scheduleSurveyReminderEmail = (email, calnetid, when) => {
-    return workerUtils.addJob('surveyReminderEmail', {email: email}, {jobKey: calnetid+'surveyReminderEmail', runAt: when});
+module.exports.scheduleSurveyReminderEmail = (calnetid, when) => {
+    return workerUtils.addJob('surveyReminderEmail', {calnetid: calnetid}, {jobKey: calnetid+'surveyReminderEmail', runAt: when});
+}
+
+module.exports.clearSurveyReminderText = (calnetid) => {
+    return pool.query(`select graphile_worker.remove_job($1)`, [calnetid+'surveyReminderText']);
+}
+
+module.exports.clearSurveyReminderEmail = (calnetid) => {
+    return pool.query(`select graphile_worker.remove_job($1)`, [calnetid+'surveyReminderEmail']);
 }
