@@ -1,8 +1,18 @@
 const { Pool } = require('pg');
-const pool = new Pool();
+const pool = new Pool({
+    user: require('../config/keys').pg.pguser,
+    host: require('../config/keys').pg.pghost,
+    database: require('../config/keys').pg.pgdatabase,
+    password: require('../config/keys').pg.pgpassword,
+    port: require('../config/keys').pg.pgport,
+});
 const moment = require('moment');
 
 const { Settings } = require('./settingsActions');
+const { scheduleSurveyReminderEmail,
+        scheduleSurveyReminderText,
+        clearSurveyReminderEmail,
+        clearSurveyReminderText } = require('../scheduler');
 
 const getAbort = (client) => {
     return err => {
@@ -169,6 +179,7 @@ module.exports.getOpenSlots = (year, month, day) => {
 
 const GET_SLOT_COUNT = `select count(*)::integer from schedule where location=$1 and appointmentslot=$2 and active=true`;
 const GET_USER_BY_ID = `select * from users where calnetid=$1`;
+const GET_USER_ALERTS = `select alertemail,email,alertphone,phone from users where calnetid=$1`;
 const UPDATE_RESCHEDULE_COUNT = `update users set reschedulecount=reschedulecount+1 where calnetid=$1`;
 const SET_PREVIOUS_SLOTS_INACTIVE = `update schedule set active=false where calnetid=$1`;
 const SET_USER_SLOT = `insert into schedule(calnetid,
@@ -213,8 +224,12 @@ module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid
                 return client.query(UPDATE_RESCHEDULE_COUNT, [user]).then(r => {
                     return client.query(SET_PREVIOUS_SLOTS_INACTIVE, [user]);
                 }).then(r => {
-                    return client.query(SET_USER_SLOT, [user, querySlot.toDate(), location, uid]).then(r => r.rowCount > 0);
-                });
+                    return client.query(SET_USER_SLOT, [user, querySlot.toDate(), location, uid]);
+                }).then(r => {
+                    return scheduleSurveyReminderEmail(user, querySlot.clone().subtract(4, 'hour').toDate());
+                }).then(r => {
+                    return scheduleSurveyReminderText(user, querySlot.clone().subtract(4, 'hour').toDate());
+                }).then(r => true);
             } else {
                 return false;
             }
@@ -237,7 +252,11 @@ module.exports.userAssignedDay = (user, year, month, day) => {
 
 const USER_CANCEL_SLOT = `update schedule set active=false where calnetid=$1`;
 module.exports.cancelSlot = id => {
-    return pool.query(USER_CANCEL_SLOT, [id]).then(res => res.rowCount > 0).catch(err => {
+    return pool.query(USER_CANCEL_SLOT, [id]).then(res => {
+        return clearSurveyReminderEmail(id).then(r => {
+            return clearSurveyReminderText(id).then(r => res.rowCount > 0);
+        });
+    }).catch(err => {
         console.error(err.stack);
         return err;
     });
