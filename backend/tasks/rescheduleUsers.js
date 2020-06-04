@@ -16,7 +16,7 @@ module.exports = (payload, helpers) => {
         port: require('../config/keys').pg.pgport,
     });
     return Promise.resolve(0).then(r => {
-        return updateUserSchedules(currentDate.toDate()).then(res => getUsersByID(res.map(x => x.calnetid))).then(users => {
+        return updateUserSchedules(moment().toDate()).then(res => getUsersByID(res.map(x => x.calnetid))).then(users => {
             // result is list of users
             // send out emails based on preferences
             const promises = [];
