@@ -7,7 +7,7 @@ const Cas = require('../../cas');
 const { Settings } = require('../../database/settingsActions');
 const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot, getUserSlot, testVerifyUser } = require('../../database/scheduleActions');
 const { getUserByID } = require('../../database/userActions');
-const { sendConfirmEmail, sendConfirmText } = require('../../messager');
+const { scheduleConfirmEmail, scheduleConfirmText } = require('../../scheduler');
 
 router.post('/get_time_slots', Cas.block, (request, response) => {
     // for a given day, verify user is scheduled for that day
@@ -68,7 +68,7 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
             return getUserByID(calnetid).then(res => {
                 response.json({uid: uid});
                 if(res.alertemail) {
-                    sendConfirmEmail(res.email, uid, requestMoment.format('dddd, MMMM DD'),
+                    scheduleConfirmEmail(res.email, uid, requestMoment.format('dddd, MMMM DD'),
                                                         requestMoment.format('h:mmA'),
                                                         requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
                                                         request.body.location,
@@ -78,7 +78,7 @@ router.post('/request_time_slot', Cas.block, (request, response) => {
                     });
                 }
                 if(res.alertphone && res.phone) {
-                    sendConfirmText(res.phone, uid, requestMoment.format('dddd, MMMM DD'),
+                    scheduleConfirmText(res.phone, uid, requestMoment.format('dddd, MMMM DD'),
                                                 requestMoment.format('h:mmA'),
                                                 requestMoment.clone().add(Settings().increment, 'minute').format('h:mmA'),
                                                 request.body.location,
