@@ -290,6 +290,9 @@ module.exports.testVerifyUser = id => {
                 var latestDate = moment(r.rows[0].max);
                 if(!r.rows[0].max || latestDate.isBefore(moment().startOf('day').add(1, 'day'))) {
                     latestDate = moment().startOf('day').add(1, 'day');
+                    while(!Settings().days.includes(latestDate.day())) {
+                        latestDate = latestDate.add(1, 'day');
+                    }
                 }
                 return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(r => {
                     if(r.rows[0].count < Settings().dayquota) {
