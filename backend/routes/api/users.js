@@ -22,14 +22,25 @@ router.get('/login', Cas.bounce, (request, response) => {
     return containsUser(calnetid).then(res => {
         if(!res) {
             // insert new user
-            return insertUser(calnetid).then(res => {
-                response.redirect('/newuser');
-            }).catch(err => {
-                console.error(`Error inserting new user ${calnetid}`);
-                console.error(err.stack);
-                response.status(500);
-                return err;
-            });
+            if(require('../../config/keys').newusers) {
+                return insertUser(calnetid).then(res => {
+                    response.redirect('/newuser');
+                }).catch(err => {
+                    console.error(`Error inserting new user ${calnetid}`);
+                    console.error(err.stack);
+                    response.status(500);
+                    return err;
+                });
+            } else {
+                console.log(`user with calnetid ${calnetid} not authorized`);
+                request.session.destroy(err => {
+                    if(err) {
+                        console.error(`couldn't destroy session`);
+                        console.error(err);
+                    }
+                });
+                response.status(401).send('Unauthorized user');
+            }
         } else {
             // update last signin
             return updateLastUserSignin(calnetid).then(res => {
