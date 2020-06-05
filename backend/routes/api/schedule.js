@@ -5,9 +5,53 @@ const short = require('short-uuid');
 
 const Cas = require('../../cas');
 const { Settings } = require('../../database/settingsActions');
-const { getOpenSlots, userAssignedDay, assignSlot, cancelSlot, getUserSlot, testVerifyUser } = require('../../database/scheduleActions');
-const { getUserByID } = require('../../database/userActions');
-const { scheduleConfirmEmail, scheduleConfirmText } = require('../../scheduler');
+
+/**
+ * Returns the user's currently assigned slot
+ * request body format: {}
+ * response body format:
+ * {success: true, scheduled: true, slot: moment.Moment, location: string}
+ * {success: true, scheduled: false, slot: moment.Moment}
+ * {success: false}
+ */
+router.post('/get/slot', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+    
+});
+
+/**
+ * Returns the availability for the given user
+ * request body format: {}
+ * response body format:
+ * {success: true, {locationname: [moment.Moment, moment.Moment, ...]}}
+ * {success: false}
+ */
+router.post('/get/available', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+});
+
+/**
+ * Assigns the user a slot, and triggers an email and text confirmation
+ * request body format: {slot: moment.Moment, location: string}
+ * response body format: {success: true|false, error: ["TAKEN", "NOT_VALID"]}
+ */
+router.post('/set/slot', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+});
+
+/**
+ * Cancels a user's appointment
+ * request body: {}
+ * response body:
+ * {success: true}
+ * {success: false}
+ */
+router.post('/get/cancel', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+});
+
+
+
 
 router.post('/get_time_slots', Cas.block, (request, response) => {
     // for a given day, verify user is scheduled for that day
