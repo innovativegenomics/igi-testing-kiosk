@@ -13,8 +13,8 @@ process.env.PGPORT = require('./config/keys').pg.pgport;
 const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
-const schedule = require('./routes/api/schedule');
-const admin = require('./routes/api/admin');
+// const schedule = require('./routes/api/schedule');
+// const admin = require('./routes/api/admin');
 
 const { verifyScheduler, setUpdateSchedulesTask } = require('./scheduler');
 
