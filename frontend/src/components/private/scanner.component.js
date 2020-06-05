@@ -96,7 +96,7 @@ class Scanner extends Component {
                         </div>
                     </div>
                     <div className='row justify-content-center'>
-                        <div className={`col-md-6 text-center ${(this.props.auth.user.admin > 1 && !hasErrors) ? '' : 'd-none'}`}>
+                        <div className={`col-md-6 text-center ${(this.props.auth.user.admin > 1 && !this.state.errors.includes('INVALID_UID')) ? '' : 'd-none'}`}>
                             <button className='btn btn-lg btn-primary' onClick={e => this.processUser(uid)} disabled={this.state.processed}>User Processed</button>
                             <div className={`alert alert-success ${this.state.processed ? '' : 'd-none'}`}>Done!</div>
                         </div>
