@@ -7,7 +7,6 @@ const pool = new Pool({
     port: require('../config/keys').pg.pgport,
 });
 const moment = require('moment');
-const { Settings } = require('./settingsActions');
 
 const getAbort = (client) => {
     return err => {
@@ -27,7 +26,7 @@ const USER_TABLE_CREATE = `create table users(firstname text not null,
                                            street text not null,
                                            city text not null,
                                            state text not null,
-                                           country text not null,
+                                           county text not null,
                                            zip text not null,
                                            sex text not null,
                                            race text not null,
@@ -79,18 +78,32 @@ module.exports.getUserProfile = id => {
     });
 }
 
-const SET_USER_PROFILE = `insert into users values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+const SET_USER_PROFILE = `insert into users(firstname,
+                                            middlename,
+                                            lastname,
+                                            calnetid,
+                                            dob,
+                                            street,
+                                            city,
+                                            state,
+                                            county,
+                                            zip,
+                                            sex,
+                                            race,
+                                            pbuilding,
+                                            email,
+                                            phone) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
                                                    $11, $12, $13, $14, $15)`;
 module.exports.setUserProfile = (id, profile) => {
     return pool.query(SET_USER_PROFILE, [profile.firstname,
                                         profile.middlename,
                                         profile.lastname,
                                         id,
-                                        profile.dob,
+                                        moment(profile.dob).toDate(),
                                         profile.street,
                                         profile.city,
                                         profile.state,
-                                        profile.country,
+                                        profile.county,
                                         profile.zip,
                                         profile.sex,
                                         profile.race,
@@ -99,6 +112,7 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.phone]).then(res => {
         return {success: res.rowCount>0};
     }).catch(err => {
+        console.error(err);
         return {success: false};
     });
 }

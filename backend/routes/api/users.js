@@ -5,6 +5,7 @@ const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance()
 
 const Cas = require('../../cas');
 const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin } = require('../../database/userActions');
+const { newUserSlot } = require('../../database/scheduleActions');
 
 /**
  * Logs in existing and new users
@@ -71,7 +72,7 @@ router.post('/get/profile', Cas.block, (request, response) => {
  *   street: string,
  *   city: string,
  *   state: string,
- *   country: string,
+ *   county: string,
  *   zip: string,
  *   sex: string,
  *   race: string,
@@ -85,7 +86,16 @@ router.post('/get/profile', Cas.block, (request, response) => {
 router.post('/set/profile', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     setUserProfile(calnetid, request.body).then(success => {
-        response.json({success: success});
+        if(success) {
+            return newUserSlot(calnetid).then(r => {
+                response.json({success: true});
+            });
+        } else {
+            response.json({success: false});
+        }
+    }).catch(err => {
+        console.error(err);
+        response.json({success: false});
     });
 });
 
