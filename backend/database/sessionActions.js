@@ -12,12 +12,9 @@ const pool = new Pool({
 const getAbort = (client) => {
     return err => {
         console.error('Error in transaction', err.stack);
-        return client.query('rollback').then((err, res) => {
-            if(err) {
-                console.error('Error in transaction', err.stack);
-
-            }
+        return client.query('rollback').then(res => {
             client.release();
+            return err;
         });
     }
 }

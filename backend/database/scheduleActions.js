@@ -7,33 +7,27 @@ const pool = new Pool({
     port: require('../config/keys').pg.pgport,
 });
 const moment = require('moment');
+const short = require('short-uuid');
 
 const { Settings } = require('./settingsActions');
-const { scheduleSurveyReminderEmail,
-        scheduleSurveyReminderText,
-        clearSurveyReminderEmail,
-        clearSurveyReminderText } = require('../scheduler');
 
 const getAbort = (client) => {
     return err => {
         console.error('Error in transaction', err.stack);
-        return client.query('rollback').then((err, res) => {
-            if(err) {
-                console.error('Error in transaction', err.stack);
-
-            }
+        return client.query('rollback').then(res => {
             client.release();
+            return err;
         });
     }
 }
 
 const SCHEDULE_TABLE_CREATE = `create table schedule(calnetid text not null,
-                                                     appointmentslot timestamptz not null,
-                                                     location text not null,
-                                                     appointmentuid text not null,
-                                                     created timestamptz not null default now(),
+                                                     slot timestamptz not null,
+                                                     location text null,
+                                                     uid text not null,
+                                                     scheduled timestamptz null,
                                                      completed timestamptz null,
-                                                     active bool not null default true)`;
+                                                     rejected timestamptz null)`;
 const SCHEDULE_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='schedule')`;
 module.exports.verifyScheduleTable = () => {
     return pool.connect().then(client => {
@@ -58,261 +52,120 @@ module.exports.verifyScheduleTable = () => {
     });
 }
 
-const DATE_COUNT_QUERY = `select count(*)::integer from users where nextappointment=$1 and testverified is not null`;
-const LATEST_DATE_QUERY = `select max(nextappointment) from users where testverified is not null`;
-const FIND_EXPIRED_USERS = `select calnetid from users where nextappointment<$1 and testverified is not null order by testverified asc`;
-const INACTIVATE_MULTIPLE_SLOTS = `update schedule set active=false where calnetid in (`;
-const SET_MUTIPLE_USER_DATES = `update users set nextappointment=$1, reschedulecount=0 where calnetid in (`;
+const GET_USER_SLOT = `select slot,location,uid from schedule where calnetid=$1 order by slot desc limit 1`;
 /**
- * @param {Date} date - current date
+ * Returns the latest slot for the given user.
+ * If the user doesnt exist or the query fails, throws error.
  */
-module.exports.updateUserSchedules = date => {
-    // find all users whos appointments are expired
-    // assign them in order of join date
-    if(!date instanceof Date) {
-        return Promise.reject('date is not of type Date');
-    }
-    return pool.connect().then(client => {
-        const abort = getAbort(client);
-        return client.query('begin').then(res => {
-            return client.query(LATEST_DATE_QUERY); // find the farthest ahead scheduled date
-        }).then(res => {
-            var latestDate = moment(res.rows[0].max);
-            if(latestDate.isBefore(moment(date).startOf('day')) || !latestDate.isValid()) {
-                latestDate = moment(date).startOf('day');
-            }
-            return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(res => {
-                return Settings().dayquota-res.rows[0].count;
-            }).then(res => {
-                const remainingLatestDate = res;
-                var expiredCopy = [];
-                return client.query(FIND_EXPIRED_USERS, [date]).then(expired => {
-                    expiredCopy = [...expired.rows];
-                    if(Math.min(expired.rows.length, remainingLatestDate) > 0) {
-                        var inactivateSlots = INACTIVATE_MULTIPLE_SLOTS;
-                        var latestUsers = SET_MUTIPLE_USER_DATES;
-                        const loopTimes = Math.min(expired.rowCount, remainingLatestDate);
-                        for(var i = 0;i < loopTimes;i++) {
-                            const next = expired.rows.shift().calnetid;
-                            inactivateSlots = inactivateSlots + '\'' + next + '\',';
-                            latestUsers = latestUsers + '\'' + next + '\',';
-                        }
-                        return client.query(inactivateSlots.slice(0, inactivateSlots.length-1)+')').then(r => {
-                            return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [latestDate.toDate()]).then(r => { return expired });
-                        });
-                    }
-                    return expired;
-                }).then(expired => {
-                    var nextDate = latestDate.clone().add(1, 'day');
-                    var updatePromises = [];
-                    for(var i = 0;i<=Math.floor(expired.rows.length/Settings().dayquota);i++) {
-                        while(!Settings().days.includes(nextDate.day())) {
-                            nextDate = nextDate.add(1, 'day');
-                        }
-                        var inactivateSlots = INACTIVATE_MULTIPLE_SLOTS;
-                        var latestUsers = SET_MUTIPLE_USER_DATES;
-                        if(expired.rows.length > 0) {
-                            const loopTimes = Math.min(expired.rows.length, Settings().dayquota);
-                            for(var x = 0;x < loopTimes;x++) {
-                                const next = expired.rows.shift().calnetid;
-                                inactivateSlots = inactivateSlots + '\'' + next + '\',';
-                                latestUsers = latestUsers + '\'' + next + '\',';
-                            }
-
-                            const tempDate = nextDate.clone();
-                            updatePromises.push(
-                                client.query(inactivateSlots.slice(0, inactivateSlots.length-1)+')').then(r => {
-                                    return client.query(latestUsers.slice(0, latestUsers.length-1)+')', [tempDate.toDate()]);
-                                }));
-                        }
-                        nextDate.add(1, 'day');
-                    }
-                    return Promise.all(updatePromises).then(r => expiredCopy);
-                });
-            });
-        }).then(res => {
-            return client.query('end transaction').then(r => res);
-        }).then(res => {
-            client.release();
-            return res;
-        }).catch(err => {
-            return abort(err);
-        });
-    }).catch(err => {
-        console.error('Error connecting to update user schedules');
-        console.error(err.stack);
-        return err;
-    });
-}
-
-const GET_USERS_BY_DATE = `select appointmentslot,location from schedule where appointmentslot >= $1::date and appointmentslot < $1::date + interval '1 day' and active=true`;
-/**
- * @param {Number} year - year to check
- * @param {Number} month - month to check
- * @param {Number} day - day to check
- */
-module.exports.getOpenSlots = (year, month, day) => {
-    return pool.query(GET_USERS_BY_DATE, [moment({year: year, month: month, day: day}).toDate()]).then(res => {
-        const taken = res.rows.map(e => {return {location: e.location, appointmentslot: moment(e.appointmentslot)}});
-        const available = {};
-        for(var location of Settings().locations) {
-            const momentIncrement = moment({year: year, month: month, day: day, hour: Settings().starttime});
-            available[location] = [];
-            for(var i = 0; i < Math.floor((Settings().endtime-Settings().starttime)*60/Settings().increment);i++) {
-                available[location].push({time: momentIncrement.clone(), open: Settings().buffer});
-                momentIncrement.add(Settings().increment, 'minute');
-            }
-        }
-        for(var t of taken) {
-            const index = available[t.location].findIndex(e => e.time.isSame(t.appointmentslot));
-            if(index > -1) {
-                available[t.location][index].open--;
-            }
-        }
-        return available;
-    }).catch(err => {
-        console.error('error querying for open slots');
-        console.error(err.stack);
-        return err;
-    });
-}
-
-const GET_SLOT_COUNT = `select count(*)::integer from schedule where location=$1 and appointmentslot=$2 and active=true`;
-const GET_USER_BY_ID = `select * from users where calnetid=$1`;
-const GET_USER_ALERTS = `select alertemail,email,alertphone,phone from users where calnetid=$1`;
-const UPDATE_RESCHEDULE_COUNT = `update users set reschedulecount=reschedulecount+1 where calnetid=$1`;
-const SET_PREVIOUS_SLOTS_INACTIVE = `update schedule set active=false where calnetid=$1`;
-const SET_USER_SLOT = `insert into schedule(calnetid,
-                                            appointmentslot,
-                                            location,
-                                            appointmentuid) values ($1, $2, $3, $4)`;
-/**
- * @param {string} user - calnetid of user requesting schedule
- * @param {string} location - name of location user is requesting
- * @param {Number} year - year
- * @param {Number} month - month
- * @param {Number} day - day
- * @param {Number} hour - hour
- * @param {Number} minute - minute
- * @param {string} uid - unique id for schedule
- */
-module.exports.assignSlot = (user, location, year, month, day, hour, minute, uid) => {
-    return pool.connect().then(client => {
-        const abort = getAbort(client);
-        const querySlot = moment({year: year, month: month, day: day, hour: hour, minute: minute});
-        return client.query('begin').then(r => {
-            return client.query(GET_USER_BY_ID, [user]);
-        }).then(res => {
-            if(!res.rows[0].testverified) {
-                return false;
-            }
-            const nextAppointmentStart = moment(res.rows[0].nextappointment).hour(Settings().starttime);
-            const nextAppointmentEnd = moment(res.rows[0].nextappointment).hour(Settings().endtime);
-            return querySlot.isBetween(nextAppointmentStart, nextAppointmentEnd, undefined, '[)') &&
-                querySlot.diff(nextAppointmentStart, 'minutes') % Settings().increment === 0 &&
-                Settings().locations.includes(location) &&
-                res.rows[0].reschedulecount < Settings().maxreschedules;
-        }).then(res => {
-            if(res) {
-                return client.query(GET_SLOT_COUNT, [location, querySlot.toDate()]);
-            } else {
-                return {rows: [{count: Number.MAX_SAFE_INTEGER}]};
-            }
-        }).then(res => {
-            const count = res.rows[0].count;
-            if(count < Settings().buffer) {
-                return client.query(UPDATE_RESCHEDULE_COUNT, [user]).then(r => {
-                    return client.query(SET_PREVIOUS_SLOTS_INACTIVE, [user]);
-                }).then(r => {
-                    return client.query(SET_USER_SLOT, [user, querySlot.toDate(), location, uid]);
-                }).then(r => {
-                    return scheduleSurveyReminderEmail(user, querySlot.clone().subtract(4, 'hour').toDate());
-                }).then(r => {
-                    return scheduleSurveyReminderText(user, querySlot.clone().subtract(4, 'hour').toDate());
-                }).then(r => true);
-            } else {
-                return false;
-            }
-        }).then(res => {
-            return client.query('end transaction').then(r => {client.release(); return res});
-        }).catch(err => {
-            return abort(err);
-        });
-    }).catch(err => {
-        console.error('Error assigning slot');
-        console.error(err.stack);
-        return err;
-    });
-}
-
-const USER_ASSIGNED_DAY = `select count(*)::integer from users where calnetid=$1 and nextappointment=$2 and testverified is not null`;
-module.exports.userAssignedDay = (user, year, month, day) => {
-    return pool.query(USER_ASSIGNED_DAY, [user, moment({year: year, month: month, day: day}).toDate()]).then(res => res.rows[0].count > 0);
-}
-
-const USER_CANCEL_SLOT = `update schedule set active=false where calnetid=$1`;
-module.exports.cancelSlot = id => {
-    return pool.query(USER_CANCEL_SLOT, [id]).then(res => {
-        return clearSurveyReminderEmail(id).then(r => {
-            return clearSurveyReminderText(id).then(r => res.rowCount > 0);
-        });
-    }).catch(err => {
-        console.error(err.stack);
-        return err;
-    });
-}
-
-const USER_SLOT_QUERY = `select * from schedule where calnetid=$1 and active=true`;
 module.exports.getUserSlot = id => {
-    return pool.query(USER_SLOT_QUERY, [id]).then(res => {
-        if(res.rowCount > 0) {
-            return res.rows[0];
+    return pool.query(GET_USER_SLOT, [id]).then(res => {
+        if(res.rows.length < 1) {
+            throw new Error(`User ${id} doesn't have a slot record`);
         } else {
-            return null;
+            return res.rows[0];
         }
     }).catch(err => {
-        console.error('error getting current user slot');
+        console.error(`Error getting user slot ${id}`);
         console.error(err);
         return err;
     });
 }
 
-const USER_IS_VERIFIED = 'select testverified from users where calnetid=$1 and testverified is not null';
-const VERIFY_USER_QUERY = 'update users set testverified=now(), nextappointment=$2 where calnetid=$1';
-module.exports.testVerifyUser = id => {
+const GET_USER_WEEK = `select slot from schedule where calnetid=$1 order by slot desc limit 1`;
+const GET_SLOTS_TAKEN = `select slot,location from schedule where (slot between $1::timestamptz and $1::timestamptz + interval '1 week') and location is not null`;
+/**
+ * Returns the available slots for the given user
+ */
+module.exports.getAvailableSlots = id => {
     return pool.connect().then(client => {
-        const abort = getAbort();
-        return client.query('begin').then(res => {
-            return client.query(USER_IS_VERIFIED, [id]);
-        }).then(res => {
-            if(res.rows.length > 0) return false; // user is already verified
-            return client.query(LATEST_DATE_QUERY).then(r => {
-                var latestDate = moment(r.rows[0].max);
-                if(!r.rows[0].max || latestDate.isBefore(moment().startOf('day').add(1, 'day'))) {
-                    latestDate = moment().startOf('day').add(1, 'day');
-                    while(!Settings().days.includes(latestDate.day())) {
-                        latestDate = latestDate.add(1, 'day');
+        const abort = getAbort(client);
+        var startDate = moment();
+        return client.query('begin').then(r => {
+            return client.query(GET_USER_WEEK, [id]);
+        }).then(slot => {
+            if(slot.rows.length < 1) throw new Error(`No slot for user ${id}`);
+            startDate = moment(slot.rows[0].slot).startOf('week');
+            return client.query(GET_SLOTS_TAKEN, [startDate.toDate()]);
+        }).then(taken => {
+            const open = {};
+            for(var location of Settings().locations) {
+                open[location] = {};
+                for(var day of Settings().days) {
+                    if(moment().isAfter(startDate.clone().set('day', day))) {
+                        continue;
+                    } else {
+                        for(var i = startDate.clone().set('day', day).set('hour', Settings().starttime);i.get('hour') < Settings().endtime;i = i.add(Settings().increment, 'minute')) {
+                            open[location][i.clone()] = Settings().buffer;
+                        }
                     }
                 }
-                return client.query(DATE_COUNT_QUERY, [latestDate.toDate()]).then(r => {
-                    if(r.rows[0].count < Settings().dayquota) {
-                        return latestDate;
+            }
+            for(var row of taken.rows) {
+                if(open[row.location][row.slot] !== undefined) {
+                    open[row.location][row.slot]--;
+                }
+            }
+            return open;
+        }).then(res => {
+            return client.query('end transaction').then(r => client.release()).then(r => res);
+        }).catch(err => {
+            console.error(`Error getting available slots for user ${id}`);
+            console.error(err);
+            return abort(err);
+        });
+    });
+}
+
+const GET_PREVIOUS_SLOT = `select slot,location from schedule where calnetid=$1 order by slot desc limit 1`;
+const EXISTING_SLOT_COUNT = `select count(*)::integer from schedule where slot=$1 and location=$2`;
+const UPDATE_USER_SLOT = `update schedule set slot=$2,location=$3,scheduled=now() where calnetid=$1 and slot in (select slot from schedule where calnetid=$1 order by slot desc limit 1)`;
+/**
+ * Sets the user's slot
+ */
+module.exports.setUserSlot = (id, slot, location) => {
+    return pool.connect().then(client => {
+        const abort = getAbort(client);
+        return client.query('begin').then(r => {
+            return client.query(GET_PREVIOUS_SLOT, [id]);
+        }).then(prev => {
+            if(!moment(prev.rows[0].slot).startOf('week').isSame(slot.clone().startOf('week')) || !Settings().locations.includes(location)) {
+                return false;
+            } else {
+                return client.query(EXISTING_SLOT_COUNT, [slot.toDate(), location]).then(count => {
+                    if(count.rows[0].count >= Settings().buffer) {
+                        throw new Error('Slot is already full');
                     } else {
-                        var nextDate = latestDate.add(1, 'day');
-                        while(!Settings().days.includes(nextDate.day())) {
-                            nextDate = nextDate.add(1, 'day');
-                        }
-                        return nextDate;
+                        return client.query(UPDATE_USER_SLOT, [id, slot.toDate(), location]).then(r => true);
                     }
                 });
-            }).then(date => {
-                return client.query(VERIFY_USER_QUERY, [id, date.toDate()]).then(r => date);
-            }).then(date => {
-                return client.query('end transaction').then(r => client.release()).then(r => date);
-            });
-        }).catch(err => abort(err));
+            }
+        }).then(res => {
+            return client.query('end transaction').then(r => client.release()).then(r => res);
+        }).catch(err => {
+            console.error(`error setting user ${id} slot`);
+            console.error(err);
+            return abort(err);
+        });
+    });
+}
+
+const CANCEL_SLOT = `update schedule set location=null,slot=$2,scheduled=null where calnetid=$1 and slot in (select slot from schedule where calnetid=$1 order by slot desc limit 1)`;
+module.exports.cancelSlot = id => {
+    return pool.query(CANCEL_SLOT, [id, moment().startOf('week').toDate()]).then(res => {
+        return res.rowCount > 0;
     }).catch(err => {
-        console.error('cannot test verify user');
+        console.error(`Error cancelling slot for user ${id}`);
+        console.error(err);
+        return false;
+    });
+}
+
+const NEW_USER_SLOT = `insert into schedule (calnetid, slot, uid) values ($1, $2, $3)`;
+module.exports.newUserSlot = id => {
+    return pool.query(NEW_USER_SLOT, [id, moment().startOf('week').add(1, 'week').toDate(), short().new()]).then(res => {
+        return true;
+    }).catch(err => {
+        console.error('Error creating new user slot');
         console.error(err);
         return err;
     });

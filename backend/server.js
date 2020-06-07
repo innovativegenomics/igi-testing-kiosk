@@ -16,7 +16,7 @@ const users = require('./routes/api/users');
 // const schedule = require('./routes/api/schedule');
 // const admin = require('./routes/api/admin');
 
-const { verifyScheduler, setUpdateSchedulesTask } = require('./scheduler');
+const { verifyScheduler } = require('./scheduler');
 
 const app = express();
 // Bodyparser middleware
@@ -29,7 +29,7 @@ app.use(bodyParser.json());
 // DB Config
 // verify database
 verifyTables().then(res => {
-    return verifyScheduler().then(r => setUpdateSchedulesTask());
+    return verifyScheduler();
 }).then(res => {
     console.log('database initialized successfully!');
     // register services that rely on the database
@@ -48,8 +48,8 @@ verifyTables().then(res => {
     app.use(session(sess));
     
     app.use("/api/users", users);
-    app.use("/api/schedule", schedule);
-    app.use("/api/admin", admin);
+    // app.use("/api/schedule", schedule);
+    // app.use("/api/admin", admin);
     
     const port = process.env.PORT || 5000;
     app.listen(port, () => {
