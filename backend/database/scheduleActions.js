@@ -16,7 +16,7 @@ const getAbort = (client) => {
         console.error('Error in transaction', err.stack);
         return client.query('rollback').then(res => {
             client.release();
-            return err;
+            throw err;
         });
     }
 }
@@ -121,6 +121,9 @@ const EXISTING_SLOT_COUNT = `select count(*)::integer from schedule where slot=$
 const UPDATE_USER_SLOT = `update schedule set slot=$2,location=$3,scheduled=now() where calnetid=$1 and slot in (select slot from schedule where calnetid=$1 order by slot desc limit 1)`;
 /**
  * Sets the user's slot
+ * @param {string} id - calnetid of user
+ * @param {moment.Moment} slot - slot user wants to allocate
+ * @param {string} location - name of location
  */
 module.exports.setUserSlot = (id, slot, location) => {
     return pool.connect().then(client => {
@@ -128,8 +131,16 @@ module.exports.setUserSlot = (id, slot, location) => {
         return client.query('begin').then(r => {
             return client.query(GET_PREVIOUS_SLOT, [id]);
         }).then(prev => {
-            if(!moment(prev.rows[0].slot).startOf('week').isSame(slot.clone().startOf('week')) || !Settings().locations.includes(location)) {
-                return false;
+            if(!moment(prev.rows[0].slot).startOf('week').isSame(slot.clone().startOf('week'))) {
+                throw new Error('slot not valid');
+            } else if(!Settings().locations.includes(location)) {
+                throw new Error('location not valid');
+            } else if(moment.duration(slot.diff(slot.clone().set('hour', Settings().starttime).set('minute', 0))).asMinutes() % Settings().increment > 0) {
+                throw new Error('slot not valid');
+            } else if(!slot.isBetween(slot.clone().set('hour', Settings().starttime), slot.clone().set('hour', Settings().endtime), null, '[)')) {
+                throw new Error('slot not valid');
+            } else if(!Settings().days.includes(slot.day())) {
+                throw new Error('slot not valid');
             } else {
                 return client.query(EXISTING_SLOT_COUNT, [slot.toDate(), location]).then(count => {
                     if(count.rows[0].count >= Settings().buffer) {
@@ -143,13 +154,12 @@ module.exports.setUserSlot = (id, slot, location) => {
             return client.query('end transaction').then(r => client.release()).then(r => res);
         }).catch(err => {
             console.error(`error setting user ${id} slot`);
-            console.error(err);
             return abort(err);
         });
     });
 }
 
-const CANCEL_SLOT = `update schedule set location=null,slot=$2,scheduled=null where calnetid=$1 and slot in (select slot from schedule where calnetid=$1 order by slot desc limit 1)`;
+const CANCEL_SLOT = `update schedule set location=null,slot=$2,scheduled=null where calnetid=$1 and slot in (select slot from schedule where calnetid=$1 and completed is null and rejected is null order by slot desc limit 1)`;
 module.exports.cancelSlot = id => {
     return pool.query(CANCEL_SLOT, [id, moment().startOf('week').toDate()]).then(res => {
         return res.rowCount > 0;

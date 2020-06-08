@@ -7,6 +7,7 @@ const pool = new Pool({
     port: require('../config/keys').pg.pgport,
 });
 const moment = require('moment');
+const axios = require('axios');
 
 const getAbort = (client) => {
     return err => {
@@ -122,5 +123,26 @@ module.exports.updateUserLastSignin = id => {
         return res.rowCount > 0;
     }).catch(err => {
         return false;
+    });
+}
+
+module.exports.addLIMSPatient = profile => {
+    const payload = {
+        First_Name__c: profile.firstname,
+        Middle_Name__c: profile.middlename,
+        Last_Name__c: profile.lastname,
+        Sex__c: profile.sex,
+        DOB__c: moment(profile.dob).toDate(),
+        Street__c: profile.street,
+        City__c: profile.city,
+        State_Province__c: profile.state,
+        County__c: profile.county,
+        Email__c: profile.email,
+        Phone__c: profile.phone,
+        Primary_Location__c: profile.pbuilding
+    };
+    axios.post(require('../config/keys').limsapi, payload).then(res => {
+        console.log('LIMs POST request response');
+        console.log(res);
     });
 }

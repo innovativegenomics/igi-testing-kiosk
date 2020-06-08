@@ -13,7 +13,7 @@ process.env.PGPORT = require('./config/keys').pg.pgport;
 const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
-// const schedule = require('./routes/api/schedule');
+const schedule = require('./routes/api/schedule');
 // const admin = require('./routes/api/admin');
 
 const { verifyScheduler } = require('./scheduler');
@@ -48,7 +48,7 @@ verifyTables().then(res => {
     app.use(session(sess));
     
     app.use("/api/users", users);
-    // app.use("/api/schedule", schedule);
+    app.use("/api/schedule", schedule);
     // app.use("/api/admin", admin);
     
     const port = process.env.PORT || 5000;
