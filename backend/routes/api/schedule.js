@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const moment = require('moment');
-const short = require('short-uuid');
+// const short = require('short-uuid');
 
 const Cas = require('../../cas');
-const { Settings } = require('../../database/settingsActions');
+// const { Settings } = require('../../database/settingsActions');
+const { getUserSlot, getAvailableSlots, setUserSlot, cancelSlot } = require('../../database/scheduleActions');
 
 /**
  * Returns the user's currently assigned slot
@@ -16,7 +17,11 @@ const { Settings } = require('../../database/settingsActions');
  */
 router.post('/get/slot', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
-    
+    getUserSlot(calnetid).then(res => {
+        response.json({...res, success: true});
+    }).catch(err => {
+        response.json({success: false});
+    });
 });
 
 /**
@@ -28,6 +33,11 @@ router.post('/get/slot', Cas.block, (request, response) => {
  */
 router.post('/get/available', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
+    getAvailableSlots(calnetid).then(res => {
+        response.json({success: true, open: res});
+    }).catch(err => {
+        response.json({success: false});
+    });
 });
 
 /**
@@ -37,6 +47,11 @@ router.post('/get/available', Cas.block, (request, response) => {
  */
 router.post('/set/slot', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
+    setUserSlot(calnetid, moment(request.body.slot), request.body.location).then(res => {
+        response.json({success: true});
+    }).catch(err => {
+        response.json({success: false});
+    });
 });
 
 /**
@@ -46,8 +61,11 @@ router.post('/set/slot', Cas.block, (request, response) => {
  * {success: true}
  * {success: false}
  */
-router.post('/get/cancel', Cas.block, (request, response) => {
+router.post('/set/cancel', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
+    cancelSlot(calnetid).then(res => {
+        response.send({success: res});
+    });
 });
 
 module.exports = router;

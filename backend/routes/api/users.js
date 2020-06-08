@@ -4,7 +4,7 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
 const Cas = require('../../cas');
-const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin } = require('../../database/userActions');
+const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin, addLIMSPatient } = require('../../database/userActions');
 const { newUserSlot } = require('../../database/scheduleActions');
 
 /**
@@ -88,6 +88,7 @@ router.post('/set/profile', Cas.block, (request, response) => {
     setUserProfile(calnetid, request.body).then(success => {
         if(success) {
             return newUserSlot(calnetid).then(r => {
+                addLIMSPatient(request.body);
                 response.json({success: true});
             });
         } else {
@@ -97,6 +98,15 @@ router.post('/set/profile', Cas.block, (request, response) => {
         console.error(err);
         response.json({success: false});
     });
+});
+
+/**
+ * Callback URL for LIMs patient creation
+ * 
+ */
+router.post('/lims', (request, response) => {
+    console.log(request);
+    response.status(200).send();
 });
 
 /**
