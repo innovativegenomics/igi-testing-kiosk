@@ -11,7 +11,6 @@ import PrivateRoute from './components/private/privateRoute.component';
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
-import Screening from './components/private/screening.component';
 import Scanner from './components/private/scanner.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -27,7 +26,6 @@ export default class App extends Component {
             <Route path='/' exact component={Landing} />
             <Route path='/about' component={About} />
             <Route path='/qrcode' component={QRCode}/>
-            <PrivateRoute path='/screening' component={Screening} />
             <PrivateRoute path='/newuser' component={NewUser}/>
             <PrivateRoute path='/dashboard' component={Dashboard}/>
             <PrivateRoute path='/scheduler' component={Scheduler}/>

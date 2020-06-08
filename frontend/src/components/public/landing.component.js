@@ -27,7 +27,7 @@ class Landing extends Component {
         }
     }
     componentDidMount() {
-        axios.post('/api/users/get/is_dev_mode').then(res => {
+        axios.post('/api/users/get/devmode').then(res => {
             this.setState({devmode: res.data.devmode});
         }).catch(err => {
             console.error('could not determine if dev mode is active');

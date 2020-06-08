@@ -100,7 +100,7 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.middlename,
                                         profile.lastname,
                                         id,
-                                        moment(profile.dob).toDate(),
+                                        moment.utc(profile.dob).toDate(),
                                         profile.street,
                                         profile.city,
                                         profile.state,
@@ -111,9 +111,11 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.pbuilding,
                                         profile.email,
                                         profile.phone]).then(res => {
+        console.log('----------------success---------------' + res.rowCount);
         return {success: res.rowCount>0};
     }).catch(err => {
         console.error(err);
+        console.log('------------------error--------------');
         return {success: false};
     });
 }
