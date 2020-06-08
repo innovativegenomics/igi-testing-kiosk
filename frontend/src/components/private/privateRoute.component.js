@@ -23,10 +23,10 @@ const PrivateRoute = ({ component: Component, auth, loadUser, ...rest }) => (
                 // } else {
                 //     return <Component {...props} />;
                 // }
-                if(!auth.fullUser && rest.path !== '/newuser' && !auth.updating) {
+                if(!auth.created && rest.path !== '/newuser' && !auth.creating) {
                     return <Redirect to='/newuser' />;
-                } else if(auth.user.updating) {
-                    return <div>Updating...</div>;
+                } else if(auth.user.creating) {
+                    return <div>Creating user...</div>;
                 } else {
                     return <Component {...props} />;
                 }

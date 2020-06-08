@@ -1,18 +1,19 @@
 import { USER_LOADING_ACTION,
          USER_LOADED_ACTION,
          USER_NOT_AUTHED,
-         USER_UPDATING_ACTION,
-         USER_UPDATE_FAILED,
-         USER_VERIFIED } from '../actions/actionTypes';
+         USER_CREATED_ACTION,
+         USER_NOT_CREATED,
+         USER_CREATING_ACTION,
+         USER_CREATING_FAILED } from '../actions/actionTypes';
 import axios from 'axios';
 
 export const loadUser = () => dispatch => {
     dispatch(setUserLoading());
-    return axios.get('/api/users/get/profile').then(res => {
-        if(res.status === 200) {
-            dispatch(setUserData(res.data));
+    return axios.post('/api/users/get/profile').then(res => {
+        if(res.data.success) {
+            dispatch(setUserData(res.data.user));
         } else {
-            dispatch(setUserUnauthed());
+            dispatch(setUserNotCreated());
         }
     }).catch(err => {
         console.error('error loading user');
@@ -21,56 +22,18 @@ export const loadUser = () => dispatch => {
     });
 }
 
-export const updateUser = data => dispatch => {
-    dispatch(setUserUpdating());
-    const promiseChain = [];
-    if(data.firstname) {
-        promiseChain.push(axios.post('/api/users/set/firstname', {firstname: data.firstname}));
-    }
-    if(data.lastname) {
-        promiseChain.push(axios.post('/api/users/set/lastname', {lastname: data.lastname}));
-    }
-    if(data.email) {
-        promiseChain.push(axios.post('/api/users/set/email', {email: data.email}));
-    }
-    if(data.phone) {
-        promiseChain.push(axios.post('/api/users/set/phone', {phone: data.phone}));
-    }
-    if(data.alertemail) {
-        promiseChain.push(axios.post('/api/users/set/alertemail', {alertemail: data.alertemail}));
-    }
-    if(data.alertphone) {
-        promiseChain.push(axios.post('/api/users/set/alertphone', {alertphone: data.alertphone}));
-    }
-    Promise.all(promiseChain).then(r => dispatch(setUserData(data))).catch(err => {
-        console.error('Error updating user');
-        console.error(err);
-        dispatch(setUserUpdateFailed());
-    });
-}
-
-export const submitScreening = data => {
-    return axios.post('/api/users/submit_screening', data).then(res => {
-        if(res.status === 200) {
-            return true;
+export const createUser = data => dispatch => {
+    dispatch(setUserCreating());
+    axios.post('/api/users/set/profile', data).then(res => {
+        if(res.data.success) {
+            dispatch(setUserCreated(data));
         } else {
-            throw Error('error submitting screen questions');
+            dispatch(setUserCreationFailed());
         }
     }).catch(err => {
+        console.error('error creating user');
         console.error(err);
-        return false;
-    });
-}
-
-export const testVerifyUser = () => dispatch => {
-    return axios.post('/api/schedule/verify_user').then(res => {
-        if(res.status === 200) {
-            dispatch(setUserVerified(res.data.nextappointment));
-        } else {
-            console.error('could not verify user');
-        }
-    }).catch(err => {
-        console.error(err);
+        dispatch(setUserUnauthed());
     });
 }
 
@@ -98,21 +61,28 @@ export const setUserData = data => {
     };
 }
 
-export const setUserUpdating = () => {
+
+export const setUserCreating = () => {
     return {
-        type: USER_UPDATING_ACTION,
+        type: USER_CREATING_ACTION
     };
 }
 
-export const setUserUpdateFailed = () => {
+export const setUserCreated = data => {
     return {
-        type: USER_UPDATE_FAILED
+        type: USER_CREATED_ACTION,
+        data: data
     };
 }
 
-export const setUserVerified = nextappointment => {
+export const setUserCreationFailed = () => {
     return {
-        type: USER_VERIFIED,
-        nextappointment: nextappointment
+        type: USER_CREATING_FAILED
     };
+}
+
+export const setUserNotCreated = () => {
+    return {
+        type: USER_NOT_CREATED
+    }
 }

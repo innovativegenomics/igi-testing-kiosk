@@ -49,12 +49,14 @@ router.post('/get/profile', Cas.block, (request, response) => {
     getUserProfile(calnetid).then(user => {
         response.json({
             success: true,
-            firstname: user.firstname,
-            middlename: user.middlename,
-            lastname: user.lastname,
-            email: user.email,
-            phone: user.phone,
-            admin: user.admin
+            user: {
+                firstname: user.firstname,
+                middlename: user.middlename,
+                lastname: user.lastname,
+                email: user.email,
+                phone: user.phone,
+                admin: user.admin
+            }
         });
     }).catch(err => {
         response.json({success: false});
@@ -88,8 +90,10 @@ router.post('/set/profile', Cas.block, (request, response) => {
     setUserProfile(calnetid, request.body).then(success => {
         if(success) {
             return newUserSlot(calnetid).then(r => {
-                addLIMSPatient(request.body);
-                response.json({success: true});
+                if(r) {
+                    addLIMSPatient(request.body);
+                }
+                response.json({success: r});
             });
         } else {
             response.json({success: false});
