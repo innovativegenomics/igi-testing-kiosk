@@ -37,14 +37,14 @@ export default class Landing extends Component {
             <div style={{backgroundColor: '#eeeeee'}}>
                 <Navbar/>
                 <div className='container'>
-                    <div className='row justify-content-center'>
-                        <div className='col-5'>
-                            <div className='pl-0 pr-4 mt-3 mb-5 ml-0 mr-0 border-right border-dark text-right'>
+                    <div className='row justify-content-center mt-3 mb-2'>
+                        <div className='col-5 border-right border-dark'>
+                            <div className='pl-0 pr-4 mt-3 ml-0 mr-0 text-right'>
                                 <img src={igiLogo} className='logo-image' alt=''/>
                             </div>
                         </div>
                         <div className='col-5'>
-                            <div className='pl-5 pr-0 mt-3 mb-5 ml-0 mr-0'>
+                            <div className='pl-3 pr-0 mt-3 ml-0 mr-0'>
                                 <img src={berkeleySeal} className='logo-image' alt=''/>
                             </div>
                         </div>
