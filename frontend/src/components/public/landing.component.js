@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import axios from 'axios';
 import './landing.css';
 
@@ -7,7 +6,7 @@ import igiLogo from '../../media/igi_logo.png';
 import berkeleySeal from '../../media/berkeley_seal.png';
 import Navbar from '../navbar.component';
 
-class Landing extends Component {
+export default class Landing extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -74,9 +73,3 @@ class Landing extends Component {
         );
     }
 }
-
-const mapStateToProps = state => ({
-    isAuthenticated: state.auth.isAuthenticated
-});
-
-export default connect(mapStateToProps)(Landing);
