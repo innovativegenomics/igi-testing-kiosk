@@ -5,7 +5,7 @@ import { postcodeValidator } from 'postcode-validator';
 import moment from 'moment';
 
 import Navbar from '../navbar.component';
-import { connect } from 'react-redux';
+import ToS from './tos.component';
 
 import { createUser } from '../../actions/authActions';
 import { Redirect } from 'react-router-dom';
@@ -25,13 +25,13 @@ class ToSModal extends Component {
                 <div className='modal-dialog' role='document'>
                     <div className='modal-content'>
                         <div className='modal-header'>
-                            <h5 className='modal-title' id='exampleModalLabel'>Testing Terms of Service</h5>
+                            <h5 className='modal-title' id='exampleModalLabel'>Consent to Participate in IGI Healthy Campus Initiative</h5>
                             <button type='button' className='close' data-dismiss='modal' aria-label='Close'>
                                 <span aria-hidden='true'>&times;</span>
                             </button>
                         </div>
                         <div className='modal-body'>
-                            There are no terms of service yet. Just click <b>I Agree</b>
+                            <Tos />
                         </div>
                         <div className='modal-footer'>
                             <button type='button' className='btn btn-secondary' data-dismiss='modal'>Disagree</button>
@@ -184,7 +184,7 @@ class UserInfo extends Component {
     }
 }
 
-class NewUser extends Component {
+export default class NewUser extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -355,9 +355,3 @@ class NewUser extends Component {
         );
     }
 }
-
-const mapStateToProps = state => ({
-    auth: state.auth
-});
-
-export default connect(mapStateToProps, { createUser })(NewUser);
