@@ -111,11 +111,9 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.pbuilding,
                                         profile.email,
                                         profile.phone]).then(res => {
-        console.log('----------------success---------------' + res.rowCount);
         return {success: res.rowCount>0};
     }).catch(err => {
         console.error(err);
-        console.log('------------------error--------------');
         return {success: false};
     });
 }
@@ -134,7 +132,7 @@ module.exports.addLIMSPatient = profile => {
         Middle_Name__c: profile.middlename,
         Last_Name__c: profile.lastname,
         Sex__c: profile.sex,
-        DOB__c: moment(profile.dob).toDate(),
+        DOB__c: moment.utc(profile.dob).toDate(),
         Street__c: profile.street,
         City__c: profile.city,
         State_Province__c: profile.state,
@@ -143,7 +141,7 @@ module.exports.addLIMSPatient = profile => {
         Phone__c: profile.phone,
         Primary_Location__c: profile.pbuilding
     };
-    axios.post(require('../config/keys').limsapi, payload).then(res => {
+    return axios.post(require('../config/keys').limsapi, {payload: JSON.parse(payload), settings: JSON.parse({action: 'create', study: 'IGI Health Campus Initiative'})}).then(res => {
         console.log('LIMs POST request response');
         console.log(res);
     });
