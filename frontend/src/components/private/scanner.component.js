@@ -58,7 +58,7 @@ export default class Scanner extends Component {
             errorMessage = 'The user is here at the wrong time. Their slot begins ' + moment(this.state.slot.slot).format('dddd, MMMM Do YYYY, h:mm:ss a');
         }
         return (
-            <div style={{backgroundColor: '#eeeeee'}}>
+            <div>
                 <Navbar authed={true} admin={this.state.auth.user.admin}/>
                 <div className='container'>
                     <div className='row justify-content-center'>

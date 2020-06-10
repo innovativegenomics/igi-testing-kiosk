@@ -50,8 +50,8 @@ export default class Dashboard extends Component {
         }
         console.log(this.state.slot);
         return (
-            <div style={{backgroundColor: '#eeeeee'}}>
-                <Navbar authed={true}/>
+            <div>
+                <Navbar authed={true} admin={this.state.auth.user.admin}/>
                 <div className='container'>
                     <div className='row justify-content-center'>
                         <div className='col text-center'>

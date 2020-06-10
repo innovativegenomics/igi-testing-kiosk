@@ -201,8 +201,8 @@ export default class Scheduler extends Component {
         });
         const slots = Object.keys(this.state.schedule.open[this.state.location] || {}).map(v => moment(v));
         return (
-            <div style={{backgroundColor: '#eeeeee'}}>
-                <Navbar authed={true}/>
+            <div>
+                <Navbar authed={true} admin={this.state.auth.user.admin}/>
                 <div className='container'>
                     <div className='row justify-content-center m-3'>
                         <div className='col-sm-4'>
