@@ -34,7 +34,11 @@ module.exports = (payload, helpers) => {
                     content: res.split('base64,')[1],
                     encoding: 'base64',
                     cid: 'qrcode'
-                }
+                },
+                {
+                    filename: 'IGI_study_info_sheet.pdf',
+                    path: '../media/IGI_study_info_sheet.pdf'
+                },
             ]
         });
     });
