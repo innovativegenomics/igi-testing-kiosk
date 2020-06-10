@@ -141,8 +141,11 @@ module.exports.addLIMSPatient = profile => {
         Phone__c: profile.phone,
         Primary_Location__c: profile.pbuilding
     };
-    return axios.post(require('../config/keys').limsapi, {payload: JSON.parse(payload), settings: JSON.parse({action: 'create', study: 'IGI Health Campus Initiative'})}).then(res => {
+    return axios.post(require('../config/keys').limsapi, {payload: JSON.stringify(payload), settings: JSON.stringify({action: 'create', study: 'IGI Health Campus Initiative'})}).then(res => {
         console.log('LIMs POST request response');
         console.log(res);
+    }).catch(err => {
+        console.error('LIMs POST error');
+        console.error(err);
     });
 }

@@ -6,7 +6,7 @@ import About from './components/public/about.component';
 import QRCode from './components/public/qrcode.component';
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
-// import Scheduler from './components/private/scheduler.component';
+import Scheduler from './components/private/scheduler.component';
 // import Scanner from './components/private/scanner.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -23,7 +23,7 @@ export default class App extends Component {
             <Route path='/qrcode' component={QRCode}/>
             <Route path='/newuser' component={NewUser}/>
             <Route path='/dashboard' component={Dashboard}/>
-            {/* <Route path='/scheduler' component={Scheduler}/> */}
+            <Route path='/scheduler' component={Scheduler}/>
             {/* <Route path='/scanner' component={Scanner}/> */}
           </div>
         </Router>

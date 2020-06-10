@@ -18,7 +18,7 @@ const { getUserSlot, getAvailableSlots, setUserSlot, cancelSlot } = require('../
 router.post('/get/slot', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     getUserSlot(calnetid).then(res => {
-        response.json({...res, success: true});
+        response.json({slot: {...res}, success: true});
     }).catch(err => {
         response.json({success: false});
     });

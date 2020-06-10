@@ -159,12 +159,23 @@ module.exports.setUserSlot = (id, slot, location) => {
     });
 }
 
+const CURRENT_SLOT = `select slot from schedule where calnetid=$1 order by slot desc limit 1`;
 const CANCEL_SLOT = `update schedule set location=null,slot=$2,scheduled=null where calnetid=$1 and slot in (select slot from schedule where calnetid=$1 and completed is null and rejected is null order by slot desc limit 1)`;
 module.exports.cancelSlot = id => {
-    return pool.query(CANCEL_SLOT, [id, moment().startOf('week').toDate()]).then(res => {
-        return res.rowCount > 0;
+
+    return pool.connect().then(client => {
+        const abort = getAbort(client);
+        return client.query('begin').then(r => {
+            return client.query(CURRENT_SLOT, [id]);
+        }).then(curr => {
+            return client.query(CANCEL_SLOT, [id, moment(curr.rows[0].slot).startOf('week')]);
+        }).then(res => {
+            return client.query('end transaction').then(r => client.release()).then(r => true);
+        }).catch(err => {
+            return abort(err).catch(e => false);
+        });
     }).catch(err => {
-        console.error(`Error cancelling slot for user ${id}`);
+        console.error('Error connecting with client');
         console.error(err);
         return false;
     });
