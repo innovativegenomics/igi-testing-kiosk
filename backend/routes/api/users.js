@@ -22,7 +22,13 @@ router.get('/login', Cas.bounce, (request, response) => {
                 response.redirect('/dashboard');
             });
         } else {
-            response.redirect('/newuser');
+            if(!require('../../config/keys').newusers) {
+                console.log(`user with calnetid ${calnetid} not authorized`);
+                request.session.destroy();
+                response.status(401).send('Unauthorized user');
+            } else {
+                response.redirect('/newuser');
+            }
         }
     });
 });

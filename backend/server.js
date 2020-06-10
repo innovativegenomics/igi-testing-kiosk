@@ -14,7 +14,7 @@ const { verifyTables } = require('./database/database');
 
 const users = require('./routes/api/users');
 const schedule = require('./routes/api/schedule');
-// const admin = require('./routes/api/admin');
+const admin = require('./routes/api/admin');
 
 const { verifyScheduler } = require('./scheduler');
 
@@ -49,7 +49,7 @@ verifyTables().then(res => {
     
     app.use("/api/users", users);
     app.use("/api/schedule", schedule);
-    // app.use("/api/admin", admin);
+    app.use("/api/admin", admin);
     
     const port = process.env.PORT || 5000;
     app.listen(port, () => {

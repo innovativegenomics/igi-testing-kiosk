@@ -19,3 +19,33 @@ const getAbort = (client) => {
         });
     }
 }
+
+module.exports.getUserAdmin = id => {
+    return pool.query('select admin from users where calnetid=$1', [id]).then(res => {
+        return res.rows[0].admin;
+    }).catch(err => {
+        console.error('Error getting user admin ' + id);
+        console.error(err);
+        throw err;
+    });
+}
+
+module.exports.getSlotDetails = uid => {
+    return pool.query('select * from schedule where uid=$1', [uid]).then(res => {
+        if(res.rowCount < 1)
+            throw new Error('Invalid UID');
+        else {
+            return res.rows[0];
+        }
+    });
+}
+
+module.exports.completeUserSlot = uid => {
+    return pool.query('update schedule set completed=now() where uid=$1', [uid]).then(res => {
+        return res.rowCount > 0;
+    }).catch(err => {
+        console.error('error completing slot with uid ' + uid);
+        console.error(err);
+        return false;
+    });
+}
