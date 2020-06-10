@@ -11,13 +11,13 @@ module.exports = (payload, helpers) => {
         }
     });
 
-    const { email, day } = payload;
+    const { email } = payload;
     return transport.sendMail({
         from: config.email.user,
         to: email,
-        subject: `Next Open Testing day ${day}`,
+        subject: `IGI Healthy Campus Initiative`,
         // text: 'Please enable html messages to view this email',
-        html: `<h1>Next Open Testing day ${day}</h1>
-               <h2>The next open testing day is ${day}. Please sign up for a time slot and location in your testing account.</h2>`,
+        html: `<h3>Thank you for signing up for the IGI Healthy Campus Initiative!</h3>
+                <p>You can read more about our program on our website <a href='https://igistudy.berkeley.edu/about'>here</a></p>`,
     });
 }
