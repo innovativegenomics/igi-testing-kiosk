@@ -4,8 +4,11 @@ const moment = require('moment');
 // const short = require('short-uuid');
 
 const Cas = require('../../cas');
-// const { Settings } = require('../../database/settingsActions');
+const { Settings } = require('../../database/settingsActions');
+const { getUserProfile } = require('../../database/userActions');
 const { getUserSlot, getAvailableSlots, setUserSlot, cancelSlot } = require('../../database/scheduleActions');
+
+const { scheduleSlotConfirmEmail, scheduleSlotConfirmText } = require('../../scheduler');
 
 /**
  * Returns the user's currently assigned slot
@@ -48,8 +51,21 @@ router.post('/get/available', Cas.block, (request, response) => {
 router.post('/set/slot', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     setUserSlot(calnetid, moment(request.body.slot), request.body.location).then(res => {
-        response.json({success: true});
+        return getUserSlot(calnetid).then(slot => {
+            getUserProfile(calnetid).then(user => {
+                scheduleSlotConfirmEmail(user.email, slot.uid, moment(slot.slot).format('DDDD'), moment(slot.slot).format('h:mm A'), moment(slot.slot).add(Settings().increment, 'minute').format('h:mm A'), slot.location, Settings().locationlinks[Settings().locations.indexOf(slot.location)]);
+                if(user.phone) {
+                    scheduleSlotConfirmText(user.phone, slot.uid, moment(slot.slot).format('DDDD'), moment(slot.slot).format('h:mm A'), moment(slot.slot).add(Settings().increment, 'minute').format('h:mm A'), slot.location, Settings().locationlinks[Settings().locations.indexOf(slot.location)]);
+                }
+            }).catch(err => {
+                console.error('unable to send confirmation messages for user ' + calnetid);
+                console.error(err);
+            });
+            response.json({success: true});
+        });
     }).catch(err => {
+        console.error('error setting slot');
+        console.error(err);
         response.json({success: false});
     });
 });

@@ -7,6 +7,8 @@ const Cas = require('../../cas');
 const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin, addLIMSPatient } = require('../../database/userActions');
 const { newUserSlot } = require('../../database/scheduleActions');
 
+const { scheduleSignupEmail } = require('../../scheduler');
+
 /**
  * Logs in existing and new users
  * If the users already exists, it directs them to the dashboard.
@@ -92,6 +94,7 @@ router.post('/set/profile', Cas.block, (request, response) => {
             return newUserSlot(calnetid).then(r => {
                 if(r) {
                     addLIMSPatient(request.body);
+                    scheduleSignupEmail(request.body.email);
                 }
                 response.json({success: r});
             });

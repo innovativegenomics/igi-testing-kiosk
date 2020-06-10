@@ -101,8 +101,8 @@ module.exports.getAvailableSlots = id => {
                 }
             }
             for(var row of taken.rows) {
-                if(open[row.location][row.slot] !== undefined) {
-                    open[row.location][row.slot]--;
+                if(open[row.location][moment(row.slot)] !== undefined) {
+                    open[row.location][moment(row.slot)]--;
                 }
             }
             return open;
