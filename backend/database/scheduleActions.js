@@ -91,11 +91,16 @@ module.exports.getAvailableSlots = id => {
             for(var location of Settings().locations) {
                 open[location] = {};
                 for(var day of Settings().days) {
-                    if(moment().isAfter(startDate.clone().set('day', day))) {
+                    const now = moment();
+                    if(now.isAfter(startDate.clone().set('day', day), 'day')) {
                         continue;
                     } else {
                         for(var i = startDate.clone().set('day', day).set('hour', Settings().starttime);i.get('hour') < Settings().endtime;i = i.add(Settings().increment, 'minute')) {
-                            open[location][i.clone()] = Settings().buffer;
+                            if(i.isBefore(now)) {
+                                continue;
+                            } else {
+                                open[location][i.clone()] = Settings().buffer;
+                            }
                         }
                     }
                 }
@@ -141,7 +146,9 @@ module.exports.setUserSlot = (id, slot, location) => {
                 throw new Error('slot not valid');
             } else if(!Settings().days.includes(slot.day())) {
                 throw new Error('slot not valid');
-            } else {
+            } else if(slot.isBefore(moment())) {
+                throw new Error('slot is before current time');
+            }else {
                 return client.query(EXISTING_SLOT_COUNT, [slot.toDate(), location]).then(count => {
                     if(count.rows[0].count >= Settings().buffer) {
                         throw new Error('Slot is already full');
@@ -183,7 +190,7 @@ module.exports.cancelSlot = id => {
 
 const NEW_USER_SLOT = `insert into schedule (calnetid, slot, uid) values ($1, $2, $3)`;
 module.exports.newUserSlot = id => {
-    return pool.query(NEW_USER_SLOT, [id, moment().startOf('week').add(1, 'week').toDate(), short().new()]).then(res => {
+    return pool.query(NEW_USER_SLOT, [id, moment().startOf('week').toDate(), short().new()]).then(res => {
         return true;
     }).catch(err => {
         console.error('Error creating new user slot');

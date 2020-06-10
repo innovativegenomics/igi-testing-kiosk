@@ -34,7 +34,7 @@ export default class Landing extends Component {
     }
     render() {
         return (
-            <div style={{backgroundColor: '#eeeeee'}}>
+            <div>
                 <Navbar/>
                 <div className='container'>
                     <div className='row justify-content-center mt-3 mb-2'>
