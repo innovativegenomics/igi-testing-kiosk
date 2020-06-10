@@ -7,7 +7,8 @@ const pool = new Pool({
     port: require('../config/keys').pg.pgport,
 });
 const moment = require('moment');
-const axios = require('axios');
+
+const { newPatient } = require('../lims');
 
 const getAbort = (client) => {
     return err => {
@@ -19,6 +20,7 @@ const getAbort = (client) => {
     }
 }
 
+const LIMS_TABLE_CREATE = `create table lims(onerowid bool default true not null, accesstoken text null, refreshtoken text null, constraint onerow_uni check (onerowid))`;
 const USER_TABLE_CREATE = `create table users(firstname text not null,
                                            middlename text null,
                                            lastname text not null,
@@ -34,9 +36,11 @@ const USER_TABLE_CREATE = `create table users(firstname text not null,
                                            pbuilding text not null,
                                            email text unique not null,
                                            phone text unique null,
+                                           patientid text unique null,
                                            datejoined timestamptz not null default now(),
                                            lastsignin timestamptz not null default now(),
                                            admin integer not null default 0);`;
+const LIMS_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='lims')`;
 const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 module.exports.verifyUserTable = () => {
     return pool.connect().then(client => {
@@ -47,6 +51,14 @@ module.exports.verifyUserTable = () => {
             if(!res.rows[0].exists) {
                 console.log('User table doesn\'t exit, creating one!');
                 return client.query(USER_TABLE_CREATE);
+            }
+            return;
+        }).then(res => {
+            return client.query(LIMS_TABLE_EXISTS);
+        }).then(res => {
+            if(!res.rows[0].exists) {
+                console.log('Lims table doesn\'t exit, creating one!');
+                return client.query(LIMS_TABLE_CREATE);
             }
             return;
         }).then(res => {
@@ -118,6 +130,16 @@ module.exports.setUserProfile = (id, profile) => {
     });
 }
 
+module.exports.setUserPatientID = (id, patientid) => {
+    return pool.query('update users set patientid=$2 where calnetid=$1', [id, patientid]).then(res => {
+        return res.rowCount > 0;
+    }).catch(err => {
+        console.error('Error updating user patientid');
+        console.error(err);
+        return false;
+    });
+}
+
 module.exports.updateUserLastSignin = id => {
     return pool.query('update users set lastsignin=now() where calnetid=$1', [id]).then(res => {
         return res.rowCount > 0;
@@ -127,25 +149,18 @@ module.exports.updateUserLastSignin = id => {
 }
 
 module.exports.addLIMSPatient = profile => {
-    const payload = {
-        First_Name__c: profile.firstname,
-        Middle_Name__c: profile.middlename,
-        Last_Name__c: profile.lastname,
-        Sex__c: profile.sex,
-        DOB__c: moment.utc(profile.dob).toDate(),
-        Street__c: profile.street,
-        City__c: profile.city,
-        State_Province__c: profile.state,
-        County__c: profile.county,
-        Email__c: profile.email,
-        Phone__c: profile.phone,
-        Primary_Location__c: profile.pbuilding
-    };
-    return axios.post(require('../config/keys').limsapi, {payload: JSON.stringify(payload), settings: JSON.stringify({action: 'create', study: 'IGI Health Campus Initiative'})}).then(res => {
-        console.log('LIMs POST request response');
-        console.log(res);
+    return pool.query('select accesstoken,refreshtoken from lims').then(res => {
+        return newPatient(profile, res.rows[0].accesstoken, res.rows[0].refreshtoken).then(res => {
+            if(res.accesstoken) {
+                pool.query('update lims set accesstoken=$1 where onerowid=true', [res.accesstoken]);
+            }
+            return res.patient_id;
+        }).catch(err => {
+            console.error('Error posting new patient');
+            console.error(err);
+        });
     }).catch(err => {
-        console.error('LIMs POST error');
+        console.error(`Can't get access_token from database`);
         console.error(err);
     });
 }

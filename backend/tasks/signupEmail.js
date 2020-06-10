@@ -18,6 +18,21 @@ module.exports = (payload, helpers) => {
         subject: `IGI Healthy Campus Initiative`,
         // text: 'Please enable html messages to view this email',
         html: `<h3>Thank you for signing up for the IGI Healthy Campus Initiative!</h3>
-                <p>You can read more about our program on our website <a href='https://igistudy.berkeley.edu/about'>here</a></p>`,
+                <p>You can read more about our program on our website <a href='https://igistudy.berkeley.edu/about'>here</a>.
+                Attached to this email is the informed consent and bill of rights for this study. The study info sheet is also attached.</p>`,
+        attachments: [
+            {
+                filename: 'IGI_study_info_sheet.pdf',
+                path: '../media/IGI_study_info_sheet.pdf'
+            },
+            {
+                filename: 'Informed_Consent_20200610.pdf',
+                path: '../media/Informed_Consent_20200610.pdf'
+            },
+            {
+                filename: 'IGI_Healthy_Campus_Study_Bill_of_Rights',
+                path: '../media/IGI_Healthy_Campus_Study_Bill_of_Rights'
+            }
+        ]
     });
 }

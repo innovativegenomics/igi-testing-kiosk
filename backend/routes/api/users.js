@@ -4,7 +4,7 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
 const Cas = require('../../cas');
-const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin, addLIMSPatient } = require('../../database/userActions');
+const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin, addLIMSPatient, setUserPatientID } = require('../../database/userActions');
 const { newUserSlot } = require('../../database/scheduleActions');
 
 const { scheduleSignupEmail } = require('../../scheduler');
@@ -99,7 +99,9 @@ router.post('/set/profile', Cas.block, (request, response) => {
         if(success) {
             return newUserSlot(calnetid).then(r => {
                 if(r) {
-                    addLIMSPatient(request.body);
+                    addLIMSPatient(request.body).then(patientid => {
+                        return setUserPatientID(calnetid, patientid);
+                    });
                     scheduleSignupEmail(request.body.email);
                 }
                 response.json({success: r});
