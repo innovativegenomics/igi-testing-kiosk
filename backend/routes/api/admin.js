@@ -30,6 +30,9 @@ router.post('/get/slot', Cas.block, (request, response) => {
                     }
                     if(!moment().isBetween(moment(slot.slot), moment(slot.slot).add(Settings().increment, 'minute'))){
                         errors.push('WRONG_TIME');
+                        if(!moment().isSame(moment(slot.slot), 'day')) {
+                            complete = false;
+                        }
                     }
                     if(complete && level > 1)
                         completeUserSlot(request.body.uid);
