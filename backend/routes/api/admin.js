@@ -30,13 +30,18 @@ router.post('/get/slot', Cas.block, (request, response) => {
                     }
                     if(!moment().isBetween(moment(slot.slot), moment(slot.slot).add(Settings().increment, 'minute'))){
                         errors.push('WRONG_TIME');
+                        if(errors[0] !== 'WRONG_TIME') {
+                            complete = false;
+                        }
                         if(!moment().isSame(moment(slot.slot), 'day')) {
                             complete = false;
                         }
                     }
-                    if(complete && level > 1)
-                        completeUserSlot(request.body.uid);
-                    response.send({success: true, errors: errors, slot: {slot: slot.slot, location: slot.location, firstname: user.firstname, lastname: user.lastname}});
+                    if(complete && level > 1) {
+                        return completeUserSlot(request.body.uid).then(res => response.send({success: true, completed: res, errors: errors, slot: {slot: slot.slot, location: slot.location, firstname: user.firstname, lastname: user.lastname}}));
+                    } else {
+                        response.send({success: true, completed: complete, errors: errors, slot: {slot: slot.slot, location: slot.location, firstname: user.firstname, lastname: user.lastname}});
+                    }
                 });
             }).catch(err => {
                 console.error(err);
