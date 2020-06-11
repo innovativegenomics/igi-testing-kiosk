@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { connect } from 'react-redux';
+import { Modal, Button } from 'react-bootstrap';
 import Navbar from '../navbar.component';
 import moment from 'moment';
 
@@ -117,14 +117,67 @@ class AppointmentTable extends Component {
     }
 }
 
-class ConfirmModal extends Component {
+class Question extends Component {
     render() {
+        const listItems = [];
+        if(this.props.list) {
+            for(var l in this.props.list) {
+                listItems.push(<li key={l}>{this.props.list[l]}</li>);
+            }
+        }
+        return (
+            <div className='row pt-2 pb-2'>
+                <div className='col-md-9'>
+                    <p className='m-0'>{this.props.question}</p>
+                    <ul>
+                        {listItems}
+                    </ul>
+                </div>
+                <div className='col-2'>
+                    <div className='btn-group'>
+                        <button className={`btn ${(this.props.selected===true)?'btn-primary':'btn-secondary'}`} onClick={this.props.option1Click}>{this.props.option1}</button>
+                        <button className={`btn ${(this.props.selected===false)?'btn-primary':'btn-secondary'}`} onClick={this.props.option2Click}>{this.props.option2}</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+class ConfirmModal extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            question0: null,
+            question1: null,
+            question2: null,
+            question3: null,
+            question4: null,
+            question5: null,
+            question6: null,
+        }
+    }
+    render() {
+        var isComplete = true;
+        for(var k in this.state) {
+            if(this.state[k] === null) {
+                isComplete = false;
+                break;
+            }
+        }
+        var symtomatic = false;
+        for(var k in this.state) {
+            if(this.state[k] === false) {
+                symtomatic = true;
+                break;
+            }
+        }
         return (
             <div className="modal fade" id='confirmModal' tabIndex="-1" role="dialog">
-            <div className="modal-dialog" role="document">
+            <div className="modal-dialog modal-lg" role="document">
                 <div className="modal-content">
                 <div className="modal-header">
-                    <h5 className="modal-title">Modal title</h5>
+                    <h5 className="modal-title">Confirm appointment</h5>
                     <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
@@ -132,9 +185,67 @@ class ConfirmModal extends Component {
                 <div className="modal-body">
                     <p>Confirm that you would like to reserve this time slot</p>
                     <p className='lead'>{this.props.selected?this.props.selected.format('dddd, MMMM D h:mm A'):''} at {this.props.location}</p>
+                    <h3>Please answer the following survey before you confirm your appointment</h3>
+                    <p>None of these responses will be recorded</p>
+                    <Question question='Have you been diagnosed with Covid 19 in the past 30 days?'
+                                selected={this.state.question0}
+                                option1='Yes'
+                                option2='No'
+                                option1Click={e => this.setState({question0: true})}
+                                option2Click={e => this.setState({question0: false})}/>
+                    <Question question='Have you traveled in the past 14 days?'
+                                selected={this.state.question1}
+                                option1='Yes'
+                                option2='No'
+                                option1Click={e => this.setState({question1: true})}
+                                option2Click={e => this.setState({question1: false})}/>
+                    <Question question='Do you live with someone who has been diagnosed with COVID-19 in the past 30 days?'
+                                selected={this.state.question2}
+                                option1='Yes'
+                                option2='No'
+                                option1Click={e => this.setState({question2: true})}
+                                option2Click={e => this.setState({question2: false})}/>
+                    <Question question='Have you been in unprotected (without full, approved PPE) contact with anyone 
+                                        diagnosed with COVID-19 or associated biofluids/clinical samples in the past 14 days?'
+                                selected={this.state.question3}
+                                option1='Yes'
+                                option2='No'
+                                option1Click={e => this.setState({question3: true})}
+                                option2Click={e => this.setState({question3: false})}/>
+                    <Question question='What is your current temperature?'
+                                selected={this.state.question4}
+                                option1='Over 100F'
+                                option2='Under 100F'
+                                option1Click={e => this.setState({question4: true})}
+                                option2Click={e => this.setState({question4: false})}/>
+                    <Question question='In the last 24 hours, have you had any of:'
+                                selected={this.state.question5}
+                                option1='Yes'
+                                option2='No'
+                                option1Click={e => this.setState({question5: true})}
+                                option2Click={e => this.setState({question5: false})}
+                                list={['New cough?', 
+                                        'Difficulty breathing?', 
+                                        'Repeated shaking with chills?',
+                                        'Nausea/vomiting?',
+                                        'Shortness of breath?',
+                                        'New loss of taste or smell?']}/>
+                    <Question question='In the last 24 hours, have you had any TWO of the following:'
+                                selected={this.state.question6}
+                                option1='Yes'
+                                option2='No'
+                                option1Click={e => this.setState({question6: true})}
+                                option2Click={e => this.setState({question6: false})}
+                                list={['Persistent runny nose?', 
+                                        'Unexplained muscle aches?', 
+                                        'Congestion?',
+                                        'Sneezing?',
+                                        'Sore throat?',
+                                        'Headache?',
+                                        'Diarrhea?']}/>
                 </div>
                 <div className="modal-footer">
-                    <button type="button" className="btn btn-primary" data-dismiss="modal" onClick={this.props.onSubmit}>Save changes</button>
+                    <button type="button" className="btn btn-primary" data-dismiss="modal" disabled={!isComplete} onClick={e => this.props.onSubmit(symtomatic)}>Confirm</button>
                     <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
                 </div>
@@ -162,14 +273,18 @@ export default class Scheduler extends Component {
             location: '',
             day: null,
             selected: null,
-            success: false
+            success: false,
+            showSymtomaticModal: false
         };
     }
     componentDidMount() {
         loadUser().then(res => this.setState({auth: {...res, loaded: true}}));
         loadSchedule().then(res => this.setState({schedule: {...res, loaded: true}}));
     }
-    submitRequest = e => {
+    submitRequest = s => {
+        if(s) {
+            return this.setState({showSymtomaticModal: true});
+        }
         console.log(this.state.selected);
         console.log(this.state.location);
         requestSlot(this.state.selected, this.state.location).then(res => {
@@ -222,6 +337,18 @@ export default class Scheduler extends Component {
                     </div>
                 </div>
                 <ConfirmModal selected={this.state.selected} location={this.state.location} onSubmit={this.submitRequest} />
+                <Modal show={this.state.showSymtomaticModal} backdrop='static' keyboard={false}>
+                    <Modal.Header>
+                        <Modal.Title>Alert</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        You indicated on the symtom questionaire that you are experiencing symtoms linked to Covid 19.
+                        Please consult the UC Berkeley Tang center for a testing appointment. Thanks!
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variation='primary' onClick={e => window.open('/dashboard', '_self')}>Ok</Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         );
     }
