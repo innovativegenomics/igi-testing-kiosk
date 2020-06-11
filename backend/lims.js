@@ -19,10 +19,11 @@ const postNewPatient = (accesstoken, payload) => {
                         payload,
                         {headers: {Authorization: 'Bearer ' + accesstoken, 'Content-Type': 'application/json'}})
     .then(res => {
-        if(res.data.patient_id) {
+        const resp = JSON.parse(res);
+        if(resp.data.patient_id) {
             return {patient_id: res.data.patient_id};
         } else {
-            throw {response: res};
+            throw {response: {data: resp}};
         }
     }).catch(err => {
         console.error('error posting new patient ' + payload);
