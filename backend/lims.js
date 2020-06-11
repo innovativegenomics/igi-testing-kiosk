@@ -19,9 +19,9 @@ const postNewPatient = (accesstoken, payload) => {
                         payload,
                         {headers: {Authorization: 'Bearer ' + accesstoken, 'Content-Type': 'application/json'}})
     .then(res => {
-        const resp = JSON.parse(res);
-        if(resp.data.patient_id) {
-            return {patient_id: res.data.patient_id};
+        const resp = JSON.parse(res.data);
+        if(resp.patient_id) {
+            return {patient_id: resp.patient_id};
         } else {
             throw {response: {data: resp}};
         }
