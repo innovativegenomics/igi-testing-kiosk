@@ -37,7 +37,7 @@ module.exports = (payload, helpers) => {
                 },
                 {
                     filename: 'IGI_study_info_sheet.pdf',
-                    path: '../media/IGI_study_info_sheet.pdf'
+                    path: './media/IGI_study_info_sheet.pdf'
                 },
             ]
         });

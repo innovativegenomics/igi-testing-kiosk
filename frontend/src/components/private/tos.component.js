@@ -28,7 +28,7 @@ class ToSQuestions extends Component {
             <div>
                 <p className='lead text-center'>Consent</p>
                 <p>
-                    You will be emailed a copy of this consent form and <a href={billOfRights} target='_blank'>Medical Research Subject’s Bill of Rights</a>, which
+                    You will be emailed a copy of this consent form and <a href={billOfRights} rel='noopener noreferrer' target='_blank'>Medical Research Subject’s Bill of Rights</a>, which
                     will also be available on this webpage.
                 </p>
                 <p>

@@ -23,15 +23,15 @@ module.exports = (payload, helpers) => {
         attachments: [
             {
                 filename: 'IGI_study_info_sheet.pdf',
-                path: '../media/IGI_study_info_sheet.pdf'
+                path: './media/IGI_study_info_sheet.pdf'
             },
             {
                 filename: 'Informed_Consent_20200610.pdf',
-                path: '../media/Informed_Consent_20200610.pdf'
+                path: './media/Informed_Consent_20200610.pdf'
             },
             {
-                filename: 'IGI_Healthy_Campus_Study_Bill_of_Rights',
-                path: '../media/IGI_Healthy_Campus_Study_Bill_of_Rights'
+                filename: 'IGI_Healthy_Campus_Study_Bill_of_Rights.pdf',
+                path: './media/IGI_Healthy_Campus_Study_Bill_of_Rights.pdf'
             }
         ]
     });
