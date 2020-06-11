@@ -167,7 +167,7 @@ class ConfirmModal extends Component {
         }
         var symtomatic = false;
         for(var k in this.state) {
-            if(this.state[k] === false) {
+            if(this.state[k] === true) {
                 symtomatic = true;
                 break;
             }

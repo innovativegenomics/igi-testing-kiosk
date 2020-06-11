@@ -38,7 +38,7 @@ module.exports.newPatient = (profile, accesstoken, refreshtoken) => {
             Middle_Name__c: profile.middlename,
             Last_Name__c: profile.lastname,
             Sex__c: profile.sex,
-            DOB__c: moment.utc(profile.dob).toDate(),
+            DOB__c: moment.utc(profile.dob).format('YYYY-MM-DD HH:mm:ss'),
             Street__c: profile.street,
             City__c: profile.city,
             State_Province__c: profile.state,
