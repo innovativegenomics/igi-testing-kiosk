@@ -54,6 +54,7 @@ module.exports.completeUserSlot = uid => {
  * 
  * @param {Array<string>} terms - search terms which are separated by spaces
  */
+const SEARCH_BY_TERMS = `select * from `;
 module.exports.getAppointmentsByName = terms => {
-
+    
 }
