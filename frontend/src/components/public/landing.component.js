@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import axios from 'axios';
 import './landing.css';
 
@@ -7,7 +6,7 @@ import igiLogo from '../../media/igi_logo.png';
 import berkeleySeal from '../../media/berkeley_seal.png';
 import Navbar from '../navbar.component';
 
-class Landing extends Component {
+export default class Landing extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -27,7 +26,7 @@ class Landing extends Component {
         }
     }
     componentDidMount() {
-        axios.post('/api/users/get/is_dev_mode').then(res => {
+        axios.post('/api/users/get/devmode').then(res => {
             this.setState({devmode: res.data.devmode});
         }).catch(err => {
             console.error('could not determine if dev mode is active');
@@ -35,17 +34,17 @@ class Landing extends Component {
     }
     render() {
         return (
-            <div style={{backgroundColor: '#eeeeee'}}>
+            <div>
                 <Navbar/>
                 <div className='container'>
-                    <div className='row justify-content-center'>
-                        <div className='col-5'>
-                            <div className='pl-0 pr-4 mt-3 mb-5 ml-0 mr-0 border-right border-dark text-right'>
+                    <div className='row justify-content-center mt-3 mb-2'>
+                        <div className='col-5 border-right border-dark'>
+                            <div className='pl-0 pr-4 mt-3 ml-0 mr-0 text-right'>
                                 <img src={igiLogo} className='logo-image' alt=''/>
                             </div>
                         </div>
                         <div className='col-5'>
-                            <div className='pl-5 pr-0 mt-3 mb-5 ml-0 mr-0'>
+                            <div className='pl-3 pr-0 mt-3 ml-0 mr-0'>
                                 <img src={berkeleySeal} className='logo-image' alt=''/>
                             </div>
                         </div>
@@ -58,7 +57,7 @@ class Landing extends Component {
                         </div>
                     </div>
                     <div className={`row justify-content-center ${(this.state.devmode)?'':'d-none'}`}>
-                        <div className='col-4 text-center pb-2'>
+                        <div className='col-md-4 text-center pb-2'>
                             <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({devuser: e.target.value})} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
                         </div>
                     </div>
@@ -74,9 +73,3 @@ class Landing extends Component {
         );
     }
 }
-
-const mapStateToProps = state => ({
-    isAuthenticated: state.auth.isAuthenticated
-});
-
-export default connect(mapStateToProps)(Landing);

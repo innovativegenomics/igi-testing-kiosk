@@ -1,152 +1,476 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { PhoneNumberUtil } from 'google-libphonenumber';
+import { validate as validateEmail } from 'email-validator';
+import { postcodeValidator } from 'postcode-validator';
+import moment from 'moment';
 
 import Navbar from '../navbar.component';
-import { connect } from 'react-redux';
+import ToSModal from './tos.component';
 
-import { updateUser } from '../../actions/authActions';
+import { loadUser, createUser } from '../../actions/authActions';
 import { Redirect } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 
-class UserInfo extends Component {
+const STATE_CODES = [
+    'AL','AK','AS','AZ','AR','CA','CO','CT','DE','DC','FM','FL','GA',
+    'GU','HI','ID','IL','IN','IA','KS','KY','LA','ME','MH','MD','MA',
+    'MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND',
+    'MP','OH','OK','OR','PW','PA','PR','RI','SC','SD','TN','TX','UT',
+    'VT','VI','VA','WA','WV','WI','WY'
+   ];
+
+const USER_INFO = {
+    firstname: {
+        type: 'TEXT',
+        title: 'First Name',
+        required: true,
+        validFunc: v => v.length < 41,
+    },
+    middlename: {
+        type: 'TEXT',
+        title: 'Middle Name',
+        required: false,
+        validFunc: v => v.length < 41,
+    },
+    lastname: {
+        type: 'TEXT',
+        title: 'Last Name',
+        required: true,
+        validFunc: v => v.length < 81,
+    },
+    dob: {
+        type: 'DATE',
+        title: 'Date of Birth',
+        placeholder: 'MM-DD-YYYY',
+        required: true,
+        validFunc: v => true
+    },
+    sex: {
+        type: 'SELECT',
+        title: 'Sex',
+        required: true,
+        options: ['Female', 'Male', 'Other', 'Unspecified'],
+        validFunc: v => true
+    },
+    race: {
+        type: 'SELECT',
+        title: 'Race',
+        required: true,
+        options: ['American Indian/Alaska Native',
+                    'Asian',
+                    'Black',
+                    'Hawaiian/Pacific Islander',
+                    'White',
+                    'Other',
+                    'Unknown'],
+        validFunc: v => true
+    },
+    pbuilding: {
+        type: 'TEXT',
+        title: 'Primary Building',
+        required: true,
+        validFunc: v => v.length < 256
+    },
+    email: {
+        type: 'TEXT',
+        title: 'Email',
+        required: true,
+        validFunc: v => validateEmail(v)
+    },
+    phone: {
+        type: 'TEXT',
+        title: 'Phone',
+        placeholder: '(123) 456 7891',
+        required: false,
+        validFunc: v => {
+            try {
+                return PhoneNumberUtil.getInstance().isValidNumber(PhoneNumberUtil.getInstance().parse(v, 'US'));
+            } catch(err) {
+                return false;
+            }
+        }
+    },
+    addressLabel: {
+        type: 'LABEL',
+        title: 'Address'
+    },
+    street: {
+        type: 'TEXT',
+        title: 'Street',
+        required: true,
+        validFunc: v => v.length < 256
+    },
+    city: {
+        type: 'TEXT',
+        title: 'City',
+        required: true,
+        validFunc: v => v.length < 41
+    },
+    state: {
+        type: 'SELECT',
+        title: 'State',
+        required: true,
+        options: STATE_CODES,
+        validFunc: v => true
+    },
+    county: {
+        type: 'TEXT',
+        title: 'County',
+        required: false,
+        validFunc: v => v.length < 81
+    },
+    zip: {
+        type: 'TEXT',
+        title: 'Zip Code',
+        required: true,
+        validFunc: v => v.length < 21 && postcodeValidator(v, 'US')
+    },
+};
+
+class TextInput extends Component {
+    isValid = v => {
+        return (!this.props.required && v === '') || (v !== '' && this.props.validFunc(v));
+    }
     render() {
         return (
-            <div className='card'>
-                <div className='card-body'>
-                    <h5 className='card-title text-center'>New User Info</h5>
-                    <div className='row'>
-                        <div className='col'>
-                            <p className='lead'>
-                                Please make sure your name matches the name on your Cal ID card.
-                            </p>
-                        </div>
-                    </div>
-                    <form>
-                        <div className='form-group row required'>
-                            <label htmlFor='firstname' className='col-md-3 col-form-label'>First Name</label>
-                            <div className='col-md-9'>
-                                <input type='text' className='form-control' id='firstname' placeholder='firstname' onChange={this.props.updateFirstName} value={this.props.firstname} autoComplete={'off'} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
-                            </div>
-                        </div>
-                        <div className='form-group row required'>
-                            <label htmlFor='lastname' className='col-md-3 col-form-label'>Last Name</label>
-                            <div className='col-md-9'>
-                                <input type='text' className='form-control' id='lastname' placeholder='lastname' onChange={this.props.updateLastName} value={this.props.lastname} autoComplete={'off'} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
-                            </div>
-                        </div>
-                        <div className='form-group row required'>
-                            <label htmlFor='email' className='col-md-3 col-form-label'>Email</label>
-                            <div className='col-md-9'>
-                                <input type='email' className='form-control' id='email' placeholder='email' onChange={this.props.updateEmail} value={this.props.email} autoComplete={'off'} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
-                            </div>
-                        </div>
-                        <div className='form-group row'>
-                            <label htmlFor='phone' className='col-md-3 col-form-label'>Phone(mobile)</label>
-                            <div className='col-md-9'>
-                                <input type='text' className='form-control' id='phone' placeholder='(123) 456 7891' onChange={this.props.updatePhone} value={this.props.phone} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
-                            </div>
-                        </div>
-                    </form>
-                    <div className='row'>
-                        <div className='col-md-2'>
-                            <button className='btn btn-primary' onClick={this.props.saveUserData} disabled={!this.props.isValid}>Save</button>
-                        </div>
-                        <div className='col-md-9'>
-                            <p className='m-0'>By clicking 'Save' you agree to having your information stored in a secure server, and that it will be provided to UHS upon request.</p>
-                        </div>
-                    </div>
+            <div className={`form-group row ${this.props.required?'required':''}`}>
+                <label htmlFor={this.props.name} className='col-md-3 col-form-label'>{this.props.title}</label>
+                <div className='col-md-9'>
+                    <input type='text' className={`form-control ${(this.props.valid || this.props.value === '')?'':'border-danger'}`} id={this.props.name} placeholder={this.props.placeholder||this.props.title} onChange={e => this.props.update(e.target.value, this.isValid(e.target.value))} value={this.props.value} autoComplete='off' autoCorrect='off'/>
                 </div>
             </div>
         );
     }
 }
 
-class NewUser extends Component {
+TextInput.propTypes = {
+    required: PropTypes.bool,
+    name: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    valid: PropTypes.bool.isRequired,
+    value: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    update: PropTypes.func.isRequired,
+    validFunc: PropTypes.func.isRequired
+}
+
+class DateInput extends Component {
+    isDateSupported = () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'date');
+        input.setAttribute('value', 'a');
+        return (input.value !== 'a');
+    }
+    isValid = v => {
+        return (!this.props.required && v === '') || (moment.utc(v).isValid() && this.props.validFunc(v));
+    }
+    render() {
+        if(this.isDateSupported()) {
+            return (
+                <div className={`form-group row ${this.props.required?'required':''}`}>
+                    <label htmlFor={this.props.name} className='col-md-3 col-form-label'>{this.props.title}</label>
+                    <div className='col-md-9'>
+                        <input type='date' className={`form-control ${(this.props.valid || this.props.value === '')?'':'border-danger'}`} id={this.props.name} placeholder={this.props.placeholder||this.props.title} onChange={e => this.props.update(e.target.value, this.isValid(e.target.value))} value={this.props.value} autoComplete='off' autoCorrect='off'/>
+                    </div>
+                </div>
+            );
+        } else {
+            return (
+                <div className={`form-group row ${this.props.required?'required':''}`}>
+                    <label htmlFor={this.props.name} className='col-md-3 col-form-label'>{this.props.title}</label>
+                    <div className='col-md-9'>
+                        <input type='text' className={`form-control ${(this.props.valid || this.props.value === '')?'':'border-danger'}`} id={this.props.name} placeholder={this.props.placeholder||this.props.title} onChange={e => this.props.update(e.target.value, this.isValid(e.target.value))} value={this.props.value} autoComplete='off' autoCorrect='off'/>
+                    </div>
+                </div>
+            );
+        }
+    }
+}
+
+DateInput.propTypes = {
+    required: PropTypes.bool,
+    name: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    valid: PropTypes.bool.isRequired,
+    value: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    update: PropTypes.func.isRequired,
+    validFunc: PropTypes.func.isRequired
+}
+
+class SelectInput extends Component {
+    isValid = v => {
+        return (!this.props.required && v === '') || (this.props.options.includes(v) && this.props.validFunc(v));
+    }
+    render() {
+        const optionElements = [];
+        this.props.options.forEach(o => {
+            optionElements.push(<option key={o}>{o}</option>);
+        })
+        return (
+            <div className={`form-group row ${this.props.required?'required':''}`}>
+                <label htmlFor={this.props.name} className='col-md-3 col-form-label'>{this.props.title}</label>
+                <div className='col-md-9'>
+                    <select id={this.props.name} className={`form-control ${(this.props.valid || this.props.value === '')?'':'border-danger'}`} onChange={e => this.props.update(e.target.value, this.isValid(e.target.value))} value={this.props.value}>
+                        <option value=''>--none--</option>
+                        {optionElements}
+                    </select>
+                </div>
+            </div>
+        );
+    }
+}
+
+SelectInput.propTypes = {
+    required: PropTypes.bool,
+    name: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    valid: PropTypes.bool.isRequired,
+    value: PropTypes.string.isRequired,
+    placeholder: PropTypes.string,
+    options: PropTypes.array.isRequired,
+    update: PropTypes.func.isRequired,
+    validFunc: PropTypes.func.isRequired
+}
+
+export default class NewUser extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            firstname: props.auth.user.firstname || '',
-            lastname: props.auth.user.lastname || '',
-            email: props.auth.user.email || '',
-            phone: props.auth.user.phone || '',
-            alertemail: props.auth.user.alertemail,
-            alertphone: props.auth.user.alertphone,
+            user: {},
+            unauthed: false,
+            success: false,
+            showTerms: true,
+            questions: [null, null, null, null],
+            showNoReturnError: false,
+            showConsentError: false,
+            canReturn: false,
         };
-        this.state.isValid = this.validateState();
-    }
-    saveUserData = () => {
-        if(this.validateState()) {
-            this.props.updateUser({...this.state, phone: (this.state.phone === '') ? null : this.state.phone});
-            this.props.history.push('/screening');
+        for(var i in USER_INFO) {
+            this.state.user[i] = {
+                placeholder: USER_INFO[i].placeholder,
+                required: USER_INFO[i].required,
+                title: USER_INFO[i].title,
+                type: USER_INFO[i].type,
+                value: '',
+                options: USER_INFO[i].options,
+                valid: !USER_INFO[i].required,
+                validFunc: USER_INFO[i].validFunc
+            }
         }
     }
-    validateState = update => {
-        const stateCopy = {...this.state, ...update};
-        var isValidNumber = false;
-        try {
-            isValidNumber = PhoneNumberUtil.getInstance().isValidNumber(PhoneNumberUtil.getInstance().parse(stateCopy.phone, 'US'));
-            this.setState({alertphone: true});
-        } catch(err) {
-            isValidNumber = (stateCopy.phone === '');
-            this.setState({alertphone: false});
+
+    agree = () => {
+        this.setState({showTerms: false});
+        if(!this.state.questions[0]) {
+            return this.setState({showConsentError: true});
         }
-        const valid = stateCopy.firstname !== '' &&
-                stateCopy.lastname !== '' &&
-                /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(stateCopy.email) &&
-                isValidNumber;
-        return valid;
     }
-    updateFirstName = e => {
-        const update = {firstname: e.target.value};
-        update.isValid = this.validateState(update);
-        this.setState(update);
+    disagree = () => {
+        this.setState({showTerms: false});
+        window.open('/api/users/logout', '_self');
     }
-    updateLastName = e => {
-        const update = {lastname: e.target.value};
-        update.isValid = this.validateState(update);
-        this.setState(update);
+    submit = () => {
+        // create user
+        if(!this.state.canReturn) {
+            return this.setState({showNoReturnError: true});
+        }
+        const payload = {};
+        Object.keys(this.state.user).forEach(k => {
+            if(this.state.user[k].type === 'LABEL') {
+                return;
+            } else if(this.state.user[k].type === 'DATE') {
+                payload[k] = moment.utc(this.state.user[k].value).toDate();
+            } else {
+                payload[k] = this.state.user[k].value;
+            }
+        });
+        payload.questions = this.state.questions;
+        createUser(payload).then(res => {
+            if(!res) {
+                // Handle error!
+            } else {
+                this.setState({success: true});
+            }
+        });
     }
-    updateEmail = e => {
-        const update = {email: e.target.value};
-        update.isValid = this.validateState(update);
-        this.setState(update);
+
+    componentDidMount() {
+        loadUser().then(res => {
+            this.setState({unauthed: res.unauthed, success: res.success});
+        });
     }
-    updatePhone = e => {
-        const update = {phone: e.target.value};
-        update.isValid = this.validateState(update);
-        this.setState(update);
-    }
+
     render() {
-        if(this.props.auth.fullUser) return <Redirect to='/dashboard' />;
+        if(this.state.unauthed) {
+            return <Redirect to='/' />
+        } else if(this.state.success) {
+            return <Redirect to='/dashboard' />
+        }
+        var isValid = true;
+        const formItems=[];
+        Object.keys(this.state.user).forEach(k => {
+            if(!this.state.user[k].valid) {
+                isValid = false;
+            }
+            switch(this.state.user[k].type) {
+                case 'TEXT':
+                    formItems.push(<TextInput required={this.state.user[k].required}
+                                                title={this.state.user[k].title}
+                                                validFunc={this.state.user[k].validFunc}
+                                                valid={this.state.user[k].valid}
+                                                value={this.state.user[k].value}
+                                                update={(value, valid) => {
+                                                    const update = {...this.state.user};
+                                                    update[k].value = value;
+                                                    update[k].valid = valid;
+                                                    this.setState({user: update});
+                                                }}
+                                                placeholder={this.state.user[k].placeholder}
+                                                name={k}
+                                                key={k}/>);
+                    break;
+                case 'DATE':
+                    formItems.push(<DateInput required={this.state.user[k].required}
+                        title={this.state.user[k].title}
+                        validFunc={this.state.user[k].validFunc}
+                        valid={this.state.user[k].valid}
+                        value={this.state.user[k].value}
+                        update={(value, valid) => {
+                            const update = {...this.state.user};
+                            update[k].value = value;
+                            update[k].valid = valid;
+                            this.setState({user: update});
+                        }}
+                        placeholder={this.state.user[k].placeholder}
+                        name={k}
+                        key={k}/>);
+                    break;
+                case 'SELECT':
+                    formItems.push(<SelectInput required={this.state.user[k].required}
+                        title={this.state.user[k].title}
+                        validFunc={this.state.user[k].validFunc}
+                        valid={this.state.user[k].valid}
+                        value={this.state.user[k].value}
+                        update={(value, valid) => {
+                            const update = {...this.state.user};
+                            update[k].value = value;
+                            update[k].valid = valid;
+                            this.setState({user: update});
+                        }}
+                        options={this.state.user[k].options}
+                        placeholder={this.state.user[k].placeholder}
+                        name={k}
+                        key={k}/>);
+                    break;
+                case 'LABEL':
+                    formItems.push(<p className='lead w-100 text-center' key={k}>{this.state.user[k].title}</p>);
+                    break;
+            }
+        });
         return (
             <div>
-                <Navbar/>
-                <div style={{backgroundColor: '#eeeeee'}}>
+                <Navbar showLogout={true}/>
+                <div>
                     <div className='container'>
                         <div className='row justify-content-center'>
                             <div className='col-md-8 p-3'>
-                                <UserInfo firstname={this.state.firstname}
-                                            lastname={this.state.lastname}
-                                            email={this.state.email}
-                                            phone={this.state.phone}
-                                            alertemail={this.state.alertemail}
-                                            alertphone={this.state.alertphone}
-                                            isValid={this.state.isValid}
-                                            updateFirstName={this.updateFirstName}
-                                            updateLastName={this.updateLastName}
-                                            updateEmail={this.updateEmail}
-                                            updatePhone={this.updatePhone}
-                                            saveUserData={this.saveUserData}/>
+                                <div className='card'>
+                                    <div className='card-body'>
+                                        <h5 className='card-title text-center'>New User Info</h5>
+                                        <div className='row'>
+                                            <div className='col'>
+                                                <p className='lead'>
+                                                    Please make sure your name matches the name on your Cal ID card.
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <form>
+                                            {formItems}
+                                            <div className='form-group row'>
+                                                <label htmlFor='clearedToReturn' className='col-md-3 col-form-label'>
+                                                    I confirm that I have been approved to return to campus.
+                                                </label>
+                                                <input type='checkbox' onChange={e => this.setState({canReturn: !this.state.canReturn})} value={this.state.canReturn}/>
+                                            </div>
+                                        </form>
+                                        <div className='row'>
+                                            <div className='col-md-2'>
+                                                <button className='btn btn-primary' onClick={this.submit} disabled={!isValid}>Submit</button>
+                                            </div>
+                                            <div className='col-md-9'>
+                                                <p className='m-0'>
+                                                    By clicking “submit” I affirm that I have read and understood the above consent
+                                                    document, and have answered all questions truthfully and accurately.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                <ToSModal onAccept={this.agree}
+                            onClose={this.disagree}
+                            questions={this.state.questions}
+                            select={(i, v) => {
+                                console.log(i + ';' + v);
+                                const questions = this.state.questions;
+                                questions[i] = v;
+                                this.setState({questions: questions})}
+                            } show={this.state.showTerms}/>
+                <Modal show={this.state.showNoReturnError}>
+                    <Modal.Header>
+                        <Modal.Title>
+                            Alert
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>
+                            You must be approved for on-campus work to participate in this study. If you receive approval at a later
+                            date, you may complete this enrollment process again.
+                        </p>
+                        <p>
+                            If you have questions related to your health or receiving clinical COVID-19 testing, please see
+                            <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a>.
+                        </p>
+                        <p>
+                            If you have other questions related to this study, please contact the study coordinator, Alexander
+                            Ehrenberg, at <a href='mailto:igistudy@berkeley.edu'>igistudy@berkeley.edu</a>.
+                        </p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
+                    </Modal.Footer>
+                </Modal>
+                <Modal show={this.state.showConsentError} backdrop='static' keyboard={false} size='lg'>
+                    <Modal.Header>
+                        <Modal.Title>
+                            Alert
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>
+                            You have indicated that you do not wish to have your saliva samples and associated data to detect SARS-
+                            CoV-2 infection and be contacted with your results. As such, you are declining to enroll in this study. You
+                            may enroll at a later date if you change your mind or this was done in error.
+                        </p>
+                        <p>
+                            If you have questions related to your health or receiving clinical COVID-19 testing, please see
+                            <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a>.
+                        </p>
+                        <p>
+                            If you have other questions related to this study, please contact the study coordinator, Alexander
+                            Ehrenberg, at <a href='mailto:igistudy@berkeley.edu'>igistudy@berkeley.edu</a>.
+                        </p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         );
     }
 }
-
-const mapStateToProps = state => ({
-    auth: state.auth
-});
-
-export default connect(mapStateToProps, { updateUser })(NewUser);

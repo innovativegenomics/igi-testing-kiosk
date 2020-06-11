@@ -4,11 +4,14 @@ import qs from 'qs';
 
 import Navbar from '../navbar.component';
 
-class QRCode extends Component {
+export default class QRCode extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            img: ''
+            img: '',
+            authed: false,
+            loaded: false,
+            loading: false
         };
     }
     render() {
@@ -24,7 +27,7 @@ class QRCode extends Component {
         }
         return (
             <div style={{backgroundColor: '#eeeeee'}}>
-                <Navbar/>
+                <Navbar authed={this.state.authed}/>
                 <div className='container'>
                     <div className='row justify-content-center'>
                         <div className='col-md-5'>
@@ -36,5 +39,3 @@ class QRCode extends Component {
         );
     }
 }
-
-export default QRCode;
