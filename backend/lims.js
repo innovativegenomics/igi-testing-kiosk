@@ -28,7 +28,7 @@ const postNewPatient = (accesstoken, payload) => {
     }).catch(err => {
         console.error('error posting new patient ' + payload);
         console.error(err);
-        throw {error: err.response.data.errorCode};
+        throw {error: err.response.data[0].errorCode};
     });
 }
 
