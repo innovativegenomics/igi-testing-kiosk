@@ -49,3 +49,11 @@ module.exports.completeUserSlot = uid => {
         return false;
     });
 }
+
+/**
+ * 
+ * @param {Array<string>} terms - search terms which are separated by spaces
+ */
+module.exports.getAppointmentsByName = terms => {
+
+}
