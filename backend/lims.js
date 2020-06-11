@@ -2,7 +2,7 @@ const axios = require('axios');
 const moment = require('moment');
 
 const getNewAccessToken = refreshtoken => {
-    axios.post(require('./config/keys').lims.token, null, {
+    return axios.post(require('./config/keys').lims.token, null, {
                                                             params: {
                                                                 grant_type: 'refresh_token',
                                                                 client_id: require('./config/keys').lims.clientid,
