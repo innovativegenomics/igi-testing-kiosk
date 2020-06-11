@@ -35,14 +35,15 @@ module.exports.newPatient = (profile, accesstoken, refreshtoken) => {
     const payload = {
         payload: JSON.stringify({
             First_Name__c: profile.firstname,
-            Middle_Name__c: profile.middlename,
+            Middle_Name__c: profile.middlename || '',
             Last_Name__c: profile.lastname,
             Sex__c: profile.sex,
             DOB__c: moment.utc(profile.dob).format('YYYY-MM-DD HH:mm:ss'),
             Street__c: profile.street,
             City__c: profile.city,
             State_Province__c: profile.state,
-            County__c: profile.county,
+            Zip_Postal_Code__c: profile.zip,
+            County__c: profile.county || '',
             Email__c: profile.email,
             Phone__c: profile.phone,
             Primary_Location__c: profile.pbuilding
