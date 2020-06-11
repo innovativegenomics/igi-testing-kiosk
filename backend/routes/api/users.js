@@ -4,199 +4,131 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
 const Cas = require('../../cas');
-const { containsUser,
-        insertUser,
-        updateLastUserSignin,
-        checkAllUserInfoPresent,
-        getUserByID,
-        updateFirstName,
-        updateLastName,
-        updateEmail,
-        updatePhone,
-        updateAlertEmail,
-        updateAlertPhone } = require('../../database/userActions');
-const { insertScreening } = require('../../database/screeningActions');
+const { getUserExists, getUserProfile, setUserProfile, updateUserLastSignin, addLIMSPatient, setUserPatientID } = require('../../database/userActions');
+const { newUserSlot } = require('../../database/scheduleActions');
 
+const { scheduleSignupEmail } = require('../../scheduler');
+
+/**
+ * Logs in existing and new users
+ * If the users already exists, it directs them to the dashboard.
+ * If the user is new, it directs them to the new user page.
+ */
 router.get('/login', Cas.bounce, (request, response) => {
     const calnetid = request.session.cas_user;
-    return containsUser(calnetid).then(res => {
-        if(!res) {
-            // insert new user
-            if(require('../../config/keys').newusers) {
-                return insertUser(calnetid).then(res => {
-                    response.redirect('/newuser');
-                }).catch(err => {
-                    console.error(`Error inserting new user ${calnetid}`);
-                    console.error(err.stack);
-                    response.status(500);
-                    return err;
-                });
-            } else {
-                console.log(`user with calnetid ${calnetid} not authorized`);
-                request.session.destroy(err => {
-                    if(err) {
-                        console.error(`couldn't destroy session`);
-                        console.error(err);
-                    }
-                });
-                response.status(401).send('Unauthorized user');
-            }
-        } else {
-            // update last signin
-            return updateLastUserSignin(calnetid).then(res => {
-                // redirect to dashboard
-                return checkAllUserInfoPresent(calnetid);
-            }).then(res => {
-                if(res) {
-                    response.redirect('/dashboard');
-                } else {
-                    response.redirect('/newuser');
-                }
-            }).catch(err => {
-                console.error(`Error updating last signin date for user ${calnetid}`);
-                console.error(err.stack);
-                response.status(500);
-                return err;
+    getUserExists(calnetid).then(exists => {
+        if(exists) {
+            return updateUserLastSignin(calnetid).then(r => {
+                response.redirect('/dashboard');
             });
+        } else {
+            if(!require('../../config/keys').newusers) {
+                console.log(`user with calnetid ${calnetid} not authorized`);
+                request.session.destroy();
+                response.status(401).send('Unauthorized user');
+            } else {
+                response.redirect('/newuser');
+            }
         }
-    }).catch(err => {
-        console.error(`error checking if user ${calnetid} exists!`);
-        console.error(err.stack);
-        response.status(500);
     });
 });
 
+/**
+ * Logs out users
+ */
 router.get('/logout', Cas.logout);
 
-router.get('/get/profile', Cas.block, (request, response) => {
-    // returns a single row from the database
+/**
+ * Returns selected profile information for a given user
+ * request format: {}
+ * response format:
+ * {
+ *   success: true,
+ *   firstname: string,
+ *   middlename: string,
+ *   lastname: string,
+ *   email: string,
+ *   phone: string,
+ *   admin: Number
+ * }
+ */
+router.post('/get/profile', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
-    getUserByID(calnetid).then(res => {
-        response.json(res);
+    getUserProfile(calnetid).then(user => {
+        response.json({
+            success: true,
+            user: {
+                firstname: user.firstname,
+                middlename: user.middlename,
+                lastname: user.lastname,
+                email: user.email,
+                phone: user.phone,
+                admin: user.admin
+            }
+        });
     }).catch(err => {
-        response.status(500);
+        response.json({success: false});
     });
 });
 
-router.post('/get/is_dev_mode', (request, response) => {
-    response.json({devmode: (process.env.NODE_ENV !== 'production')});
-});
-
-// sets any of the following parameters:
-// - first or last name
-// - email
-// - phone
-// - alertemail
-// - alertphone
-router.post('/set/firstname', Cas.block, (request, response) => {
+/**
+ * Sets all the profile information for a user
+ * request format:
+ * {
+ *   firstname: string,
+ *   middlename: string,
+ *   lastname: string,
+ *   dob: moment,
+ *   street: string,
+ *   city: string,
+ *   state: string,
+ *   county: string,
+ *   zip: string,
+ *   sex: string,
+ *   race: string,
+ *   pbuilding: string,
+ *   email: string,
+ *   phone: string,
+ * }
+ * response format:
+ * {success: true|false}
+ */
+router.post('/set/profile', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
-    if(!request.body.firstname) {
-        return response.status(400).json({error: 'No firstname parameter'});
-    }
-    updateFirstName(calnetid, request.body.firstname).then(res => {
-        if(res) {
-            return response.status(200).json({});
-        }
-        return response.status(500);
-    }).catch(err => {
-        console.error(`Error setting firstname for ${calnetid}`);
-        console.error(err.stack);
-    });
-});
-router.post('/set/lastname', Cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    if(!request.body.lastname) {
-        return response.status(400).json({error: 'No lastname parameter'});
-    }
-    updateLastName(calnetid, request.body.lastname).then(res => {
-        if(res) {
-            return response.status(200).json({});
-        }
-        return response.status(500);
-    }).catch(err => {
-        console.error(`Error setting lastname for ${calnetid}`);
-        console.error(err.stack);
-    });
-});
-router.post('/set/email', Cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    if(!request.body.email) {
-        return response.status(400).json({error: 'No email parameter'});
-    }
-    if(!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(request.body.email)) {
-        return response.status(400).json({error: 'Email invalid'});
-    }
-    updateEmail(calnetid, request.body.email).then(res => {
-        if(res) {
-            return response.status(200).json({});
-        }
-        return response.status(500);
-    }).catch(err => {
-        console.error(`Error setting email for ${calnetid}`);
-        console.error(err.stack);
-    });
-});
-router.post('/set/phone', Cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    if(!request.body.phone) {
-        return response.status(400).json({error: 'No phone parameter'});
-    }
-    const phone = phoneUtil.parse(request.body.phone, 'US');
-    if(!phoneUtil.isValidNumber(phone)) {
-        return response.status(400).json({error: 'invalid phone number'});
-    }
-    updatePhone(calnetid, phoneUtil.format(phone, PNF.E164)).then(res => {
-        if(res) {
-            return response.status(200).json({});
-        }
-        return response.status(500);
-    }).catch(err => {
-        console.error(`Error setting phone for ${calnetid}`);
-        console.error(err.stack);
-    });
-});
-router.post('/set/alertemail', Cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    if(typeof request.body.alertemail !== 'boolean') {
-        return response.status(400).json({error: 'No alertemail parameter'});
-    }
-    updateAlertEmail(calnetid, request.body.alertemail).then(res => {
-        if(res) {
-            return response.status(200).json({});
-        }
-        return response.status(500);
-    }).catch(err => {
-        console.error(`Error setting alertemail for ${calnetid}`);
-        console.error(err.stack);
-    });
-});
-router.post('/set/alertphone', Cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    if(typeof request.body.alertphone !== 'boolean') {
-        return response.status(400).json({error: 'No alertphone parameter'});
-    }
-    updateAlertPhone(calnetid, request.body.alertphone).then(res => {
-        if(res) {
-            return response.status(200).json({});
-        }
-        return response.status(500);
-    }).catch(err => {
-        console.error(`Error setting alertphone for ${calnetid}`);
-        console.error(err.stack);
-        return response.status(500);
-    });
-});
-router.post('/submit_screening', Cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    insertScreening(calnetid, request.body).then(res => {
-        if(res) {
-            response.json({});
+    setUserProfile(calnetid, request.body).then(success => {
+        if(success.success) {
+            return newUserSlot(calnetid).then(r => {
+                if(r) {
+                    addLIMSPatient(request.body).then(patientid => {
+                        return setUserPatientID(calnetid, patientid);
+                    });
+                    scheduleSignupEmail(request.body.email);
+                }
+                response.json({success: r});
+            });
         } else {
-            response.status(400).json({error: 'could not insert screening'});
+            response.json({success: false});
         }
     }).catch(err => {
-        response.status(500);
+        console.error(err);
+        response.json({success: false});
     });
+});
+
+/**
+ * Callback URL for LIMs patient creation
+ * 
+ */
+router.post('/lims', (request, response) => {
+    console.log(request);
+    response.status(200).send();
+});
+
+/**
+ * Quick and dirty way for the frontend to know if the server is dev mode
+ */
+router.post('/get/devmode', (request, response) => {
+    response.json({devmode: (process.env.NODE_ENV !== 'production')});
 });
 
 module.exports = router;

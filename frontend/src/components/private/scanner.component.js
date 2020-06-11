@@ -1,66 +1,51 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import qs from 'qs';
 import moment from 'moment';
 
-import { getSlotInfo, finishAppointment } from '../../actions/adminActions';
+import { loadUser } from '../../actions/authActions';
+import { getSlot } from '../../actions/adminActions';
 
 import Navbar from '../navbar.component';
 
-class Scanner extends Component {
+export default class Scanner extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            auth: {
+                user: {},
+                loaded: false,
+                unauthed: false,
+                success: false
+            },
             errors: [],
-            appointmentslot: null,
-            location: '',
-            firstname: '',
-            lastname: '',
+            success: false,
             loaded: false,
-            processed: false,
+            slot: {}
         };
     }
-    processUser = uid => {
-        finishAppointment(uid).then(r => {
-            this.setState({processed: r});
-        });
+    componentDidMount() {
+        loadUser().then(res => this.setState({auth: {...res, loaded: true}}));
+        const uid = qs.parse(this.props.location.search, {ignoreQueryPrefix: true}).uid;
+        if(uid) {
+            getSlot(uid).then(res => this.setState({...res, loaded: true}));
+        } else {
+            alert('No UID');
+        }
     }
     render() {
-        const uid = qs.parse(this.props.location.search, {ignoreQueryPrefix: true}).uid;
-        if(this.props.auth.user.admin < 1) {
+        if(!this.state.auth.loaded) {
+            return <div>Loading...</div>;
+        } else if(this.state.auth.unauthed) {
+            return <Redirect to='/' />;
+        } else if(this.state.auth.user.admin < 1) {
             return <Redirect to='/dashboard' />;
+        } else if(!this.state.loaded) {
+            return <div>Loading...</div>;
+        } else if(!this.state.success) {
+            return <h1>Error loading content. Please reload the page.</h1>;
         }
-        if(!this.state.loaded) {
-            console.log('begin load');
-            if(uid) {
-                getSlotInfo(uid).then(res => {
-                    this.setState({
-                        ...res,
-                        loaded: true
-                    });
-                }).catch(err => {
-                    console.log('could not get appointment');
-                });
-            }
-            return (
-                <div style={{backgroundColor: '#eeeeee'}}>
-                    <Navbar/>
-                    <div className='container'>
-                        <div className='row justify-content-center'>
-                            <div className='col text-center'>
-                                <p className='display-4'>Scan Result</p>
-                            </div>
-                        </div>
-                        <div className='row justify-content-center'>
-                            <div className='col text-center'>
-                                <div className='h2 alert alert-warning'>Loading...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
+
         const hasErrors = this.state.errors.length > 0;
         var errorMessage = '';
         if(this.state.errors.includes('INVALID_UID')) {
@@ -68,17 +53,13 @@ class Scanner extends Component {
         } else if(this.state.errors.includes('COMPLETED')) {
             errorMessage = 'The user has already completed this appointment.';
         } else if(this.state.errors.includes('INACTIVE')) {
-            errorMessage = 'This appointment has been cancelled.';
+            errorMessage = 'This appointment has been cancelled, or was never made.';
         } else if(this.state.errors.includes('WRONG_TIME')) {
-            errorMessage = 'The user is here at the wrong time. Their slot begins ' + moment(this.state.appointmentslot).format('dddd, MMMM Do YYYY, h:mm:ss a');
-        } else if(this.state.errors.includes('NOT_SCREENED')) {
-            errorMessage = 'This user has not completed the screening questionaire in the past four hours.';
-        } else if(this.state.errors.includes('SCREENING_FAILED')) {
-            errorMessage = 'The user has answered Yes to at least one of the questions on the screening questionaire in the past four hours. Please direct them to the Tang center immediately.';
+            errorMessage = 'The user is here at the wrong time. Their slot begins ' + moment(this.state.slot.slot).format('dddd, MMMM Do YYYY, h:mm:ss a');
         }
         return (
-            <div style={{backgroundColor: '#eeeeee'}}>
-                <Navbar/>
+            <div>
+                <Navbar authed={true} admin={this.state.auth.user.admin}/>
                 <div className='container'>
                     <div className='row justify-content-center'>
                         <div className='col text-center'>
@@ -93,12 +74,6 @@ class Scanner extends Component {
                     <div className='row justify-content-center'>
                         <div className={`col-md-6 text-center ${hasErrors ? 'd-none' : ''}`}>
                             <div className='h3 font-weight-light alert alert-success'>Clear to proceed</div>
-                        </div>
-                    </div>
-                    <div className='row justify-content-center'>
-                        <div className={`col-md-6 text-center ${(this.props.auth.user.admin > 1 && !this.state.errors.includes('INVALID_UID')) ? '' : 'd-none'}`}>
-                            <button className='btn btn-lg btn-primary' onClick={e => this.processUser(uid)} disabled={this.state.processed}>User Processed</button>
-                            <div className={`alert alert-success ${this.state.processed ? '' : 'd-none'}`}>Done!</div>
                         </div>
                     </div>
                     <div className={`row justify-content-center ${hasErrors?'':'d-none'}`}>
@@ -118,9 +93,9 @@ class Scanner extends Component {
                     </div>
                     <div className='row justify-content-center'>
                         <div className='col-md-6 text-center'>
-                            <p className='lead'>Appointment slot: {moment(this.state.appointmentslot).format('dddd, MMMM Do YYYY, h:mm:ss a')}</p>
-                            <p className='lead'>Name: {this.state.firstname} {this.state.lastname}</p>
-                            <p className='lead'>Appointment location: {this.state.location}</p>
+                            <p className='lead'>Appointment slot: {this.state.slot.slot?moment(this.state.slot.slot).format('dddd, MMMM Do YYYY, h:mm:ss a'):''}</p>
+                            <p className='lead'>Name: {this.state.slot.firstname} {this.state.slot.lastname}</p>
+                            <p className='lead'>Appointment location: {this.state.slot.location}</p>
                         </div>
                     </div>
                 </div>
@@ -128,9 +103,3 @@ class Scanner extends Component {
         );
     }
 }
-
-const mapStateToProps = state => ({
-    auth: state.auth
-});
-
-export default connect(mapStateToProps)(Scanner);

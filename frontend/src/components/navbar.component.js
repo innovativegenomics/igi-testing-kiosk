@@ -1,17 +1,16 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
 import './navbar.css';
 import { Link } from 'react-router-dom';
 
 class LogoutLink extends Component {
     render() {
         return (
-            <a className={'btn btn-danger ' + ((this.props.visible) ? '' : 'invisible')} href={this.props.address}>CalNet Logout</a>
+            <a className={'btn btn-danger ' + ((this.props.visible) ? '' : 'd-none')} href={this.props.address}>CalNet Logout</a>
         );
     }
 }
 
-class Navbar extends Component {
+export default class Navbar extends Component {
     render() {
         return (
             <nav className='navbar navbar-expand-lg navbar-light navbar-bg p-3' style={{fontFamily: 'Raleway'}}>
@@ -24,27 +23,18 @@ class Navbar extends Component {
                         <li className='nav-item pl-5'>
                             <Link className='text-white lead' to='/about'>About</Link>
                         </li>
-                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'d-none'}`}>
+                        <li className={`nav-item pl-5 ${(this.props.authed)?'':'d-none'}`}>
                             <Link className='text-white lead' to='/dashboard'>Dashboard</Link>
                         </li>
-                        <li className={`nav-item pl-5 ${(this.props.fullUser)?'':'d-none'}`}>
-                            <Link className='text-white lead' to='/screening'>Screening</Link>
+                        <li className={`nav-item pl-5 ${(this.props.admin>0)?'':'d-none'}`}>
                         </li>
                     </ul>
                     <form className='form-inline'>
-                        <LogoutLink visible={this.props.logoutVisible} address='/api/users/logout' />
+                        <Link className={'btn btn-success mr-3 ' + ((this.props.admin>0) ? '' : 'd-none')} to='/admin'>Admin</Link>
+                        <LogoutLink visible={this.props.authed || this.props.showLogout} address='/api/users/logout' />
                     </form>
                 </div>
             </nav>
         );
     }
 }
-
-const mapStateToProps = (state, ownProps) => {
-    return {
-        logoutVisible: state.auth.isAuthenticated,
-        fullUser: state.auth.fullUser
-    };
-}
-
-export default connect(mapStateToProps)(Navbar);
