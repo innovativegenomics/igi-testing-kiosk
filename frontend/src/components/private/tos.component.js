@@ -1,6 +1,54 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
-export default class ToS extends Component {
+import { Modal, Button } from 'react-bootstrap';
+
+class Question extends Component {
+    render() {
+        return (
+            <div className='row pt-2 pb-2'>
+                <div className='col-md-10'>
+                    <p className='m-0'>{this.props.children}</p>
+                </div>
+                <div className='col-1'>
+                    <div className='btn-group'>
+                        <button className={`btn ${(this.props.selected===true)?'btn-primary':'btn-secondary'}`} onClick={e => this.props.select(true)}>Yes</button>
+                        <button className={`btn ${(this.props.selected===false)?'btn-primary':'btn-secondary'}`} onClick={e => this.props.select(false)}>No</button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+class ToSQuestions extends Component {
+    render() {
+        return (
+            <div>
+                <p className='lead'>Consent</p>
+                <Question selected={this.props.questions[0]} select={v => this.props.select(0, v)}>
+                    My saliva samples and associated data may be used to detect SARS-CoV-2 infection. I consent to
+                    be contacted with my results. These results are for research purposes only and will not become
+                    part of my medical health record.
+                </Question>
+                <Question selected={this.props.questions[1]} select={v => this.props.select(1, v)}>
+                    I consent for data I enter into this consent form, the study enrollment form, or this study’s
+                    scheduling system to be used for this research study on COVID-19.
+                </Question>
+                <Question selected={this.props.questions[2]} select={v => this.props.select(2, v)}>
+                    I consent for data I enter into this consent form, the study enrollment form, or this study's
+                    scheduling system to be used for future COVID-19 research by this group or others. Data will be
+                    de-identified prior to use in any future COVID-19 research by this group or others.
+                </Question>
+                <Question selected={this.props.questions[3]} select={v => this.props.select(3, v)}>
+                    Someone may contact me in the future to ask me to take part in more research.
+                </Question>
+            </div>
+        );
+    }
+}
+
+class ToS extends Component {
     render() {
         return (
             <div>
@@ -132,25 +180,38 @@ export default class ToS extends Component {
                     You will be emailed a copy of this consent form and Medical Research Subject’s Bill of Rights which will
                     also be available on this webpage.
                 </p>
-                <p>
-                    Please read each sentence below and think about your choice. After reading each sentence, select either
-                    the “yes” or “no” box. No matter what you decide, it will not affect your ability to return to campus.
-                </p>
-                <ol>
-                    <li>
-                        My saliva samples and associated data may be used to detect SARS-CoV-2 infection. I consent to
-                        be contacted with my results.
-                    </li>
-                    <li>
-                        I consent for data I enter into this consent form, the study enrollment form, or this study’s
-                        scheduling system to be used for research on COVID-19.
-                    </li>
-                    <li>
-                        Someone may contact me in the future to ask me to take part in more research such as the use
-                        of a mobile contact tracing application.
-                    </li>
-                </ol>
             </div>
         );
     }
+}
+
+export default class ToSModal extends Component {
+    constructor(props) {
+        super(props);
+    }
+    render() {
+        return (
+            <Modal show={this.props.show} onHide={this.props.onClose} backdrop='static' keyboard={false} size='lg'>
+                <Modal.Header>
+                    <Modal.Title>
+                        Consent to Participate in IGI Healthy Campus Initiative
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <ToS />
+                    <ToSQuestions questions={this.props.questions} select={this.props.select}/>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant='primary' onClick={this.props.onAccept} disabled={this.props.questions.includes(null)}>I Agree</Button>
+                    <Button variant='secondary' onClick={this.props.onClose}>Disagree</Button>
+                </Modal.Footer>
+            </Modal>
+        );
+    }
+}
+
+ToSModal.propTypes = {
+    show: PropTypes.bool.isRequired,
+    onClose: PropTypes.func.isRequired,
+    onAccept: PropTypes.func.isRequired
 }

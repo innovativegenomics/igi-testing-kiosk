@@ -37,6 +37,7 @@ const USER_TABLE_CREATE = `create table users(firstname text not null,
                                            email text unique not null,
                                            phone text unique null,
                                            patientid text unique null,
+                                           questions bool[4] not null,
                                            datejoined timestamptz not null default now(),
                                            lastsignin timestamptz not null default now(),
                                            admin integer not null default 0);`;
@@ -105,8 +106,9 @@ const SET_USER_PROFILE = `insert into users(firstname,
                                             race,
                                             pbuilding,
                                             email,
-                                            phone) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-                                                   $11, $12, $13, $14, $15)`;
+                                            phone,
+                                            questions) values($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+                                                   $11, $12, $13, $14, $15, $16)`;
 module.exports.setUserProfile = (id, profile) => {
     return pool.query(SET_USER_PROFILE, [profile.firstname,
                                         profile.middlename,
@@ -122,7 +124,8 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.race,
                                         profile.pbuilding,
                                         profile.email,
-                                        profile.phone]).then(res => {
+                                        profile.phone,
+                                        profile.questions]).then(res => {
         return {success: res.rowCount>0};
     }).catch(err => {
         console.error(err);

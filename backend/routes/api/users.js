@@ -96,7 +96,7 @@ router.post('/get/profile', Cas.block, (request, response) => {
 router.post('/set/profile', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     setUserProfile(calnetid, request.body).then(success => {
-        if(success) {
+        if(success.success) {
             return newUserSlot(calnetid).then(r => {
                 if(r) {
                     addLIMSPatient(request.body).then(patientid => {

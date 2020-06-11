@@ -6,10 +6,11 @@ import { postcodeValidator } from 'postcode-validator';
 import moment from 'moment';
 
 import Navbar from '../navbar.component';
-import ToS from './tos.component';
+import ToSModal from './tos.component';
 
 import { loadUser, createUser } from '../../actions/authActions';
 import { Redirect } from 'react-router-dom';
+import { Modal, Button } from 'react-bootstrap';
 
 const STATE_CODES = [
     'AL','AK','AS','AZ','AR','CA','CO','CT','DE','DC','FM','FL','GA',
@@ -127,32 +128,6 @@ const USER_INFO = {
     },
 };
 
-class ToSModal extends Component {
-    render() {
-        return (
-            <div className='modal fade' id='ToSModal' tabIndex='-1' role='dialog' aria-labelledby='exampleModalLabel' aria-hidden='true'>
-                <div className='modal-dialog modal-lg' role='document'>
-                    <div className='modal-content'>
-                        <div className='modal-header'>
-                            <h5 className='modal-title' id='exampleModalLabel'>Consent to Participate in IGI Healthy Campus Initiative</h5>
-                            <button type='button' className='close' data-dismiss='modal' aria-label='Close'>
-                                <span aria-hidden='true'>&times;</span>
-                            </button>
-                        </div>
-                        <div className='modal-body'>
-                            <ToS />
-                        </div>
-                        <div className='modal-footer'>
-                            <button type='button' className='btn btn-secondary' data-dismiss='modal'>Disagree</button>
-                            <button type='button' className='btn btn-primary' data-dismiss='modal' onClick={e => this.props.agree()}>I Agree</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-}
-
 class TextInput extends Component {
     isValid = v => {
         return (!this.props.required && v === '') || (v !== '' && this.props.validFunc(v));
@@ -265,7 +240,12 @@ export default class NewUser extends Component {
         this.state = {
             user: {},
             unauthed: false,
-            success: false
+            success: false,
+            showTerms: true,
+            questions: [null, null, null, null],
+            showNoReturnError: false,
+            showConsentError: false,
+            canReturn: false,
         };
         for(var i in USER_INFO) {
             this.state.user[i] = {
@@ -282,7 +262,20 @@ export default class NewUser extends Component {
     }
 
     agree = () => {
-        // create user!
+        this.setState({showTerms: false});
+        if(!this.state.questions[0]) {
+            return this.setState({showConsentError: true});
+        }
+    }
+    disagree = () => {
+        this.setState({showTerms: false});
+        window.open('/api/users/logout', '_self');
+    }
+    submit = () => {
+        // create user
+        if(!this.state.canReturn) {
+            return this.setState({showNoReturnError: true});
+        }
         const payload = {};
         Object.keys(this.state.user).forEach(k => {
             if(this.state.user[k].type === 'LABEL') {
@@ -293,6 +286,7 @@ export default class NewUser extends Component {
                 payload[k] = this.state.user[k].value;
             }
         });
+        payload.questions = this.state.questions;
         createUser(payload).then(res => {
             if(!res) {
                 // Handle error!
@@ -393,14 +387,23 @@ export default class NewUser extends Component {
                                             </div>
                                         </div>
                                         <form>
-                                        {formItems}
+                                            {formItems}
+                                            <div className='form-group row'>
+                                                <label htmlFor='clearedToReturn' className='col-md-3 col-form-label'>
+                                                    I confirm that I have been approved to return to campus.
+                                                </label>
+                                                <input type='checkbox' onChange={e => this.setState({canReturn: !this.state.canReturn})} value={this.state.canReturn}/>
+                                            </div>
                                         </form>
                                         <div className='row'>
                                             <div className='col-md-2'>
-                                                <button className='btn btn-primary' data-toggle='modal' data-target='#ToSModal' disabled={!isValid}>Save</button>
+                                                <button className='btn btn-primary' onClick={this.submit} disabled={!isValid}>Submit</button>
                                             </div>
                                             <div className='col-md-9'>
-                                                <p className='m-0'>By clicking 'Save' you agree to having your information stored in a secure server, and that it will be provided to UHS upon request.</p>
+                                                <p className='m-0'>
+                                                    By clicking “submit” I affirm that I have read and understood the above consent
+                                                    document, and have answered all questions truthfully and accurately.
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -409,7 +412,64 @@ export default class NewUser extends Component {
                         </div>
                     </div>
                 </div>
-                <ToSModal agree={this.agree} />
+                <ToSModal onAccept={this.agree}
+                            onClose={this.disagree}
+                            questions={this.state.questions}
+                            select={(i, v) => {
+                                console.log(i + ';' + v);
+                                const questions = this.state.questions;
+                                questions[i] = v;
+                                this.setState({questions: questions})}
+                            } show={this.state.showTerms}/>
+                <Modal show={this.state.showNoReturnError}>
+                    <Modal.Header>
+                        <Modal.Title>
+                            Alert
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>
+                            You must be approved for on-campus work to participate in this study. If you receive approval at a later
+                            date, you may complete this enrollment process again.
+                        </p>
+                        <p>
+                            If you have questions related to your health or receiving clinical COVID-19 testing, please see
+                            <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a>.
+                        </p>
+                        <p>
+                            If you have other questions related to this study, please contact the study coordinator, Alexander
+                            Ehrenberg, at <a href='mailto:igistudy@berkeley.edu'>igistudy@berkeley.edu</a>.
+                        </p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
+                    </Modal.Footer>
+                </Modal>
+                <Modal show={this.state.showConsentError} backdrop='static' keyboard={false} size='lg'>
+                    <Modal.Header>
+                        <Modal.Title>
+                            Alert
+                        </Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>
+                            You have indicated that you do not wish to have your saliva samples and associated data to detect SARS-
+                            CoV-2 infection and be contacted with your results. As such, you are declining to enroll in this study. You
+                            may enroll at a later date if you change your mind or this was done in error.
+                        </p>
+                        <p>
+                            If you have questions related to your health or receiving clinical COVID-19 testing, please see
+                            <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a>.
+                        </p>
+                        <p>
+                            If you have other questions related to this study, please contact the study coordinator, Alexander
+                            Ehrenberg, at <a href='mailto:igistudy@berkeley.edu'>igistudy@berkeley.edu</a>.
+                        </p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
+                    </Modal.Footer>
+                </Modal>
             </div>
         );
     }
