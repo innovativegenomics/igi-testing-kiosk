@@ -53,9 +53,9 @@ router.post('/set/slot', Cas.block, (request, response) => {
     setUserSlot(calnetid, moment(request.body.slot), request.body.location).then(res => {
         return getUserSlot(calnetid).then(slot => {
             getUserProfile(calnetid).then(user => {
-                scheduleSlotConfirmEmail(user.email, slot.uid, moment(slot.slot).format('DDDD'), moment(slot.slot).format('h:mm A'), moment(slot.slot).add(Settings().increment, 'minute').format('h:mm A'), slot.location, Settings().locationlinks[Settings().locations.indexOf(slot.location)]);
+                scheduleSlotConfirmEmail(user.email, slot.uid, moment(slot.slot).format('dddd'), moment(slot.slot).format('h:mm A'), moment(slot.slot).add(Settings().increment, 'minute').format('h:mm A'), slot.location, Settings().locationlinks[Settings().locations.indexOf(slot.location)]);
                 if(user.phone) {
-                    scheduleSlotConfirmText(user.phone, slot.uid, moment(slot.slot).format('DDDD'), moment(slot.slot).format('h:mm A'), moment(slot.slot).add(Settings().increment, 'minute').format('h:mm A'), slot.location, Settings().locationlinks[Settings().locations.indexOf(slot.location)]);
+                    scheduleSlotConfirmText(user.phone, slot.uid, moment(slot.slot).format('dddd'), moment(slot.slot).format('h:mm A'), moment(slot.slot).add(Settings().increment, 'minute').format('h:mm A'), slot.location, Settings().locationlinks[Settings().locations.indexOf(slot.location)]);
                 }
             }).catch(err => {
                 console.error('unable to send confirmation messages for user ' + calnetid);
