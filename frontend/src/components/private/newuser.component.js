@@ -117,7 +117,7 @@ const USER_INFO = {
     county: {
         type: 'TEXT',
         title: 'County',
-        required: false,
+        required: true,
         validFunc: v => v.length < 81
     },
     zip: {
