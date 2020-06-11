@@ -51,4 +51,21 @@ router.post('/get/slot', Cas.block, (request, response) => {
     });
 });
 
+router.post('/search/appointments', Cas.block, (request, response) => {
+    const calnetid = request.session.cas_user;
+    getUserAdmin(calnetid).then(level => {
+        if(level > 0) {
+            const terms = request.body.term.split(' ');
+            return getAppointmentsByName(terms).then(res => {
+                
+            });
+        } else {
+            response.send({success: false});
+        }
+    }).catch(err => {
+        console.error('unable to get slot details ' + request.body.uid);
+        response.send({success: false});
+    });
+});
+
 module.exports = router;
