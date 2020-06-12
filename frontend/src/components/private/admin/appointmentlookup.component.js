@@ -32,7 +32,7 @@ export default class AppointmentLookup extends Component {
         const resultRows = [];
         this.state.results.forEach((v, i) => {
             resultRows.push(<tr key={i}>
-                <td>{i}</td>
+                <td>{i+1}</td>
                 <td>{v.calnetid}</td>
                 <td>{`${v.firstname} ${v.lastname}`}</td>
                 <td>{moment(v.slot).format('dddd, MMMM D h:mm A')}</td>
