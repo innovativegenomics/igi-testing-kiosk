@@ -37,6 +37,7 @@ export default class AppointmentLookup extends Component {
                 <td>{`${v.firstname} ${v.lastname}`}</td>
                 <td>{moment(v.slot).format('dddd, MMMM D h:mm A')}</td>
                 <td>{v.location}</td>
+                <td>{v.completed?moment(v.completed).format('dddd, MMMM D h:mm A'):''}</td>
             </tr>);
         });
         return (
@@ -57,6 +58,7 @@ export default class AppointmentLookup extends Component {
                             <th scope='col'>Name</th>
                             <th scope='col'>Appointment Slot</th>
                             <th scope='col'>Appointment Location</th>
+                            <th scope='col'>Appointment Completed</th>
                         </tr>
                     </thead>
                     <tbody>

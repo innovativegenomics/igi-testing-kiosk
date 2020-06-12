@@ -59,7 +59,8 @@ const SEARCH_BY_TERM = `select
                             u.firstname,
                             u.lastname,
                             s.slot,
-                            s.location 
+                            s.location,
+                            s.completed
                         from 
                             users u,schedule s 
                         inner join 
@@ -74,7 +75,7 @@ const SEARCH_BY_TERM = `select
                         where 
                             u.calnetid=s.calnetid
                         and 
-                            lower(concat(u.firstname,' ',u.lastname)) like concat(lower($1),'%')
+                            (lower(u.lastname) like concat(lower($1),'%') or lower(u.firstname) like concat(lower($1),'%'))
                         order by
                             s.location,
                             s.slot`;
