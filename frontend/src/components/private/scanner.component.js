@@ -20,6 +20,7 @@ export default class Scanner extends Component {
             },
             errors: [],
             success: false,
+            completed: false,
             loaded: false,
             slot: {}
         };
@@ -67,12 +68,12 @@ export default class Scanner extends Component {
                         </div>
                     </div>
                     <div className='row justify-content-center'>
-                        <div className={`col-md-6 text-center ${hasErrors ? '' : 'd-none'}`}>
+                        <div className={`col-md-6 text-center ${this.state.completed? 'd-none' : ''}`}>
                             <div className='h3 font-weight-light alert alert-danger'>Not clear to proceed</div>
                         </div>
                     </div>
                     <div className='row justify-content-center'>
-                        <div className={`col-md-6 text-center ${hasErrors ? 'd-none' : ''}`}>
+                        <div className={`col-md-6 text-center ${this.state.completed? '' : 'd-none'}`}>
                             <div className='h3 font-weight-light alert alert-success'>Clear to proceed</div>
                         </div>
                     </div>
