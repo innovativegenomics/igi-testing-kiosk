@@ -114,7 +114,7 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.middlename,
                                         profile.lastname,
                                         id,
-                                        moment.utc(profile.dob).toDate(),
+                                        moment.utc(profile.dob).format('YYYY-MM-DD'),
                                         profile.street,
                                         profile.city,
                                         profile.state,

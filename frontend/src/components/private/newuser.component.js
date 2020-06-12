@@ -281,7 +281,8 @@ export default class NewUser extends Component {
             if(this.state.user[k].type === 'LABEL') {
                 return;
             } else if(this.state.user[k].type === 'DATE') {
-                payload[k] = moment.utc(this.state.user[k].value).toDate();
+                console.log(this.state.user[k].value);
+                payload[k] = moment.utc(this.state.user[k].value).set('hour', 0).set('minute', 0).set('second', 0);
             } else {
                 payload[k] = this.state.user[k].value;
             }
