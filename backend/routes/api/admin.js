@@ -7,7 +7,7 @@ const Cas = require('../../cas');
 const { Settings } = require('../../database/settingsActions');
 
 const { getUserProfile } = require('../../database/userActions');
-const { getUserAdmin, getSlotDetails, completeUserSlot } = require('../../database/adminActions');
+const { getUserAdmin, getSlotDetails, completeUserSlot, getAppointmentsByName } = require('../../database/adminActions');
 
 /**
  * Returns the slot details for a given UID
@@ -60,15 +60,16 @@ router.post('/search/appointments', Cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     getUserAdmin(calnetid).then(level => {
         if(level > 0) {
-            const terms = request.body.term.split(' ');
-            return getAppointmentsByName(terms).then(res => {
-                
+            const term = request.body.term;
+            return getAppointmentsByName(term).then(res => {
+                response.send({success: true, results: res});
             });
         } else {
             response.send({success: false});
         }
     }).catch(err => {
-        console.error('unable to get slot details ' + request.body.uid);
+        console.error('unable to get slot details ');
+        console.error(err);
         response.send({success: false});
     });
 });
