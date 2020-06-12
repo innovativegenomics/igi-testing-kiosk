@@ -49,3 +49,41 @@ module.exports.completeUserSlot = uid => {
         return false;
     });
 }
+
+/**
+ * 
+ * @param {Array<string>} terms - search terms which are separated by spaces
+ */
+const SEARCH_BY_TERM = `select 
+                            u.calnetid,
+                            u.firstname,
+                            u.lastname,
+                            s.slot,
+                            s.location 
+                        from 
+                            users u,schedule s 
+                        inner join 
+                            (select calnetid,
+                                max(slot) as MaxDateTime 
+                            from schedule 
+                            group by calnetid) groupeds 
+                        on 
+                            s.calnetid=groupeds.calnetid 
+                        and 
+                            s.slot=groupeds.MaxDateTime 
+                        where 
+                            u.calnetid=s.calnetid
+                        and 
+                            lower(concat(u.firstname,' ',u.lastname)) like concat(lower($1),'%')
+                        order by
+                            s.location,
+                            s.slot`;
+module.exports.getAppointmentsByName = term => {
+    return pool.query(SEARCH_BY_TERM, [term]).then(res => {
+        return res.rows;
+    }).catch(err => {
+        console.error('error searching user appoitnments by name');
+        console.error(err);
+        return [];
+    });
+}
