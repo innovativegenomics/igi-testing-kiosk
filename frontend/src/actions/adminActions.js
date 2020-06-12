@@ -14,3 +14,13 @@ export const getSlot = uid => {
         return {success: false};
     });
 }
+
+export const getAppointmentsByName = term => {
+    return axios.post('/api/admin/search/appointments', {term: term}).then(res => {
+        return {success: res.data.success, results: res.data.results};
+    }).catch(err => {
+        console.error('error getting appointment search results');
+        console.error(err);
+        return {success: false, results: []};
+    });
+}
