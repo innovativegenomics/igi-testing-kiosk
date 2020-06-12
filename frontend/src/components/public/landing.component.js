@@ -3,6 +3,7 @@ import axios from 'axios';
 import './landing.css';
 
 import igiLogo from '../../media/igi_logo.png';
+import igiFast from '../../media/IGI-FAST.png';
 import berkeleySeal from '../../media/berkeley_seal.png';
 import Navbar from '../navbar.component';
 
@@ -37,7 +38,7 @@ export default class Landing extends Component {
             <div>
                 <Navbar/>
                 <div className='container'>
-                    <div className='row justify-content-center mt-3 mb-2'>
+                    {/* <div className='row justify-content-center mt-3 mb-2'>
                         <div className='col-5 border-right border-dark'>
                             <div className='pl-0 pr-4 mt-3 ml-0 mr-0 text-right'>
                                 <img src={igiLogo} className='logo-image' alt=''/>
@@ -47,6 +48,11 @@ export default class Landing extends Component {
                             <div className='pl-3 pr-0 mt-3 ml-0 mr-0'>
                                 <img src={berkeleySeal} className='logo-image' alt=''/>
                             </div>
+                        </div>
+                    </div> */}
+                    <div className='row justify-content-center'>
+                        <div className='col'>
+                            <img src={igiFast} className='w-100' alt='IGI FAST'/>
                         </div>
                     </div>
                     <div className='row justify-content-center'>
@@ -61,7 +67,7 @@ export default class Landing extends Component {
                             <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({devuser: e.target.value})} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
                         </div>
                     </div>
-                    <div className='row justify-content-center'>
+                    <div className='row justify-content-center mb-2'>
                         <div className='col text-center'>
                             <button className='btn btn-lg btn-primary text-light' onClick={this.handleLoginButton}>
                                 Login with CalNet ID
