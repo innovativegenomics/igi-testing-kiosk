@@ -34,8 +34,8 @@ const USER_TABLE_CREATE = `create table users(firstname text not null,
                                            sex text not null,
                                            race text not null,
                                            pbuilding text not null,
-                                           email text unique not null,
-                                           phone text unique null,
+                                           email text not null,
+                                           phone text null,
                                            patientid text unique null,
                                            questions bool[4] not null,
                                            datejoined timestamptz not null default now(),
@@ -124,7 +124,7 @@ module.exports.setUserProfile = (id, profile) => {
                                         profile.race,
                                         profile.pbuilding,
                                         profile.email,
-                                        profile.phone,
+                                        (profile.phone===''?null:profile.phone),
                                         profile.questions]).then(res => {
         return {success: res.rowCount>0};
     }).catch(err => {
