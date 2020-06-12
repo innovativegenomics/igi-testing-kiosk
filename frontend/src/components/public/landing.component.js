@@ -57,8 +57,8 @@ export default class Landing extends Component {
                     </div>
                     <div className='row justify-content-center'>
                         <div className='col'>
-                            <p className='display-4 font-weight-light text-center'>
-                                IGI Healthy Campus | Berkeley
+                            <p className='h2 font-weight-light text-center'>
+                                IGI Free Asymptomatic Saliva Test
                             </p>
                         </div>
                     </div>
