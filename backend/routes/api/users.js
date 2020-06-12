@@ -1,4 +1,5 @@
 const express = require("express");
+const moment = require('moment');
 const router = express.Router();
 const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
@@ -99,6 +100,7 @@ router.post('/set/profile', Cas.block, (request, response) => {
         if(success.success) {
             return newUserSlot(calnetid).then(r => {
                 if(r) {
+                    console.log(moment.utc(request.body.dob).format('YYYY-MM-DD HH:mm:ss'));
                     addLIMSPatient(request.body).then(patientid => {
                         return setUserPatientID(calnetid, patientid);
                     });
