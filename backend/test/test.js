@@ -74,10 +74,11 @@ describe('userActions', () => {
                                                          state: 'CA',
                                                          zip: '94705',
                                                          sex: 'Male',
-                                                         race: 'Asian',
+                                                         race: 'Unknown',
                                                          pbuilding: 'Stanley hall',
                                                          email: `example${res}@example.com`,
-                                                         county: ''
+                                                         county: '',
+                                                         questions: [true, true, true, true]
                                                         }).then(r => {
                         return newUserSlot(`user${res}`).then(r => {
                             console.log(res + ' : ' + (Date.now()-now) + 'ms');

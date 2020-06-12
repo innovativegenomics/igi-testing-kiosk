@@ -74,7 +74,10 @@ const SEARCH_BY_TERM = `select
                         where 
                             u.calnetid=s.calnetid
                         and 
-                            lower(concat(u.firstname,u.lastname)) like concat(lower($1),'%')`;
+                            lower(concat(u.firstname,' ',u.lastname)) like concat(lower($1),'%')
+                        order by
+                            s.location,
+                            s.slot`;
 module.exports.getAppointmentsByName = term => {
     return pool.query(SEARCH_BY_TERM, [term]).then(res => {
         return res.rows;

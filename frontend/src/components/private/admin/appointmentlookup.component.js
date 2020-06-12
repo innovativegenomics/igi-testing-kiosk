@@ -10,15 +10,22 @@ export default class AppointmentLookup extends Component {
             results: [],
             success: false,
             sortBy: 'Appointment Date',
-            search: ''
+            search: '',
+            loading: false,
         };
     }
     updateSearch = v => {
-        this.setState({search: v});
+        if(!this.state.loading) {
+            getAppointmentsByName(v).then(res => {
+                this.setState({...res, loading: false});
+            });
+        }
+        this.setState({search: v, loading: true});
     }
     componentDidMount() {
+        this.setState({loading: true});
         getAppointmentsByName('').then(res => {
-            this.setState({...res});
+            this.setState({...res, loading: false});
         });
     }
     render() {
