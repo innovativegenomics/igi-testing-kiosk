@@ -56,6 +56,7 @@ module.exports.newPatient = (profile, accesstoken, refreshtoken) => {
     };
     return postNewPatient(accesstoken, payload).catch(err => {
         console.error('CATCHING ERROR FROM PATIENT ATTEMPT');
+        console.error(err);
         if(err.error === 'INVALID_SESSION_ID') {
             console.error('TRYING TO GET NEW ACCESS TOKEN');
             return getNewAccessToken(refreshtoken).then(res => {

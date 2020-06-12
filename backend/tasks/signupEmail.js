@@ -15,9 +15,9 @@ module.exports = (payload, helpers) => {
     return transport.sendMail({
         from: config.email.user,
         to: email,
-        subject: `IGI Healthy Campus Initiative`,
+        subject: `IGI Healthy Campus Study`,
         // text: 'Please enable html messages to view this email',
-        html: `<h3>Thank you for signing up for the IGI Healthy Campus Initiative!</h3>
+        html: `<h3>Thank you for signing up for the IGI Healthy Campus Study!</h3>
                 <p>You can read more about our program on our website <a href='https://igistudy.berkeley.edu/about'>here</a>.
                 Attached to this email is the informed consent and bill of rights for this study. The study info sheet is also attached.</p>`,
         attachments: [
