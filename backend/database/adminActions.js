@@ -20,6 +20,38 @@ const getAbort = (client) => {
     }
 }
 
+const ADMIN_TABLE_CREATE = `create table admin(name text not null,
+    calnetid text unique null,
+    email text not null,
+    phone text null,
+    datejoined timestamptz not null default now(),
+    lastsignin timestamptz not null default now(),
+    level integer not null,
+    uid text not null)`;
+const ADMIN_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='admin')`;
+module.exports.verifyAdminTable = () => {
+    return pool.connect().then(client => {
+        const abort = getAbort(client);
+        return client.query('begin').then(res => {
+            return client.query(ADMIN_TABLE_EXISTS);
+        }).then(res => {
+            if(!res.rows[0].exists) {
+                console.log('Admin table doesn\'t exit, creating one!');
+                return client.query(ADMIN_TABLE_CREATE);
+            }
+            return;
+        }).then(res => {
+            return client.query('end transaction');
+        }).then(res => {
+            client.release(); // release client!!!
+        }).catch(err => {
+            return abort(err).then((err, res) => {
+                return err;
+            });
+        });
+    });
+}
+
 module.exports.getUserAdmin = id => {
     return pool.query('select admin from users where calnetid=$1', [id]).then(res => {
         return res.rows[0].admin;
