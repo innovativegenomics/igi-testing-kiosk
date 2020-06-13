@@ -39,8 +39,7 @@ const USER_TABLE_CREATE = `create table users(firstname text not null,
                                            patientid text unique null,
                                            questions bool[4] not null,
                                            datejoined timestamptz not null default now(),
-                                           lastsignin timestamptz not null default now(),
-                                           admin integer not null default 0);`;
+                                           lastsignin timestamptz not null default now());`;
 const LIMS_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='lims')`;
 const USER_TABLE_EXISTS = `select exists (select from information_schema.tables where table_name='users');`;
 module.exports.verifyUserTable = () => {

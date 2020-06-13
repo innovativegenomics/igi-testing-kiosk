@@ -103,71 +103,71 @@ module.exports.getAdminLevel = calnetid => {
 
 
 
-module.exports.getUserAdmin = id => {
-    return pool.query('select admin from users where calnetid=$1', [id]).then(res => {
-        return res.rows[0].admin;
-    }).catch(err => {
-        console.error('Error getting user admin ' + id);
-        console.error(err);
-        throw err;
-    });
-}
+// module.exports.getUserAdmin = id => {
+//     return pool.query('select admin from users where calnetid=$1', [id]).then(res => {
+//         return res.rows[0].admin;
+//     }).catch(err => {
+//         console.error('Error getting user admin ' + id);
+//         console.error(err);
+//         throw err;
+//     });
+// }
 
-module.exports.getSlotDetails = uid => {
-    return pool.query('select * from schedule where uid=$1', [uid]).then(res => {
-        if(res.rowCount < 1)
-            throw new Error('Invalid UID');
-        else {
-            return res.rows[0];
-        }
-    });
-}
+// module.exports.getSlotDetails = uid => {
+//     return pool.query('select * from schedule where uid=$1', [uid]).then(res => {
+//         if(res.rowCount < 1)
+//             throw new Error('Invalid UID');
+//         else {
+//             return res.rows[0];
+//         }
+//     });
+// }
 
-module.exports.completeUserSlot = uid => {
-    return pool.query('update schedule set completed=now() where uid=$1', [uid]).then(res => {
-        return res.rowCount > 0;
-    }).catch(err => {
-        console.error('error completing slot with uid ' + uid);
-        console.error(err);
-        return false;
-    });
-}
+// module.exports.completeUserSlot = uid => {
+//     return pool.query('update schedule set completed=now() where uid=$1', [uid]).then(res => {
+//         return res.rowCount > 0;
+//     }).catch(err => {
+//         console.error('error completing slot with uid ' + uid);
+//         console.error(err);
+//         return false;
+//     });
+// }
 
-/**
- * 
- * @param {Array<string>} terms - search terms which are separated by spaces
- */
-const SEARCH_BY_TERM = `select 
-                            u.calnetid,
-                            u.firstname,
-                            u.lastname,
-                            s.slot,
-                            s.location,
-                            s.completed
-                        from 
-                            users u,schedule s 
-                        inner join 
-                            (select calnetid,
-                                max(slot) as MaxDateTime 
-                            from schedule 
-                            group by calnetid) groupeds 
-                        on 
-                            s.calnetid=groupeds.calnetid 
-                        and 
-                            s.slot=groupeds.MaxDateTime 
-                        where 
-                            u.calnetid=s.calnetid
-                        and 
-                            (lower(u.lastname) like concat(lower($1),'%') or lower(u.firstname) like concat(lower($1),'%'))
-                        order by
-                            s.location,
-                            s.slot`;
-module.exports.getAppointmentsByName = term => {
-    return pool.query(SEARCH_BY_TERM, [term]).then(res => {
-        return res.rows;
-    }).catch(err => {
-        console.error('error searching user appoitnments by name');
-        console.error(err);
-        return [];
-    });
-}
+// /**
+//  * 
+//  * @param {Array<string>} terms - search terms which are separated by spaces
+//  */
+// const SEARCH_BY_TERM = `select 
+//                             u.calnetid,
+//                             u.firstname,
+//                             u.lastname,
+//                             s.slot,
+//                             s.location,
+//                             s.completed
+//                         from 
+//                             users u,schedule s 
+//                         inner join 
+//                             (select calnetid,
+//                                 max(slot) as MaxDateTime 
+//                             from schedule 
+//                             group by calnetid) groupeds 
+//                         on 
+//                             s.calnetid=groupeds.calnetid 
+//                         and 
+//                             s.slot=groupeds.MaxDateTime 
+//                         where 
+//                             u.calnetid=s.calnetid
+//                         and 
+//                             (lower(u.lastname) like concat(lower($1),'%') or lower(u.firstname) like concat(lower($1),'%'))
+//                         order by
+//                             s.location,
+//                             s.slot`;
+// module.exports.getAppointmentsByName = term => {
+//     return pool.query(SEARCH_BY_TERM, [term]).then(res => {
+//         return res.rows;
+//     }).catch(err => {
+//         console.error('error searching user appoitnments by name');
+//         console.error(err);
+//         return [];
+//     });
+// }
