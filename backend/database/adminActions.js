@@ -20,6 +20,13 @@ const getAbort = (client) => {
     }
 }
 
+/**
+ * Admin levels:
+ * 0 - basic level: can scan QR codes and see user appointments
+ * 1 - station 2 level: can scan QR codes, and can mark users as completed
+ * 2 - supervisor: can view statistics and export data
+ * 3 - superuser: can add new admin users
+ */
 const ADMIN_TABLE_CREATE = `create table admin(name text not null,
     calnetid text unique null,
     email text not null,
@@ -51,6 +58,50 @@ module.exports.verifyAdminTable = () => {
         });
     });
 }
+
+/**
+ * Adds a new admin user, and returns a UID for that admin
+ * @param {string} name - the full name of the new admin
+ * @param {string} email - the email of the new admin
+ * @param {string} phone - the phone of the new admin
+ * @param {Number} level - the level of the new admin
+ */
+module.exports.addAdminUser = (name, email, phone, level) => {
+
+}
+
+/**
+ * When a request comes in to create new account with uid,
+ * check if the UID is linked to an admin account, and if 
+ * the account is already created.
+ * @param {string} uid - the UID from the new user request
+ */
+module.exports.checkAdminExists = uid => {
+
+}
+
+/**
+ * Sets the calnetid for an admin account
+ * @param {string} uid - the UID linked to the admin account
+ * @param {string} calnetid - the calnetid to attach to it
+ */
+module.exports.setAdminCalnetid = (uid, calnetid) => {
+
+}
+
+/**
+ * Returns the admin level of the specified user.
+ * If the user doesn't exist, returns -1.
+ * @param {string} calnetid - the calnetid to check
+ */
+module.exports.getAdminLevel = calnetid => {
+
+}
+
+
+
+
+
 
 module.exports.getUserAdmin = id => {
     return pool.query('select admin from users where calnetid=$1', [id]).then(res => {
