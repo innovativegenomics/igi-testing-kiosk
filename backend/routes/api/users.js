@@ -56,16 +56,19 @@ router.get('/logout', cas.logout);
  *   }
  * }
  */
-router.get('/profile', cas.block, (request, response) => {
+router.get('/profile', cas.block, async (request, response) => {
     const calnetid = request.session.cas_user;
     pino.debug(`trying to get profile for user ${calnetid}`);
-    return User.findOne({attributes: ['firstname', 'middlename', 'lastname', 'email', 'phone'], where: {calnetid: calnetid}}).then(profile => {
-        if(profile) {
-            response.send({success: true, user: profile});
-        } else {
-            response.send({success: false, user: {}});
-        }
-    });
+    const profile = await User.findOne({attributes: ['firstname', 
+                                                        'middlename', 
+                                                        'lastname', 
+                                                        'email', 
+                                                        'phone'], where: {calnetid: calnetid}});
+    if(profile) {
+        response.send({success: true, user: profile});
+    } else {
+        response.send({success: false, user: {}});
+    }
 });
 
 /**
