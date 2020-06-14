@@ -8,6 +8,7 @@ process.env.TZ = 'America/Los_Angeles';
 
 const { sequelize } = require('./models');
 const users = require('./routes/api/users');
+const slots = require('./routes/api/slots');
 
 const { verifyTasks } = require('./scheduler');
 
@@ -42,7 +43,7 @@ sequelize.authenticate().then(res => {
     app.use(session(sess));
     
     app.use('/api/users', users);
-    // app.use("/api/schedule", schedule);
+    app.use('/api/slots', slots);
     // app.use("/api/admin", admin);
     
     const port = process.env.PORT || 5000;

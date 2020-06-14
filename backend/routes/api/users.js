@@ -8,7 +8,6 @@ const { sequelize, User, Slot, Settings } = require('../../models');
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
 const { scheduleSignupEmail } = require('../../scheduler');
-const { schedule } = require('node-cron');
 
 /**
  * Logs in existing and new users
