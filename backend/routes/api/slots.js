@@ -113,10 +113,61 @@ router.get('/slot', cas.block, async (request, response) => {
  *   time: Moment
  * }
  * response:
- * {success: true|false}
+ * {success: true|false, error: undefined|[string]}
  */
 router.post('/slot', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const t = await sequelize.transaction();
+  try {
+    const reqtime = moment(request.body.time);
+    const reqlocation = request.body.location;
+    const settings = await Settings.findOne({transaction: t});
+    const slot = (await Slot.findAll({
+      limit: 1,
+      where: { calnetid: calnetid },
+      order: [['time', 'desc']],
+      transaction: t,
+    }))[0];
 
+    if(!moment(slot.time).startOf('week').isSame(reqtime.clone().startOf('week'))) {
+      throw new Error('slot not valid');
+    } else if(!settings.locations.includes(reqlocation)) {
+        throw new Error('location not valid');
+    } else if(moment.duration(reqtime.diff(reqtime.clone().set('hour', settings.starttime).set('minute', 0))).asMinutes() % settings.window > 0) {
+        throw new Error('slot not valid');
+    } else if(!reqtime.isBetween(reqtime.clone().set('hour', settings.starttime), reqtime.clone().set('hour', settings.endtime), null, '[)')) {
+        throw new Error('slot not valid');
+    } else if(!settings.days.includes(reqtime.day())) {
+        throw new Error('slot not valid');
+    } else if(reqtime.isBefore(moment())) {
+        throw new Error('slot is before current time');
+    } else if(slot.completed) {
+      throw new Error('slot is already completed');
+    }
+
+    const takenCount = await Slot.count({
+      where: {
+        time: reqtime.toDate(),
+        location: reqlocation,
+      },
+      transaction: t,
+    });
+    if(takenCount >= settings.buffer) {
+      throw new Error('Slot is already full');
+    } else {
+      slot.time = reqtime.toDate();
+      slot.location = reqlocation;
+      slot.scheduled = moment().toDate();
+      await slot.save();
+      await t.commit();
+      response.send({success: true});
+    }
+  } catch(err) {
+    pino.error(`Can't set slot for user ${calnetid}`);
+    pino.error(err);
+    await t.rollback();
+    response.send({success: false});
+  }
 });
 
 /**
