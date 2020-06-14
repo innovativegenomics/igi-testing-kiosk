@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pino = require('pino')({level: process.env.LOG_LEVEL || 'info'});
+const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 const short = require('short-uuid');
 
@@ -14,26 +14,23 @@ const { scheduleSignupEmail } = require('../../scheduler');
  * If the users already exists, it directs them to the dashboard.
  * If the user is new, it directs them to the new user page.
  */
-router.get('/login', cas.bounce, (request, response) => {
-    const calnetid = request.session.cas_user;
-    return sequelize.transaction(t => {
-        return User.findOne({where: {calnetid: calnetid}, transaction: t}).then(user => {
-            if(user) {
-                user.lastlogin = moment().toDate();
-                return user.save().then(res => {
-                    response.redirect('/dashboard');
-                });
-            } else {
-                if(!require('../../config/keys').newusers) {
-                    pino.error(`user with calnetid ${calnetid} not authorized`);
-                    request.session.destroy();
-                    response.status(401).send('Unauthorized user');
-                } else {
-                    response.redirect('/newuser');
-                }
-            }
-        });
-    });
+router.get('/login', cas.bounce, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const t = await sequelize.transaction();
+  const user = await User.findOne({ where: { calnetid: calnetid }, transaction: t });
+  if (user) {
+    user.lastlogin = moment().toDate();
+    await user.save();
+    response.redirect('/dashboard');
+  } else {
+    if (!require('../../config/keys').newusers) {
+      pino.error(`user with calnetid ${calnetid} not authorized`);
+      request.session.destroy();
+      response.status(401).send('Unauthorized user');
+    } else {
+      response.redirect('/newuser');
+    }
+  }
 });
 
 /**
@@ -57,18 +54,20 @@ router.get('/logout', cas.logout);
  * }
  */
 router.get('/profile', cas.block, async (request, response) => {
-    const calnetid = request.session.cas_user;
-    pino.debug(`trying to get profile for user ${calnetid}`);
-    const profile = await User.findOne({attributes: ['firstname', 
-                                                        'middlename', 
-                                                        'lastname', 
-                                                        'email', 
-                                                        'phone'], where: {calnetid: calnetid}});
-    if(profile) {
-        response.send({success: true, user: profile});
-    } else {
-        response.send({success: false, user: {}});
-    }
+  const calnetid = request.session.cas_user;
+  pino.debug(`trying to get profile for user ${calnetid}`);
+  const profile = await User.findOne({
+    attributes: ['firstname',
+      'middlename',
+      'lastname',
+      'email',
+      'phone'], where: { calnetid: calnetid }
+  });
+  if (profile) {
+    response.send({ success: true, user: profile });
+  } else {
+    response.send({ success: false, user: {} });
+  }
 });
 
 /**
@@ -92,63 +91,71 @@ router.get('/profile', cas.block, async (request, response) => {
  * response format:
  * {success: true|false}
  */
-router.post('/profile', cas.block, (request, response) => {
-    const calnetid = request.session.cas_user;
-    return sequelize.transaction(t => {
-        return User.count({where: {calnetid: calnetid}, transaction: t}).then(c => {
-            if(c > 0) {
-                response.send({success: false, error: 'USER_EXISTS'});
-            } else {
-                return User.create({
-                    firstname: request.body.firstname,
-                    middlename: request.body.middlename,
-                    lastname: request.body.lastname,
-                    calnetid: calnetid,
-                    dob: moment.utc(request.body.dob).format('YYYY-MM-DD'),
-                    street: request.body.street,
-                    city: request.body.city,
-                    state: request.body.state,
-                    county: request.body.county,
-                    zip: request.body.zip,
-                    sex: request.body.sex,
-                    pbuilding: request.body.pbuilding,
-                    email: request.body.email,
-                    phone: request.body.phone,
-                    questions: request.body.questions,
-                }, {transaction: t}).then(user => {
-                    return Slot.create({calnetid: calnetid,
-                                        time: moment().startOf('week').toDate(),
-                                        uid: short().new()}, {transaction: t}).then(slot => {
-                        scheduleSignupEmail(request.body.email).catch(err => {
-                            pino.error(`Coundn't schedule signup email for user ${calnetid}`);
-                            pino.error(err);
-                        });
-                        response.send({success: true});
-                    });
-                }).then(r => {
-                    return Settings.findOne({transaction: t});
-                }).then(settings => {
-                    return newPatient(request.body, settings.accesstoken, settings.refreshtoken).then(res=> {
-                        if(res.accesstoken) {
-                            settings.accesstoken = res.accesstoken;
-                            return settings.save();
-                        }
-                    }).catch(err => {
-                        pino.error('Can not add new LIMs patient');
-                        pino.error(err);
-                        return true;
-                    });
-                });
-            }
-        });
-    });
+router.post('/profile', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const t = await sequelize.transaction();
+  const count = await User.count({ where: { calnetid: calnetid }, transaction: t });
+  pino.info(`User count for ${calnetid}: ${count}`);
+  if (count > 0) {
+    response.send({ success: false, error: 'USER_EXISTS' });
+    await t.commit();
+  } else {
+    try {
+      await User.create({
+        firstname: request.body.firstname,
+        middlename: request.body.middlename,
+        lastname: request.body.lastname,
+        calnetid: calnetid,
+        dob: moment.utc(request.body.dob).format('YYYY-MM-DD'),
+        street: request.body.street,
+        city: request.body.city,
+        state: request.body.state,
+        county: request.body.county,
+        zip: request.body.zip,
+        sex: request.body.sex,
+        pbuilding: request.body.pbuilding,
+        email: request.body.email,
+        phone: request.body.phone,
+        questions: request.body.questions,
+      }, { transaction: t });
+      await Slot.create({
+        calnetid: calnetid,
+        time: moment().startOf('week').toDate(),
+        uid: short().new()
+      }, { transaction: t });
+      await t.commit();
+      response.send({ success: true });
+    } catch (err) {
+      pino.error(`error creating user profile for ${calnetid}`);
+      pino.error(err);
+      await t.rollback();
+      response.send({ success: false, error: 'SERVER_ERROR' });
+    }
+    try {
+      await scheduleSignupEmail(request.body.email);
+    } catch (err) {
+      pino.error(`Coundn't schedule signup email for user ${calnetid}`);
+      pino.error(err);
+    }
+    const settings = await Settings.findOne({ transaction: t });
+    try {
+      const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken);
+      if (res.accesstoken) {
+        settings.accesstoken = res.accesstoken;
+        await settings.save();
+      }
+    } catch (err) {
+      pino.error('Can not add new LIMs patient');
+      pino.error(err);
+    }
+  }
 });
 
 /**
  * Quick and dirty way for the frontend to know if the server is dev mode
  */
 router.get('/devmode', (request, response) => {
-    response.json({devmode: (process.env.NODE_ENV !== 'production')});
+  response.json({ devmode: (process.env.NODE_ENV !== 'production') });
 });
 
 module.exports = router;
