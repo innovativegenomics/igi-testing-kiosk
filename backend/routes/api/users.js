@@ -93,12 +93,12 @@ router.get('/profile', cas.block, async (request, response) => {
  */
 router.post('/profile', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const t = await sequelize.transaction();
+  const t1 = await sequelize.transaction();
   const count = await User.count({ where: { calnetid: calnetid }, transaction: t });
   pino.info(`User count for ${calnetid}: ${count}`);
   if (count > 0) {
     response.send({ success: false, error: 'USER_EXISTS' });
-    await t.commit();
+    await t1.commit();
   } else {
     try {
       await User.create({
@@ -117,18 +117,18 @@ router.post('/profile', cas.block, async (request, response) => {
         email: request.body.email,
         phone: request.body.phone,
         questions: request.body.questions,
-      }, { transaction: t });
+      }, { transaction: t1 });
       await Slot.create({
         calnetid: calnetid,
         time: moment().startOf('week').toDate(),
         uid: short().new()
-      }, { transaction: t });
-      await t.commit();
+      }, { transaction: t1 });
+      await t1.commit();
       response.send({ success: true });
     } catch (err) {
       pino.error(`error creating user profile for ${calnetid}`);
       pino.error(err);
-      await t.rollback();
+      await t1.rollback();
       response.send({ success: false, error: 'SERVER_ERROR' });
     }
     try {
@@ -137,16 +137,24 @@ router.post('/profile', cas.block, async (request, response) => {
       pino.error(`Coundn't schedule signup email for user ${calnetid}`);
       pino.error(err);
     }
-    const settings = await Settings.findOne({ transaction: t });
+    const t2 = await sequelize.transaction();
+    const settings = await Settings.findOne({transaction: t2});
     try {
       const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken);
       if (res.accesstoken) {
         settings.accesstoken = res.accesstoken;
         await settings.save();
       }
+      if(res.patient_id) {
+        const user = User.findOne({where: {calnetid: calnetid}, transaction: t2});
+        user.patientid = res.patient_id;
+        await user.save();
+      }
+      await t2.commit();
     } catch (err) {
       pino.error('Can not add new LIMs patient');
       pino.error(err);
+      await t2.rollback();
     }
   }
 });
