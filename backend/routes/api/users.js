@@ -7,6 +7,8 @@ const short = require('short-uuid');
 const { sequelize, User, Slot, Settings } = require('../../models');
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
+const { scheduleSignupEmail } = require('../../scheduler');
+const { schedule } = require('node-cron');
 
 /**
  * Logs in existing and new users
@@ -58,7 +60,6 @@ router.get('/logout', cas.logout);
 router.get('/profile', cas.block, (request, response) => {
     const calnetid = request.session.cas_user;
     pino.debug(`trying to get profile for user ${calnetid}`);
-    console.log('here');
     return User.findOne({attributes: ['firstname', 'middlename', 'lastname', 'email', 'phone'], where: {calnetid: calnetid}}).then(profile => {
         if(profile) {
             response.send({success: true, user: profile});
@@ -116,6 +117,10 @@ router.post('/profile', cas.block, (request, response) => {
                     return Slot.create({calnetid: calnetid,
                                         time: moment().startOf('week').toDate(),
                                         uid: short().new()}, {transaction: t}).then(slot => {
+                        scheduleSignupEmail(request.body.email).catch(err => {
+                            pino.error(`Coundn't schedule signup email for user ${calnetid}`);
+                            pino.error(err);
+                        });
                         response.send({success: true});
                     });
                 }).then(r => {

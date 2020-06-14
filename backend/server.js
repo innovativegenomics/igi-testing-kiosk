@@ -9,6 +9,8 @@ process.env.TZ = 'America/Los_Angeles';
 const { sequelize } = require('./models');
 const users = require('./routes/api/users');
 
+const { verifyTasks } = require('./scheduler');
+
 const app = express();
 // Bodyparser middleware
 app.use(
@@ -21,8 +23,7 @@ app.use(expressPino);
 // DB Config
 // verify database
 sequelize.authenticate().then(res => {
-    // return verifyScheduler();
-    return;
+    return verifyTasks();
 }).then(res => {
     pino.info('database initialized successfully!');
     // register services that rely on the database
