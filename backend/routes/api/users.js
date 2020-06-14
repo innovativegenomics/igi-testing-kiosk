@@ -4,7 +4,8 @@ const pino = require('pino')({level: process.env.LOG_LEVEL || 'info'});
 const moment = require('moment');
 const short = require('short-uuid');
 
-const { sequelize, User, Slot } = require('../../models');
+const { sequelize, User, Slot, Settings } = require('../../models');
+const { newPatient } = require('../../lims');
 const cas = require('../../cas');
 
 /**
@@ -60,7 +61,7 @@ router.get('/profile', cas.block, (request, response) => {
     console.log('here');
     return User.findOne({attributes: ['firstname', 'middlename', 'lastname', 'email', 'phone'], where: {calnetid: calnetid}}).then(profile => {
         if(profile) {
-            response.send({success: true, user: {}})
+            response.send({success: true, user: profile});
         } else {
             response.send({success: false, user: {}});
         }
@@ -117,10 +118,30 @@ router.post('/profile', cas.block, (request, response) => {
                                         uid: short().new()}, {transaction: t}).then(slot => {
                         response.send({success: true});
                     });
+                }).then(r => {
+                    return Settings.findOne({transaction: t});
+                }).then(settings => {
+                    return newPatient(request.body, settings.accesstoken, settings.refreshtoken).then(res=> {
+                        if(res.accesstoken) {
+                            settings.accesstoken = res.accesstoken;
+                            return settings.save();
+                        }
+                    }).catch(err => {
+                        pino.error('Can not add new LIMs patient');
+                        pino.error(err);
+                        return true;
+                    });
                 });
             }
         });
     });
+});
+
+/**
+ * Quick and dirty way for the frontend to know if the server is dev mode
+ */
+router.get('/devmode', (request, response) => {
+    response.json({devmode: (process.env.NODE_ENV !== 'production')});
 });
 
 module.exports = router;
