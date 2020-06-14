@@ -33,7 +33,7 @@ module.exports = {
         allowNull: false,
         defaultValue: 16,
       },
-      increment: {
+      window: {
         type: Sequelize.INTEGER,
         allowNull: false,
         defaultValue: 10,

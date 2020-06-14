@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 16,
     },
-    increment: {
+    window: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 10,
