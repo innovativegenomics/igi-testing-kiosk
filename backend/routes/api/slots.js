@@ -117,7 +117,9 @@ router.get('/slot', cas.block, async (request, response) => {
  */
 router.post('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const t = await sequelize.transaction();
+  const t = await sequelize.transaction({
+    isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+  });
   try {
     const reqtime = moment(request.body.time);
     const reqlocation = request.body.location;
