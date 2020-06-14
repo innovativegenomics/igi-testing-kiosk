@@ -3,7 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const pino = require('pino')();
+const pino = require('pino')({level: process.env.LOG_LEVEL || 'info'});
 const basename = path.basename(__filename);
 const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/config.json')[env];

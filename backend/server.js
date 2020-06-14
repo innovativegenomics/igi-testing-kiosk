@@ -1,8 +1,8 @@
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const pino = require('pino')();
-const expressPino = require('express-pino-logger');
+const pino = require('pino')({level: process.env.LOG_LEVEL || 'info'});
+const expressPino = require('express-pino-logger')();
 
 process.env.TZ = 'America/Los_Angeles';
 
