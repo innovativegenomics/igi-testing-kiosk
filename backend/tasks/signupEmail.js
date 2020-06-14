@@ -1,4 +1,4 @@
-module.exports = (payload, helpers) => {
+module.exports = async (payload, helpers) => {
     const nodemailer = require('nodemailer');
 
     const config = require('../config/keys');
@@ -12,7 +12,7 @@ module.exports = (payload, helpers) => {
     });
 
     const { email } = payload;
-    return transport.sendMail({
+    await transport.sendMail({
         from: config.email.user,
         to: email,
         subject: `IGI Healthy Campus Study`,

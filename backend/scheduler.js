@@ -15,14 +15,13 @@ const moment = require('moment');
 
 let workerUtils;
 
-module.exports.verifyTasks = () => {
-    return makeWorkerUtils({pgPool: pool}).then(r => (workerUtils=r)).then(r => {
-        return workerUtils.migrate();
-    });
+module.exports.verifyTasks = async () => {
+    workerUtils = await makeWorkerUtils({pgPool: pool});
+    await workerUtils.migrate();
 }
 
-module.exports.scheduleSlotConfirmText = (number, uid, day, timeStart, timeEnd, location, locationLink) => {
-    return workerUtils.addJob('slotConfirmText', {number: number,
+module.exports.scheduleSlotConfirmText = async (number, uid, day, timeStart, timeEnd, location, locationLink) => {
+    await workerUtils.addJob('slotConfirmText', {number: number,
                                               uid: uid,
                                               day: day,
                                               timeStart: timeStart,
@@ -31,8 +30,8 @@ module.exports.scheduleSlotConfirmText = (number, uid, day, timeStart, timeEnd, 
                                               locationLink: locationLink});
 }
 
-module.exports.scheduleSlotConfirmEmail = (email, uid, day, timeStart, timeEnd, location, locationLink) => {
-    return workerUtils.addJob('slotConfirmEmail', {email: email,
+module.exports.scheduleSlotConfirmEmail = async (email, uid, day, timeStart, timeEnd, location, locationLink) => {
+    await workerUtils.addJob('slotConfirmEmail', {email: email,
                                                uid: uid,
                                                day: day,
                                                timeStart: timeStart,
@@ -41,6 +40,6 @@ module.exports.scheduleSlotConfirmEmail = (email, uid, day, timeStart, timeEnd, 
                                                locationLink: locationLink});
 }
 
-module.exports.scheduleSignupEmail = (email) => {
-    return workerUtils.addJob('signupEmail', {email: email});
+module.exports.scheduleSignupEmail = async (email) => {
+    await workerUtils.addJob('signupEmail', {email: email});
 }

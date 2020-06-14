@@ -1,4 +1,4 @@
-module.exports = (payload, helpers) => {
+module.exports = async (payload, helpers) => {
     const nodemailer = require('nodemailer');
     const qrcode = require('qrcode');
 
@@ -15,7 +15,7 @@ module.exports = (payload, helpers) => {
     const { email, uid, day, timeStart, timeEnd, location, locationLink } = payload;
     const scanUrl = config.host + '/scanner?uid=' + uid;
     const qrUrl = config.host + '/qrcode?uid=' + uid;
-    return qrcode.toDataURL(scanUrl).then(res => {
+    await qrcode.toDataURL(scanUrl).then(res => {
         return transport.sendMail({
             from: config.email.user,
             to: email,

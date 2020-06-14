@@ -1,4 +1,4 @@
-module.exports = (payload, helpers) => {
+module.exports = async (payload, helpers) => {
     const twilio = require('twilio');
     const config = require('../config/keys');
     const client = new twilio(config.twilio.accountSid,
@@ -6,7 +6,7 @@ module.exports = (payload, helpers) => {
 
     const { number, uid, day, timeStart, timeEnd, location, locationLink } = payload;
     const qrUrl = config.host + '/qrcode?uid=' + uid;
-    return client.messages.create({
+    await client.messages.create({
         body: `Testing Appointment Confirmation for ${day}
 Please arrive between ${timeStart} and ${timeEnd} at location ${location}.
 To view a map to this location, visit the following link ${locationLink}.

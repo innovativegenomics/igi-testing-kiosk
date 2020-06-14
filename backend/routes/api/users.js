@@ -94,7 +94,7 @@ router.get('/profile', cas.block, async (request, response) => {
 router.post('/profile', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const t1 = await sequelize.transaction();
-  const count = await User.count({ where: { calnetid: calnetid }, transaction: t });
+  const count = await User.count({ where: { calnetid: calnetid }, transaction: t1 });
   pino.info(`User count for ${calnetid}: ${count}`);
   if (count > 0) {
     response.send({ success: false, error: 'USER_EXISTS' });
@@ -131,12 +131,14 @@ router.post('/profile', cas.block, async (request, response) => {
       await t1.rollback();
       response.send({ success: false, error: 'SERVER_ERROR' });
     }
+    
     try {
       await scheduleSignupEmail(request.body.email);
     } catch (err) {
       pino.error(`Coundn't schedule signup email for user ${calnetid}`);
       pino.error(err);
     }
+
     const t2 = await sequelize.transaction();
     const settings = await Settings.findOne({transaction: t2});
     try {
