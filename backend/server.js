@@ -44,8 +44,8 @@ app.disable('x-powered-by');
       resave: false,
     };
     if (process.env.NODE_ENV === 'production') {
-      // app.set('trust proxy', 1);
-      // sess.cookie.secure = true;
+      app.set('trust proxy', 1);
+      sess.cookie.secure = true;
     }
     app.use(session(sess));
 
