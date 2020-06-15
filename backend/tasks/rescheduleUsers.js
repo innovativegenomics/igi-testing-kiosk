@@ -71,7 +71,7 @@ module.exports = async (payload, helpers) => {
     await t.rollback();
   }
   const workerUtils = await makeWorkerUtils({pgPool: pool});
-  await workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week'), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
+  await workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week').add(1, 'minute'), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
   await workerUtils.release();
   await pool.end();
 }
