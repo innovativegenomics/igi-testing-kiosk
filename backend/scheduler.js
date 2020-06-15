@@ -45,5 +45,5 @@ module.exports.scheduleSignupEmail = async (email) => {
 }
 
 module.exports.scheduleRescheduleUsers = async () => {
-    await workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week'), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
+    await workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week').add(1, 'minute'), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
 }
