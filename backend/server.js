@@ -33,7 +33,7 @@ app.use(expressPino);
 
     var sess = {
       store: new (require('express-session-sequelize')(session.Store))({ db: sequelize }),
-      secret: require('./config/keys').secret,
+      secret: require('./config/keys').secretKey,
       cookie: {},
       secure: false,
       saveUninitialized: false,
