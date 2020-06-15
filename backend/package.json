@@ -4,7 +4,7 @@
   "description": "Backend server for IGI testing kiosk app",
   "main": "server.js",
   "scripts": {
-    "server": "nodemon server.js",
+    "server": "nodemon server.js | pino-pretty -t -c",
     "client": "npm start --prefix ../frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "worker": "graphile-worker",
@@ -27,14 +27,20 @@
     "connect-pg-simple": "^6.1.0",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-pino-logger": "^5.0.0",
     "express-session": "^1.17.1",
+    "express-session-sequelize": "^2.2.0",
     "google-libphonenumber": "^3.2.10",
     "graphile-worker": "^0.6.0",
     "moment": "^2.26.0",
     "node-cron": "^2.0.3",
     "nodemailer": "^6.4.8",
     "pg": "^8.2.1",
+    "pg-hstore": "^2.3.3",
+    "pino": "^6.3.2",
+    "pino-http": "^5.2.0",
     "qrcode": "^1.4.4",
+    "sequelize": "^5.21.12",
     "short-uuid": "^3.1.1",
     "twilio": "^3.44.0",
     "xml2js": "^0.4.23"
@@ -42,6 +48,8 @@
   "devDependencies": {
     "concurrently": "^5.2.0",
     "mocha": "^7.2.0",
-    "nodemon": "^2.0.4"
+    "nodemon": "^2.0.4",
+    "pino-pretty": "^4.0.0",
+    "sequelize-cli": "^5.5.1"
   }
 }

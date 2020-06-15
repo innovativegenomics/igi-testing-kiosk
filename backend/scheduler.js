@@ -1,24 +1,27 @@
+const { request } = require("express");
+
 const { Pool } = require('pg');
+const env = process.env.NODE_ENV || 'development';
+const config = require('./config/config.json')[env];
 const pool = new Pool({
-    user: require('./config/keys').pg.pguser,
-    host: require('./config/keys').pg.pghost,
-    database: require('./config/keys').pg.pgdatabase,
-    password: require('./config/keys').pg.pgpassword,
-    port: require('./config/keys').pg.pgport,
+    user: config.username,
+    host: config.host,
+    database: config.database,
+    password: config.password,
+    port: config.port || 5432,
 });
 const { makeWorkerUtils } = require('graphile-worker');
 const moment = require('moment');
 
-var workerUtils = undefined;
+let workerUtils;
 
-module.exports.verifyScheduler = () => {
-    return makeWorkerUtils({pgPool: pool}).then(r => (workerUtils=r)).then(r => {
-        return workerUtils.migrate();
-    });
+module.exports.verifyTasks = async () => {
+    workerUtils = await makeWorkerUtils({pgPool: pool});
+    await workerUtils.migrate();
 }
 
-module.exports.scheduleSlotConfirmText = (number, uid, day, timeStart, timeEnd, location, locationLink) => {
-    return workerUtils.addJob('slotConfirmText', {number: number,
+module.exports.scheduleSlotConfirmText = async (number, uid, day, timeStart, timeEnd, location, locationLink) => {
+    await workerUtils.addJob('slotConfirmText', {number: number,
                                               uid: uid,
                                               day: day,
                                               timeStart: timeStart,
@@ -27,8 +30,8 @@ module.exports.scheduleSlotConfirmText = (number, uid, day, timeStart, timeEnd, 
                                               locationLink: locationLink});
 }
 
-module.exports.scheduleSlotConfirmEmail = (email, uid, day, timeStart, timeEnd, location, locationLink) => {
-    return workerUtils.addJob('slotConfirmEmail', {email: email,
+module.exports.scheduleSlotConfirmEmail = async (email, uid, day, timeStart, timeEnd, location, locationLink) => {
+    await workerUtils.addJob('slotConfirmEmail', {email: email,
                                                uid: uid,
                                                day: day,
                                                timeStart: timeStart,
@@ -37,6 +40,10 @@ module.exports.scheduleSlotConfirmEmail = (email, uid, day, timeStart, timeEnd, 
                                                locationLink: locationLink});
 }
 
-module.exports.scheduleSignupEmail = (email) => {
-    return workerUtils.addJob('signupEmail', {email: email});
+module.exports.scheduleSignupEmail = async (email) => {
+    await workerUtils.addJob('signupEmail', {email: email});
+}
+
+module.exports.scheduleRescheduleUsers = async () => {
+    await workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week'), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
 }

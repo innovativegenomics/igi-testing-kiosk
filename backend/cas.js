@@ -13,6 +13,6 @@ const casOptions = {
     destroy_session : true
 };
 
-const Cas = new CASAuthentication(casOptions);
+const cas = new CASAuthentication(casOptions);
 
-module.exports = Cas;
+module.exports = cas;
