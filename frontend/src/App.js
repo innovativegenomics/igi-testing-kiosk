@@ -8,8 +8,8 @@ import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
 
-import Scanner from './components/private/scanner.component';
-import Admin from './components/private/admin/admin.component';
+// import Scanner from './components/private/scanner.component';
+// import Admin from './components/private/admin/admin.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
@@ -26,8 +26,8 @@ export default class App extends Component {
             <Route path='/newuser' component={NewUser}/>
             <Route path='/dashboard' component={Dashboard}/>
             <Route path='/scheduler' component={Scheduler}/>
-            <Route path='/scanner' component={Scanner}/>
-            <Route path='/admin' component={Admin} />
+            {/* <Route path='/scanner' component={Scanner}/> */}
+            {/* <Route path='/admin' component={Admin} /> */}
           </div>
         </Router>
     );

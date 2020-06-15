@@ -6,7 +6,6 @@ const moment = require('moment');
 const { sequelize, Sequelize, Slot, Settings } = require('../../models');
 const Op = Sequelize.Op;
 const cas = require('../../cas');
-const { UserBindingContext } = require('twilio/lib/rest/chat/v2/service/user/userBinding');
 
 /**
  * gets available slots
