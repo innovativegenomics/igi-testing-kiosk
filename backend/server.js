@@ -21,6 +21,8 @@ app.use(
 );
 app.use(bodyParser.json());
 app.use(expressPino);
+
+app.disable('x-powered-by');
 // DB Config
 // verify database
 (async () => {
@@ -34,14 +36,16 @@ app.use(expressPino);
     var sess = {
       store: new (require('express-session-sequelize')(session.Store))({ db: sequelize }),
       secret: require('./config/keys').secretKey,
-      cookie: {},
-      secure: false,
+      name: 'sessionId',
+      cookie: {
+        secure: false,
+      },
       saveUninitialized: false,
       resave: false,
     };
     if (process.env.NODE_ENV === 'production') {
-      app.set('trust proxy', 1);
-      sess.cookie.secure = true;
+      // app.set('trust proxy', 1);
+      // sess.cookie.secure = true;
     }
     app.use(session(sess));
 
