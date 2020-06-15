@@ -148,7 +148,7 @@ router.post('/profile', cas.block, async (request, response) => {
         await settings.save();
       }
       if(res.patient_id) {
-        const user = User.findOne({where: {calnetid: calnetid}, transaction: t2});
+        const user = await User.findOne({where: {calnetid: calnetid}, transaction: t2});
         user.patientid = res.patient_id;
         await user.save();
       }
