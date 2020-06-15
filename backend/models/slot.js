@@ -28,6 +28,7 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Slot.associate = function(models) {
     // associations can be defined here
+    Slot.belongsTo(models.User);
   };
   return Slot;
 };

@@ -43,3 +43,7 @@ module.exports.scheduleSlotConfirmEmail = async (email, uid, day, timeStart, tim
 module.exports.scheduleSignupEmail = async (email) => {
     await workerUtils.addJob('signupEmail', {email: email});
 }
+
+module.exports.scheduleRescheduleUsers = async () => {
+    await workerUtils.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week'), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
+}

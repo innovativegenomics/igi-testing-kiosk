@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { PhoneNumberUtil } from 'google-libphonenumber';
+import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 import { validate as validateEmail } from 'email-validator';
 import { postcodeValidator } from 'postcode-validator';
 import moment from 'moment';
@@ -270,6 +270,8 @@ export default class NewUser extends Component {
       } else if (this.state.user[k].type === 'DATE') {
         console.log(this.state.user[k].value);
         payload[k] = moment.utc(this.state.user[k].value).set('hour', 0).set('minute', 0).set('second', 0);
+      } else if(this.state.user[k].type === 'PHONE') {
+        payload[k] = PhoneNumberUtil.getInstance().format(PhoneNumberUtil.getInstance().parse(this.state.user[k].value, 'US'), PhoneNumberFormat.E164);
       } else {
         payload[k] = this.state.user[k].value;
       }

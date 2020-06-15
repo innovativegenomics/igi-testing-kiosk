@@ -10,7 +10,7 @@ const { sequelize } = require('./models');
 const users = require('./routes/api/users');
 const slots = require('./routes/api/slots');
 
-const { verifyTasks } = require('./scheduler');
+const { verifyTasks, scheduleRescheduleUsers } = require('./scheduler');
 
 const app = express();
 // Bodyparser middleware
@@ -26,7 +26,9 @@ app.use(expressPino);
 (async () => {
   try {
     await sequelize.authenticate();
+    await sequelize.sync();
     await verifyTasks();
+    await scheduleRescheduleUsers();
     pino.info('database initialized successfully!');
 
     var sess = {

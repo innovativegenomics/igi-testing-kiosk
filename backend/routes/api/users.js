@@ -101,7 +101,7 @@ router.post('/profile', cas.block, async (request, response) => {
     await t1.commit();
   } else {
     try {
-      await User.create({
+      const user = await User.create({
         firstname: request.body.firstname,
         middlename: request.body.middlename,
         lastname: request.body.lastname,
@@ -118,7 +118,7 @@ router.post('/profile', cas.block, async (request, response) => {
         phone: request.body.phone,
         questions: request.body.questions,
       }, { transaction: t1 });
-      await Slot.create({
+      await user.createSlot({
         calnetid: calnetid,
         time: moment().startOf('week').toDate(),
         uid: short().new()

@@ -3,7 +3,8 @@ const router = express.Router();
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
-const { sequelize, Sequelize, Slot, Settings } = require('../../models');
+const { sequelize, Sequelize, Slot, User, Settings } = require('../../models');
+const { scheduleSlotConfirmEmail, scheduleSlotConfirmText } = require('../../scheduler');
 const Op = Sequelize.Op;
 const cas = require('../../cas');
 
@@ -133,15 +134,15 @@ router.post('/slot', cas.block, async (request, response) => {
     if(!moment(slot.time).startOf('week').isSame(reqtime.clone().startOf('week'))) {
       throw new Error('slot not valid');
     } else if(!settings.locations.includes(reqlocation)) {
-        throw new Error('location not valid');
+      throw new Error('location not valid');
     } else if(moment.duration(reqtime.diff(reqtime.clone().set('hour', settings.starttime).set('minute', 0))).asMinutes() % settings.window > 0) {
-        throw new Error('slot not valid');
+      throw new Error('slot not valid');
     } else if(!reqtime.isBetween(reqtime.clone().set('hour', settings.starttime), reqtime.clone().set('hour', settings.endtime), null, '[)')) {
-        throw new Error('slot not valid');
+      throw new Error('slot not valid');
     } else if(!settings.days.includes(reqtime.day())) {
-        throw new Error('slot not valid');
+      throw new Error('slot not valid');
     } else if(reqtime.isBefore(moment())) {
-        throw new Error('slot is before current time');
+      throw new Error('slot is before current time');
     } else if(slot.completed) {
       throw new Error('slot is already completed');
     }
@@ -162,6 +163,28 @@ router.post('/slot', cas.block, async (request, response) => {
       await slot.save();
       await t.commit();
       response.send({success: true});
+      try {
+        const user = await User.findOne({where: {calnetid: calnetid}});
+        await scheduleSlotConfirmEmail(user.email, 
+                                      slot.uid, 
+                                      moment(slot.time).format('dddd'),
+                                      moment(slot.time).format('h:mm A'),
+                                      moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
+                                      slot.location,
+                                      settings.locationlinks[settings.locations.indexOf(slot.location)]);
+        if(user.phone) {
+          await scheduleSlotConfirmText(user.phone, 
+                                        slot.uid, 
+                                        moment(slot.time).format('dddd'),
+                                        moment(slot.time).format('h:mm A'),
+                                        moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
+                                        slot.location,
+                                        settings.locationlinks[settings.locations.indexOf(slot.location)]);
+        }
+      } catch(err) {
+        pino.error(`Can't schedule confirm notifications for user ${calnetid}`);
+        pino.error(err);
+      }
     }
   } catch(err) {
     pino.error(`Can't set slot for user ${calnetid}`);
