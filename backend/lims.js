@@ -33,6 +33,7 @@ const postNewPatient = async (accesstoken, payload) => {
 }
 
 module.exports.newPatient = async (profile, accesstoken, refreshtoken) => {
+  pino.info(`Date of Birth: ${moment.utc(profile.dob).format('YYYY-MM-DD HH:mm:ss')}`);
   const payload = {
     payload: JSON.stringify({
       First_Name__c: profile.firstname,
