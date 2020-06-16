@@ -46,7 +46,7 @@ module.exports = async (payload, helpers) => {
       if(moment(user.Slots[0].time).isBefore(beginning)) {
         await user.createSlot({
           calnetid: user.calnetid,
-          time: beginning.toDate(),
+          time: beginning.clone().add(1, 'week').toDate(),
           uid: short().new()
         }, {transaction: t});
         try {
