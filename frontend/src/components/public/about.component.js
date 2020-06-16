@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
+import { Container } from 'react-bootstrap';
 
 import './about.css';
-
 import Navbar from '../navbar.component';
 
 export default class About extends Component {
@@ -9,9 +9,9 @@ export default class About extends Component {
     return (
       <div>
         <Navbar />
-        <div className='container'>
+        <Container>
           <h1 className='text-center font-weight-light w-100'>About</h1>
-        </div>
+        </Container>
       </div>
     );
   }

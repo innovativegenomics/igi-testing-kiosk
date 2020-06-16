@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import './landing.css';
+import { Container, Row, Col, Form, Button } from 'react-bootstrap';
 
+import './landing.css';
 import igiFast from '../../media/IGI-FAST.png';
 import Navbar from '../navbar.component';
 
@@ -31,32 +32,30 @@ export default class Landing extends Component {
     return (
       <div>
         <Navbar />
-        <div className='container'>
-          <div className='row justify-content-center'>
-            <div className='col'>
+        <Container>
+          <Row className='justify-content-center'>
+            <Col>
               <img src={igiFast} className='w-100' alt='IGI FAST' />
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className='col'>
+            </Col>
+          </Row>
+          <Row className='justify-content-center'>
+            <Col>
               <p className='h2 font-weight-light text-center'>
                 IGI Free Asymptomatic Saliva Testing
               </p>
-            </div>
-          </div>
-          <div className={`row justify-content-center ${(this.state.devmode) ? '' : 'd-none'}`}>
-            <div className='col-md-4 text-center pb-2'>
-              <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({ devuser: e.target.value })} autoComplete='off' autoCorrect='off' autoCapitalize='none' />
-            </div>
-          </div>
-          <div className='row justify-content-center mb-2'>
-            <div className='col text-center'>
-              <button className='btn btn-lg btn-primary text-light' onClick={this.handleLoginButton}>
-                Login with CalNet ID
-              </button>
-            </div>
-          </div>
-        </div>
+            </Col>
+          </Row>
+          <Row className={`justify-content-center ${(this.state.devmode) ? '' : 'd-none'}`}>
+            <Col md='4'>
+              <Form.Control type='text' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({ devuser: e.target.value })} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
+            </Col>
+          </Row>
+          <Row className='justify-content-center mb-2'>
+            <Col className='text-center p-3'>
+              <Button onClick={this.handleLoginButton}>Login with CalNet ID</Button>
+            </Col>
+          </Row>
+        </Container>
       </div>
     );
   }

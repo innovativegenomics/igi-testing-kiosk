@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
 import moment from 'moment';
+import { Container, Row, Col, Button } from 'react-bootstrap';
 
 import { getUser } from '../../actions/authActions';
 import { getSlot, cancelSlot } from '../../actions/scheduleActions';
@@ -52,32 +53,34 @@ export default class Dashboard extends Component {
     return (
       <div>
         <Navbar authed={true} admin={this.state.auth.user.admin} />
-        <div className='container'>
-          <div className='row justify-content-center'>
-            <div className='col text-center'>
+        <Container>
+          <Row className='justify-content-center'>
+            <Col className='text-center'>
               <p className='display-4'>Next {(this.state.slot.slot.location) ? '' : 'Open'} Appointment</p>
-            </div>
-          </div>
-          <div className='row justify-content-center mb-3'>
-            <div className='col text-center'>
+            </Col>
+          </Row>
+          <Row className='justify-content-center'>
+            <Col className='text-center'>
               <p className='h1 font-weight-light'>
                 {(this.state.slot.slot.location) ? '' : 'Week of '}
                 {(this.state.slot.slot.location) ? moment(this.state.slot.slot.time).format('dddd, MMMM D h:mm A') : moment(this.state.slot.slot.time).format('dddd, MMMM D')}
                 {(this.state.slot.slot.location) ? ` at ${this.state.slot.slot.location}` : ''}
               </p>
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className='col text-center mb-3'>
-              <Link className='btn btn-outline-success btn-lg' to='/scheduler'>{(this.state.slot.slot.location) ? 'Change time and location' : 'Select time and location'}</Link>
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className='col text-center mb-3'>
-              <button className={`btn btn-outline-danger btn-lg ${this.state.slot.slot.location ? '' : 'd-none'}`} onClick={this.requestCancel}>Cancel Appointment</button>
-            </div>
-          </div>
-        </div>
+            </Col>
+          </Row>
+          <Row className='justify-content-center'>
+            <Col className='text-center mb-3'>
+              <Link className='btn btn-success' to='/scheduler'>{(this.state.slot.slot.location) ? 'Change time and location' : 'Select time and location'}</Link>
+            </Col>
+          </Row>
+          <Row className='justify-content-center'>
+            <Col className='text-center mb-3'>
+              <Button variant='danger' className={`${this.state.slot.slot.location ? '' : 'd-none'}`} onClick={this.requestCancel}>
+                Cancel Appointment
+              </Button>
+            </Col>
+          </Row>
+        </Container>
       </div>
     );
   }

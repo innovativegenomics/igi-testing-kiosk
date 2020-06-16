@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import qrcode from 'qrcode';
 import qs from 'qs';
 
+import { Container, Row, Col } from 'react-bootstrap';
+
 import Navbar from '../navbar.component';
 
 export default class QRCode extends Component {
@@ -26,15 +28,15 @@ export default class QRCode extends Component {
       }
     }
     return (
-      <div style={{ backgroundColor: '#eeeeee' }}>
+      <div>
         <Navbar authed={this.state.authed} />
-        <div className='container'>
-          <div className='row justify-content-center'>
-            <div className='col-md-5'>
+        <Container>
+          <Row className='justify-content-center'>
+            <Col md='5'>
               <img src={this.state.img} style={{ width: '100%' }} alt='QR code' />
-            </div>
-          </div>
-        </div>
+            </Col>
+          </Row>
+        </Container>
       </div>
     );
   }
