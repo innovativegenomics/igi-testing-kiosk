@@ -1,7 +1,7 @@
 module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
   const short = require('short-uuid');
-  const nodemailer = require('nodemailer');
+  const sendEmail = require('../email');
 
   const { Pool } = require('pg');
   const env = process.env.NODE_ENV || 'development';
@@ -18,15 +18,6 @@ module.exports = async (payload, helpers) => {
 
   const { User, Slot, sequelize } = require('../models');
   const config = require('../config/keys');
-
-
-  const transport = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: config.email.user,
-      pass: config.email.pass
-    }
-  });
 
   const t = await sequelize.transaction();
   try {
@@ -50,14 +41,13 @@ module.exports = async (payload, helpers) => {
           uid: short().new()
         }, {transaction: t});
         try {
-          await transport.sendMail({
-            from: config.email.user,
-            to: user.email,
-            subject: `IGI FAST - Appointment Available Week of ${beginning.format('dddd, MMMM D')}`,
-            // text: 'Please enable html messages to view this email',
-            html: `<h3>New testing appointment available for you during the week of ${beginning.format('dddd, MMMM D')}</h3>
-                  <p>You can schedule a specific time and location on our website <a href='${config.host}'>${config.host}</a>.</p>`,
-          });
+          const success = await sendEmail(user.email,
+                                          `IGI FAST - Appointment Available Week of ${beginning.format('dddd, MMMM D')}`,
+                                          `<h3>New testing appointment available for you during the week of ${beginning.format('dddd, MMMM D')}</h3>
+                                          <p>You can schedule a specific time and location on our website <a href='${config.host}'>${config.host}</a>.</p>`);
+          if(!success) {
+            throw new Error('unsuccessful email');
+          }
         } catch(err) {
           console.error(`error sending reschedule email to user ${user.calnetid}`);
           console.error(err);
