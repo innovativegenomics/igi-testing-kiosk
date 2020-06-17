@@ -46,6 +46,12 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: '',
     },
+    EmailAccessToken: {
+      type: DataTypes.STRING
+    },
+    EmailRefreshToken: {
+      type: DataTypes.STRING
+    },
   }, {});
   Settings.associate = function(models) {
     // associations can be defined here
