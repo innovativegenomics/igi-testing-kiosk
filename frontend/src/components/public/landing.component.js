@@ -30,7 +30,7 @@ export default class Landing extends Component {
   render() {
     return (
       <div>
-        <Navbar />
+        <Navbar devuser={this.state.devmode?this.state.devuser:null} />
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col'>

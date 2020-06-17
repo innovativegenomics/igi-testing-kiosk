@@ -9,6 +9,7 @@ import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
 
+import Admin from './components/admin/admin.component';
 import Scanner from './components/admin/scanner.component';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -28,6 +29,7 @@ export default class App extends Component {
             <Route path='/dashboard' component={Dashboard} />
             <Route path='/scheduler' component={Scheduler} />
 
+            <Route path='/admin/dashboard' component={Admin} />
             <Route path='/admin/scanner' component={Scanner} />
           </div>
         </Router>

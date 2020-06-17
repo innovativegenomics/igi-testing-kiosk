@@ -25,7 +25,7 @@ export const getSlotInfo = async uid => {
 export const completeSlot = async uid => {
   try {
     const response = await axios.post('/api/admin/complete', { uid: uid });
-    return response;
+    return response.data;
   } catch(err) {
     console.error(`Can't complete slot`);
     console.error(err);
@@ -33,10 +33,10 @@ export const completeSlot = async uid => {
   }
 }
 
-export const searchSlots = async term => {
+export const searchSlots = async (term, sort, order) => {
   try {
-    const response = await axios.get('/api/admin/search', { params: { term: term } });
-    return response;
+    const response = await axios.get('/api/admin/search', { params: { term: term, sort: sort, order: order } });
+    return response.data;
   } catch(err) {
     console.error(`Can't search slots`);
     console.error(err);

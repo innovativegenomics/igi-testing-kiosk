@@ -123,7 +123,9 @@ router.get('/search', cas.block, async (request, response) => {
         time: v.Slots[0].time,
         location: v.Slots[0].location,
         uid: v.Slots[0].uid,
+        completed: v.Slots[0].completed,
         name: `${v.firstname} ${v.lastname}`,
+        calnetid: v.calnetid,
       });
     });
     response.send({success: true, results: res});
