@@ -5,6 +5,14 @@ const { sequelize, Admin } = require('../../models');
 
 const cas = require('../../cas');
 
+/**
+ * User admin levels:
+ * 0 - basic, can view user appointments from QR Code scan or search
+ * 10 - station 2, can mark user as completed
+ * 20 - can view statistics
+ * 30 - can add new admin users
+ */
+
 router.get('/login', cas.bounce, async (request, response) => {
   const calnetid = request.session.cas_user;
   const uid = request.query.uid;
@@ -14,6 +22,7 @@ router.get('/login', cas.bounce, async (request, response) => {
     if(user) {
       await t.commit();
       request.session.usertype='admin';
+      request.session.adminlevel=newuser.level;
       response.redirect('/admin/dashboard');
     } else {
       if(!uid) {
@@ -32,6 +41,7 @@ router.get('/login', cas.bounce, async (request, response) => {
             await newuser.save();
             await t.commit();
             request.session.usertype='admin';
+            request.session.adminlevel=newuser.level;
             response.redirect('/admin/dashboard');
           } else {
             await t.commit();
@@ -48,5 +58,7 @@ router.get('/login', cas.bounce, async (request, response) => {
     response.status(500);
   }
 });
+
+
 
 module.exports = router;
