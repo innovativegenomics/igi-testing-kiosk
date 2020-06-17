@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const moment = require('moment');
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const { Sequelize, sequelize, Admin, Slot, User } = require('../../models');
 const Op = Sequelize.Op;
@@ -129,6 +130,34 @@ router.get('/search', cas.block, async (request, response) => {
   } else {
     pino.info('unauthed');
     response.status(401).send('Unauthorized');
+  }
+});
+
+router.post('/complete', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = request.session.adminlevel;
+  if(!!level && level >= 10) {
+    const t = await sequelize.transaction();
+    try {
+      const slot = await Slot.findOne({
+        where: {
+          uid: request.body.uid,
+        },
+        transaction: t,
+      });
+      slot.completed = moment().toDate();
+      await slot.save();
+      await t.commit();
+      response.send({success: true});
+    } catch(err) {
+      pino.error(`Error completing appointment for ${uid}`);
+      pino.error(err);
+      await t.rollback();
+      response.send({success: false});
+    }
+  } else {
+    pino.error(`Not authed`);
+    response.status(401).send();
   }
 });
 
