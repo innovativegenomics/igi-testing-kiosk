@@ -11,6 +11,9 @@ export default class About extends Component {
         <Navbar />
         <div className='container'>
           <h1 className='text-center font-weight-light w-100'>About</h1>
+          <p>
+            IGI Testing Kiosks
+          </p>
         </div>
       </div>
     );
