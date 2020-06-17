@@ -13,6 +13,7 @@ router.get('/login', cas.bounce, async (request, response) => {
     const user = await Admin.findOne({where: {calnetid: calnetid}, transaction: t});
     if(user) {
       await t.commit();
+      request.session.usertype='admin';
       response.redirect('/admin/dashboard');
     } else {
       if(!uid) {
@@ -30,6 +31,7 @@ router.get('/login', cas.bounce, async (request, response) => {
             newuser.calnetid = calnetid;
             await newuser.save();
             await t.commit();
+            request.session.usertype='admin';
             response.redirect('/admin/dashboard');
           } else {
             await t.commit();

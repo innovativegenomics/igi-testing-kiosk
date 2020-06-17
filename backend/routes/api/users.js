@@ -21,6 +21,7 @@ router.get('/login', cas.bounce, async (request, response) => {
   if (user) {
     user.lastlogin = moment().toDate();
     await user.save();
+    request.session.usertype='patient';
     response.redirect('/dashboard');
   } else {
     if (!require('../../config/keys').newusers) {
@@ -28,6 +29,7 @@ router.get('/login', cas.bounce, async (request, response) => {
       request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for user ${calnetid}`); pino.error(err)}});
       response.status(401).send('Unauthorized user');
     } else {
+      request.session.usertype='patient';
       response.redirect('/newuser');
     }
   }
