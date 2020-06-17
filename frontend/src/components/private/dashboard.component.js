@@ -3,7 +3,7 @@ import { Link, Redirect } from 'react-router-dom';
 import moment from 'moment';
 
 import { getUser } from '../../actions/authActions';
-import { getSlot, cancelSlot } from '../../actions/scheduleActions';
+import { getSlot, cancelSlot } from '../../actions/slotActions';
 
 import Navbar from '../navbar.component';
 

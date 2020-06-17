@@ -63,13 +63,12 @@ router.get('/login', cas.bounce, async (request, response) => {
 
 router.get('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  pino.info(calnetid);
   const level = request.session.adminlevel;
   if(!!level && level >= 0) {
     try {
       const slot = await Slot.findOne({
         where: {
-          uid: request.body.uid || ''
+          uid: request.query.uid || ''
         },
         include: User
       });
@@ -99,7 +98,7 @@ router.get('/search', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = request.session.adminlevel;
   if(!!level && level >= 0) {
-    const term = request.body.term || '';
+    const term = request.query.term || '';
     const users = await User.findAll({
       where: {
         [Op.or]: {
@@ -159,6 +158,10 @@ router.post('/complete', cas.block, async (request, response) => {
     pino.error(`Not authed`);
     response.status(401).send();
   }
+});
+
+router.get('/level', cas.block, async (request, response) => {
+  response.send({ success: true, level: request.session.adminlevel });
 });
 
 module.exports = router;

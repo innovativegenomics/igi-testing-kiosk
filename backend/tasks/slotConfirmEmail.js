@@ -6,7 +6,7 @@ module.exports = async (payload, helpers) => {
   const config = require('../config/keys');
 
   const { email, uid, day, timeStart, timeEnd, location, locationLink } = payload;
-  const scanUrl = config.host + '/scanner?uid=' + uid;
+  const scanUrl = config.host + '/admin/scanner?uid=' + uid;
   const qrUrl = config.host + '/qrcode?uid=' + uid;
   const qrData = await qrcode.toDataURL(scanUrl);
   await sendEmail(email,

@@ -23,15 +23,12 @@ export default class Navbar extends Component {
             <li className='nav-item pl-5'>
               <Link className='text-white lead' to='/about'>About</Link>
             </li>
-            <li className={`nav-item pl-5 ${(this.props.authed) ? '' : 'd-none'}`}>
-              <Link className='text-white lead' to='/dashboard'>Dashboard</Link>
-            </li>
-            <li className={`nav-item pl-5 ${(this.props.admin > 0) ? '' : 'd-none'}`}>
+            <li className={`nav-item pl-5 ${(this.props.authed || this.props.admin) ? '' : 'd-none'}`}>
+              <Link className='text-white lead' to={this.props.admin?'/admin/dashboard':'/dashboard'}>Dashboard</Link>
             </li>
           </ul>
           <form className='form-inline'>
-            <Link className={'btn btn-success mr-3 ' + ((this.props.admin > 0) ? '' : 'd-none')} to='/admin'>Admin</Link>
-            <LogoutLink visible={this.props.authed || this.props.showLogout} address='/api/users/logout' />
+            <LogoutLink visible={this.props.authed || this.props.showLogout} address={this.props.admin?'/api/admin/logout':'/api/users/logout'} />
           </form>
         </div>
       </nav>
