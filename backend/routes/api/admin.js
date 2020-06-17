@@ -81,6 +81,7 @@ router.get('/slot', cas.block, async (request, response) => {
             time: slot.time,
             location: slot.location,
             uid: slot.uid,
+            completed: slot.completed,
             name: `${slot.User.firstname} ${slot.User.lastname}`,
           },
         });

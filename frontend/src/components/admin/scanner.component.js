@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Container, Row, Col, Alert } from 'react-bootstrap';
+import { Container, Row, Col, Alert, Button } from 'react-bootstrap';
 import qs from 'qs';
 import moment from 'moment';
 
 import Navbar from '../navbar.component';
-import { getAdminLevel, getSlotInfo } from '../../actions/adminActions';
+import { getAdminLevel, getSlotInfo, completeSlot } from '../../actions/adminActions';
 
 export default class Scanner extends Component {
   constructor(props) {
@@ -15,11 +15,16 @@ export default class Scanner extends Component {
       loaded: false,
       slot: null,
       slotLoaded: false,
+      completed: false,
     };
+  }
+  completeSlot = async () => {
+    console.log('here');
+    this.setState({completed: true});
+    const response = await completeSlot(this.state.slot.uid);
   }
   componentDidMount = async () => {
     const uid = qs.parse(this.props.location.search, {ignoreQueryPrefix: true}).uid;
-    console.log(uid);
     const admin = getAdminLevel();
     const slot = getSlotInfo(uid);
     this.setState({loaded: true, level: (await admin).level});
@@ -37,6 +42,9 @@ export default class Scanner extends Component {
     if(!this.state.slot) {
       clear = false;
       error = 'No appointment exists for this QR code!';
+    } else if(this.state.slot.completed) {
+      clear = false;
+      error = `This appointment has already been completed`;
     } else if(!this.state.slot.location) {
       clear = false;
       error = `This patient has either not scheduled an appointment, or has cancelled their appointment`;
@@ -75,7 +83,12 @@ export default class Scanner extends Component {
             </Col>
           </Row>
           <Row className='justify-content-center text-center'>
-            {(this.state.slot.location)?
+            <Col className={(this.state.level>=10&&clear?'':'d-none')}>
+              <Button onClick={e => this.completeSlot()} disabled={this.state.completed}>Show Appointment Details</Button>
+            </Col>
+          </Row>
+          <Row className='justify-content-center text-center'>
+            {(this.state.completed)?
             <Col md='6'>
               <h3 className='text-center font-weight-light'>
                 <u>Appointment Details</u>
