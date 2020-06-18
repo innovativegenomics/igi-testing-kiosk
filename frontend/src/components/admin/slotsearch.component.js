@@ -47,7 +47,7 @@ export default class SlotSearch extends Component {
         <td>{i+1}</td>
         <td>{v.calnetid}</td>
         <td>{v.name}</td>
-        <td>{moment(v.time).format('dddd, MMMM D h:mm A')}</td>
+        <td>{!!v.location?moment(v.time).format('dddd, MMMM D h:mm A'):'Week of '+moment(v.time).format('dddd, MMMM D')}</td>
         <td>{v.location}</td>
         <td>{!!v.completed?moment(v.completed).format('dddd, MMMM D h:mm A'):'Not Completed'}</td>
         {this.props.level>=10?
