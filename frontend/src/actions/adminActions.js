@@ -43,3 +43,47 @@ export const searchSlots = async (term, sort, order) => {
     return { success: false };
   }
 }
+
+export const getAdmins = async () => {
+  try {
+    const response = await axios.get('/api/admin/admins');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get admins`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const getAdminsPending = async () => {
+  try {
+    const response = await axios.get('/api/admin/admins/pending');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get admins pending`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const removeAdmin = async uid => {
+  try {
+    const response = await axios.delete('/api/admin/admins', { params: { uid: uid } });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't remove admin ${uid}`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const createAdmin = async (name, email, level) => {
+  try {
+    const response = await axios.post('/api/admin/admins', { name: name, email: email, level: level });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't create admin ${name}`);
+    console.error(err);
+    return { success: false };
+  }
+}

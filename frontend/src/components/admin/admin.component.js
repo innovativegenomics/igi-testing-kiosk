@@ -5,6 +5,7 @@ import { Nav } from 'react-bootstrap';
 import Navbar from '../navbar.component';
 import { getAdminLevel } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
+import AdminUsers from './adminusers.component';
 
 export default class Admin extends Component {
   constructor(props) {
@@ -33,8 +34,12 @@ export default class Admin extends Component {
           <Nav.Item>
             <Nav.Link eventKey='slot-search'>Appointment Search</Nav.Link>
           </Nav.Item>
+          <Nav.Item className={this.state.level>=30?'':'d-none'}>
+            <Nav.Link eventKey='admin-users'>Manage Admins</Nav.Link>
+          </Nav.Item>
         </Nav>
         {this.state.selected === 'slot-search'?<SlotSearch level={this.state.level} />:<br />}
+        {this.state.selected === 'admin-users'?<AdminUsers level={this.state.level} />:<br />}
       </div>
     );
   }
