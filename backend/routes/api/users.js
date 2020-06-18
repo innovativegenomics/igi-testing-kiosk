@@ -120,11 +120,26 @@ router.post('/profile', cas.block, async (request, response) => {
         phone: request.body.phone,
         questions: request.body.questions,
       }, { transaction: t1 });
-      await user.createSlot({
-        calnetid: calnetid,
-        time: moment().startOf('week').toDate(),
-        uid: short().new()
-      }, { transaction: t1 });
+      const settings = await Settings.findOne({transaction: t1});
+      if(settings.days[settings.days.length-1] < moment().day() || (settings.days[settings.days.length-1] === moment().day() && settings.endtime <= moment().hour())) {
+        await user.createSlot({
+          calnetid: calnetid,
+          time: moment().startOf('week').add(1, 'week').toDate(),
+          uid: short().new()
+        }, { transaction: t1 });
+      } else if(require('../../config/keys').nextweek) {
+        await user.createSlot({
+          calnetid: calnetid,
+          time: moment().startOf('week').add(1, 'week').toDate(),
+          uid: short().new()
+        }, { transaction: t1 });
+      } else {
+        await user.createSlot({
+          calnetid: calnetid,
+          time: moment().startOf('week').toDate(),
+          uid: short().new()
+        }, { transaction: t1 });
+      }
       await t1.commit();
       response.send({ success: true });
     } catch (err) {
