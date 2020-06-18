@@ -51,7 +51,7 @@ export default class SlotSearch extends Component {
         <td>{v.location}</td>
         <td>{!!v.completed?moment(v.completed).format('dddd, MMMM D h:mm A'):'Not Completed'}</td>
         {this.props.level>=10?
-          <td><Button size='sm' variant={!!v.completed?'secondary':'primary'} onClick={e => this.markAsComplete(v.uid)} disabled={!!v.completed}>{!!v.completed?`Completed`:`Mark as Complete`}</Button></td>
+          <td><Button size='sm' className={!!v.location?'':'d-none'} variant={!!v.completed?'secondary':'primary'} onClick={e => this.markAsComplete(v.uid)} disabled={!!v.completed}>{!!v.completed?`Completed`:`Mark as Complete`}</Button></td>
           :
           <br />
         }
