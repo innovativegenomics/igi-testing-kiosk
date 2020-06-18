@@ -25,6 +25,21 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    question1: {
+      type: DataTypes.INTEGER
+    },
+    question2: {
+      type: DataTypes.INTEGER
+    },
+    question3: {
+      type: DataTypes.STRING
+    },
+    question4: {
+      type: DataTypes.STRING
+    },
+    question5: {
+      type: DataTypes.STRING
+    },
   }, {});
   Slot.associate = function(models) {
     // associations can be defined here

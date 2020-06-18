@@ -110,7 +110,8 @@ router.get('/slot', cas.block, async (request, response) => {
  * request:
  * {
  *   location: string,
- *   time: Moment
+ *   time: Moment,
+ *   questions: [],
  * }
  * response:
  * {success: true|false, error: undefined|[string]}
@@ -123,6 +124,7 @@ router.post('/slot', cas.block, async (request, response) => {
   try {
     const reqtime = moment(request.body.time);
     const reqlocation = request.body.location;
+    const questions = request.body.questions;
     const settings = await Settings.findOne({transaction: t});
     const slot = (await Slot.findAll({
       limit: 1,
@@ -160,6 +162,11 @@ router.post('/slot', cas.block, async (request, response) => {
       slot.time = reqtime.toDate();
       slot.location = reqlocation;
       slot.scheduled = moment().toDate();
+      slot.question1 = questions.question1;
+      slot.question2 = questions.question2;
+      slot.question3 = questions.question3;
+      slot.question4 = questions.question4;
+      slot.question5 = questions.question5;
       await slot.save();
       await t.commit();
       response.send({success: true});

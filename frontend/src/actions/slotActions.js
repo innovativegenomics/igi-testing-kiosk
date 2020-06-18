@@ -29,9 +29,9 @@ export const getAvailable = async () => {
 /**
  * @returns {Promise} Promise resolves when user loaded
  */
-export const requestSlot = async (slot, location) => {
+export const requestSlot = async (slot, location, questions) => {
   try {
-    const response = await axios.post('/api/slots/slot', { time: slot, location: location });
+    const response = await axios.post('/api/slots/slot', { time: slot, location: location, questions: questions });
     return response.data;
   } catch (err) {
     console.error('error requesting slot');
