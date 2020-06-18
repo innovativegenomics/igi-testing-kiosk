@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, ButtonGroup, Row, Col, Form } from 'react-bootstrap';
 import Navbar from '../navbar.component';
 import moment from 'moment';
 
@@ -148,30 +148,23 @@ class ConfirmModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      question0: null,
-      question1: null,
-      question2: null,
-      question3: null,
-      question4: null,
-      question5: null,
-      question6: null,
+      question1: 0,
+      question2: 0,
+      question3: '',
+      question4: 'None',
+      question5: 'No',
     }
   }
   render() {
     var isComplete = true;
     for (var k in this.state) {
-      if (this.state[k] === null) {
+      if (this.state[k] === '') {
         isComplete = false;
         break;
       }
     }
-    var symtomatic = false;
-    for (var k in this.state) {
-      if (this.state[k] === true) {
-        symtomatic = true;
-        break;
-      }
-    }
+    const symtomatic = false;
+
     return (
       <div className="modal fade" id='confirmModal' tabIndex="-1" role="dialog">
         <div className="modal-dialog modal-lg" role="document">
@@ -186,66 +179,60 @@ class ConfirmModal extends Component {
               <p>Confirm that you would like to reserve this time slot</p>
               <p className='lead'>{this.props.selected ? this.props.selected.format('dddd, MMMM D h:mm A') : ''} at {this.props.location}</p>
               <h3>Please answer the following survey before you confirm your appointment</h3>
-              <p>None of these responses will be recorded</p>
-              <Question question='Have you been diagnosed with Covid 19 in the past 30 days?'
-                selected={this.state.question0}
-                option1='Yes'
-                option2='No'
-                option1Click={e => this.setState({ question0: true })}
-                option2Click={e => this.setState({ question0: false })} />
-              <Question question='Have you traveled in the past 14 days?'
-                selected={this.state.question1}
-                option1='Yes'
-                option2='No'
-                option1Click={e => this.setState({ question1: true })}
-                option2Click={e => this.setState({ question1: false })} />
-              <Question question='Do you live with someone who has been diagnosed with COVID-19 in the past 30 days?'
-                selected={this.state.question2}
-                option1='Yes'
-                option2='No'
-                option1Click={e => this.setState({ question2: true })}
-                option2Click={e => this.setState({ question2: false })} />
-              <Question question='Have you been in unprotected (without full, approved PPE) contact with anyone 
-                                        diagnosed with COVID-19 or associated biofluids/clinical samples in the past 14 days?'
-                selected={this.state.question3}
-                option1='Yes'
-                option2='No'
-                option1Click={e => this.setState({ question3: true })}
-                option2Click={e => this.setState({ question3: false })} />
-              <Question question='What is your current temperature?'
-                selected={this.state.question4}
-                option1='Over 100F'
-                option2='Under 100F'
-                option1Click={e => this.setState({ question4: true })}
-                option2Click={e => this.setState({ question4: false })} />
-              <Question question='In the last 24 hours, have you had any of:'
-                selected={this.state.question5}
-                option1='Yes'
-                option2='No'
-                option1Click={e => this.setState({ question5: true })}
-                option2Click={e => this.setState({ question5: false })}
-                list={['New cough?',
-                  'Difficulty breathing?',
-                  'Repeated shaking with chills?',
-                  'Nausea/vomiting?',
-                  'Shortness of breath?',
-                  'New loss of taste or smell?']} />
-              <Question question='In the last 24 hours, have you had any TWO of the following:'
-                selected={this.state.question6}
-                option1='Yes'
-                option2='No'
-                option1Click={e => this.setState({ question6: true })}
-                option2Click={e => this.setState({ question6: false })}
-                list={['Persistent runny nose?',
-                  'Unexplained muscle aches?',
-                  'Congestion?',
-                  'Sneezing?',
-                  'Sore throat?',
-                  'Headache?',
-                  'Diarrhea?']} />
+              
+              <Row>
+                <Col md={9}>
+                  <p>In the two weeks leading up to this appointment, how many days have/will you work on campus?</p>
+                </Col>
+                <Col md={2}>
+                  <Form.Control type='number' value={this.state.question1} min={0} step={1} pattern='\d+' onChange={e => this.setState({question1: parseInt(e.target.value)})}/>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={9}>
+                  <p>For the days you are/have been on campus in the two weeks leading up to this appointment, how many hours are you on campus, on average?</p>
+                </Col>
+                <Col md={2}>
+                  <Form.Control type='number' value={this.state.question2} min={0} step={1} pattern='\d+' onChange={e => this.setState({question2: parseInt(e.target.value)})}/>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={7}>
+                  <p>When you are working on campus, what building is your primary work space in?</p>
+                </Col>
+                <Col md={4}>
+                  <Form.Control type='text' placeholder='Building' value={this.state.question3} onChange={e => this.setState({question3: e.target.value})}/>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={9}>
+                  <p>Are you using a mobile contact tracing application? If so, which one?</p>
+                </Col>
+                <Col md={2}>
+                  <ButtonGroup>
+                    <Button variant={this.state.question4==='None'?'secondary':'primary'} onClick={e => this.setState({question4: ''})}>Yes</Button>
+                    <Button variant={this.state.question4==='None'?'primary':'secondary'} onClick={e => this.setState({question4: 'None'})}>No</Button>
+                  </ButtonGroup>
+                </Col>
+                <Col md={4}>
+                  <Form.Control type='text' className={this.state.question4==='None'?'d-none':''} placeholder='App Name' value={this.state.question4} onChange={e => this.setState({question4: e.target.value})}/>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={7}>
+                  <p>Have you ever been diagnosed with COVID-19?</p>
+                </Col>
+                <Col md={5}>
+                  <ButtonGroup>
+                    <Button variant={this.state.question5==='Yes'?'primary':'secondary'} onClick={e => this.setState({question5: 'Yes'})}>Yes</Button>
+                    <Button variant={this.state.question5==='No'?'primary':'secondary'} onClick={e => this.setState({question5: 'No'})}>No</Button>
+                    <Button variant={this.state.question5==='Decline to state'?'primary':'secondary'} onClick={e => this.setState({question5: 'Decline to state'})}>Decline to state</Button>
+                  </ButtonGroup>
+                </Col>
+              </Row>
             </div>
             <div className="modal-footer">
-              <button type="button" className="btn btn-primary" data-dismiss="modal" disabled={!isComplete} onClick={e => this.props.onSubmit(symtomatic)}>Confirm</button>
+              <button type="button" className="btn btn-primary" data-dismiss="modal" disabled={!isComplete} onClick={e => this.props.onSubmit(this.state)}>Confirm</button>
               <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
           </div>
@@ -281,13 +268,13 @@ export default class Scheduler extends Component {
     getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
     getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true } }));
   }
-  submitRequest = s => {
-    if (s) {
-      return this.setState({ showSymtomaticModal: true });
-    }
+  submitRequest = qs => {
+    // if (s) {
+    //   return this.setState({ showSymtomaticModal: true });
+    // }
     console.log(this.state.selected);
     console.log(this.state.location);
-    requestSlot(this.state.selected, this.state.location).then(res => {
+    requestSlot(this.state.selected, this.state.location, qs).then(res => {
       if (!res.success) {
         alert('Unable to assign you that slot. Please try again!');
       } else {
@@ -344,7 +331,7 @@ export default class Scheduler extends Component {
           <Modal.Body>
             You indicated on the symtom questionaire that you are experiencing symtoms linked to Covid 19.
             Please consult the UC Berkeley Tang center for a testing appointment. Thanks!
-                    </Modal.Body>
+          </Modal.Body>
           <Modal.Footer>
             <Button variation='primary' onClick={e => window.open('/dashboard', '_self')}>Ok</Button>
           </Modal.Footer>
