@@ -4,7 +4,7 @@ const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
 const { sequelize, Sequelize, Slot, User, Settings } = require('../../models');
-const { scheduleSlotConfirmEmail, scheduleSlotConfirmText } = require('../../scheduler');
+const { scheduleSlotConfirmEmail, scheduleSlotConfirmText, scheduleAppointmentReminderEmail, scheduleAppointmentReminderText } = require('../../scheduler');
 const Op = Sequelize.Op;
 const cas = require('../../cas');
 
@@ -172,6 +172,7 @@ router.post('/slot', cas.block, async (request, response) => {
                                       moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
                                       slot.location,
                                       settings.locationlinks[settings.locations.indexOf(slot.location)]);
+        await scheduleAppointmentReminderEmail(user.email, moment(slot.time));
         if(user.phone) {
           await scheduleSlotConfirmText(user.phone, 
                                         slot.uid, 
@@ -180,6 +181,7 @@ router.post('/slot', cas.block, async (request, response) => {
                                         moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
                                         slot.location,
                                         settings.locationlinks[settings.locations.indexOf(slot.location)]);
+          await scheduleAppointmentReminderText(user.phone, moment(slot.time));
         }
       } catch(err) {
         pino.error(`Can't schedule confirm notifications for user ${calnetid}`);
