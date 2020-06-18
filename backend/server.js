@@ -9,6 +9,7 @@ process.env.TZ = 'America/Los_Angeles';
 const { sequelize } = require('./models');
 const users = require('./routes/api/users');
 const slots = require('./routes/api/slots');
+const admin = require('./routes/api/admin');
 
 const { verifyTasks, scheduleRescheduleUsers } = require('./scheduler');
 
@@ -51,6 +52,7 @@ app.disable('x-powered-by');
 
     app.use('/api/users', users);
     app.use('/api/slots', slots);
+    app.use('/api/admin', admin);
     const port = process.env.PORT || 5000;
     app.listen(port, () => {
       pino.info(`Server up and running on port ${port} !`);

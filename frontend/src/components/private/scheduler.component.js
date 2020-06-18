@@ -5,7 +5,7 @@ import Navbar from '../navbar.component';
 import moment from 'moment';
 
 import { getUser } from '../../actions/authActions';
-import { getAvailable, requestSlot } from '../../actions/scheduleActions';
+import { getAvailable, requestSlot } from '../../actions/slotActions';
 
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 

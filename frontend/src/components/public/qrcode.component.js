@@ -18,7 +18,7 @@ export default class QRCode extends Component {
     if (this.state.img === '') {
       const query = qs.parse(this.props.location.search, { ignoreQueryPrefix: true });
       if (query.uid) {
-        const scanUrl = window.location.protocol + '//' + window.location.host + '/scanner?uid=' + query.uid;
+        const scanUrl = window.location.protocol + '//' + window.location.host + '/admin/scanner?uid=' + query.uid;
         console.log(scanUrl);
         qrcode.toDataURL(scanUrl, { errorCorrectionLevel: 'H' }).then(res => {
           this.setState({ img: res });
