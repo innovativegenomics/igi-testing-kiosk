@@ -40,7 +40,12 @@ export default class Landing extends Component {
           <div className='row justify-content-center'>
             <div className='col'>
               <p className='h2 font-weight-light text-center'>
-                IGI Free Asymptomatic Saliva Testing
+                IGI Free Asymptomatic Saliva Testing 
+              </p>
+              <p>
+              </p>
+              <p className='h3 font-weight-light text-center'>
+                To enroll and schedule appointments:
               </p>
             </div>
           </div>
