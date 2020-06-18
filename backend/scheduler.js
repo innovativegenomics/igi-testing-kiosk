@@ -49,9 +49,30 @@ module.exports.scheduleSignupEmail = async (email) => {
 }
 
 module.exports.scheduleRescheduleUsers = async () => {
-  await workerUtils.addJob('rescheduleUsers', {}, { runAt: moment().startOf('week').add(1, 'week').add(1, 'minute'), jobKey: 'reschedule', queueName: 'rescheduleQueue' });
+  await workerUtils.addJob('rescheduleUsers', {}, { runAt: moment().startOf('week').add(1, 'week').add(1, 'minute').toDate(), jobKey: 'reschedule', queueName: 'rescheduleQueue' });
 }
 
 module.exports.scheduleNewAdminEmail = async (email, uid) => {
   await workerUtils.addJob('newAdminEmail', {email: email, uid: uid});
+}
+
+/**
+ * 30 minute reminders
+ * @param {string} email
+ * @param {moment.Moment} slot - the time slot they signed up for
+ */
+module.exports.scheduleAppointmentReminderEmail = async (email, slot) => {
+  await workerUtils.addJob('appointmentReminderEmail', { email: email }, {
+    runAt: slot.clone().subtract(30, 'minute'),
+    jobKey: `${email}`,
+    queueName: '30minutes'
+  });
+}
+
+module.exports.scheduleAppointmentReminderText = async (number, slot) => {
+  await workerUtils.addJob('appointmentReminderText', { number: number }, {
+    runAt: slot.clone().subtract(30, 'minute'),
+    jobKey: `${number}`,
+    queueName: '30minutes'
+  });
 }
