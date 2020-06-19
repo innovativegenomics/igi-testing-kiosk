@@ -95,11 +95,16 @@ router.get('/slot', cas.block, async (request, response) => {
   try {
     const slot = (await Slot.findAll({
       limit: 1,
-      attributes: ['location', 'time', 'uid'],
+      attributes: ['location', 'time', 'uid', 'completed'],
       where: { calnetid: calnetid },
       order: [['time', 'desc']],
     }))[0];
-    response.json({ success: true, slot: slot });
+    response.json({ success: true, slot: {
+      location: slot.location,
+      time: slot.time,
+      uid: slot.uid,
+      completed: slot.completed,
+    }});
   } catch (err) {
     response.json({ success: false });
   }
