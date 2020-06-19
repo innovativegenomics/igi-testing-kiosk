@@ -3,6 +3,8 @@ import qrcode from 'qrcode';
 import qs from 'qs';
 
 import { getUser } from '../../actions/authActions';
+import berkeleyLogo from '../../media/berkeley_logo.png';
+
 import Navbar from '../navbar.component';
 
 export default class QRCode extends Component {
@@ -45,6 +47,10 @@ export default class QRCode extends Component {
             </div>
           </div>
         </div>
+        <footer className='navbar navbar-light bg-transparent'>
+          <div className='navbar-nav'></div>
+          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
+        </footer>
       </div>
     );
   }

@@ -5,6 +5,8 @@ import { validate as validateEmail } from 'email-validator';
 import { postcodeValidator } from 'postcode-validator';
 import moment from 'moment';
 
+import berkeleyLogo from '../../media/berkeley_logo.png';
+
 import Navbar from '../navbar.component';
 import ToSModal from './tos.component';
 
@@ -477,6 +479,10 @@ export default class NewUser extends Component {
             <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
           </Modal.Footer>
         </Modal>
+        <footer className='navbar navbar-light bg-transparent'>
+          <div className='navbar-nav'></div>
+          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
+        </footer>
       </div>
     );
   }

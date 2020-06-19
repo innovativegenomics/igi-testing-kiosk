@@ -3,6 +3,8 @@ import { Link, Redirect } from 'react-router-dom';
 import { Row, Col, Alert } from 'react-bootstrap';
 import moment from 'moment';
 
+import berkeleyLogo from '../../media/berkeley_logo.png';
+
 import { getUser } from '../../actions/authActions';
 import { getSlot, cancelSlot } from '../../actions/slotActions';
 
@@ -99,6 +101,10 @@ export default class Dashboard extends Component {
             </Col>
           </Row>
         </div>
+        <footer className='navbar navbar-light bg-transparent'>
+          <div className='navbar-nav'></div>
+          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
+        </footer>
       </div>
     );
   }

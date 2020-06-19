@@ -7,6 +7,7 @@ import infoSheet from '../../media/IGI_study_info_sheet.pdf';
 import infoSheetSpanish from '../../media/IGI_FAST_info_sheet_Spanish.pdf';
 import informedConsent from '../../media/Informed_Consent_20200610.pdf';
 import informedConsentSpanish from '../../media/IGI_FAST_Informed_Consent_20200612_Spanish.pdf';
+import berkeleyLogo from '../../media/berkeley_logo.png';
 
 import { getUser } from '../../actions/authActions';
 import Navbar from '../navbar.component';
@@ -113,6 +114,10 @@ export default class About extends Component {
             <li><a href={informedConsent}>IGI FAST Informed Consent</a> - <a href={informedConsent}>English</a>, <a href={informedConsentSpanish}>Español</a></li>
           </ul>
         </Container>
+        <footer className='navbar navbar-light bg-transparent'>
+          <div className='navbar-nav'></div>
+          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
+        </footer>
       </div>
     );
   }

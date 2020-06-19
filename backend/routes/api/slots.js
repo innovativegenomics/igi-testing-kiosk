@@ -52,12 +52,12 @@ router.get('/available', cas.block, async (request, response) => {
         if (now.isAfter(week.clone().set('day', day), 'day')) {
           continue;
         } else {
-          for (var i = week.clone().set('day', day).set('hour', settings.starttime); i.get('hour') < settings.endtime; i = i.add(settings.window, 'minute')) {
+          for (var i = week.clone().set('day', day).set('hour', settings.starttime).set('minute', settings.startminute); i.isBefore(i.clone().set('hour', settings.endtime).set('minute', settings.endminute)); i = i.add(settings.window, 'minute')) {
             // pino.debug(`slot: ${i}`);
             if (i.isBefore(now)) {
               continue;
             } else {
-              open[location][i.clone()] = settings.buffer;
+              open[location][i.clone()] = (i.hour() < 14?4:settings.buffer);
             }
           }
         }
@@ -142,9 +142,9 @@ router.post('/slot', cas.block, async (request, response) => {
       throw new Error('slot not valid');
     } else if(!settings.locations.includes(reqlocation)) {
       throw new Error('location not valid');
-    } else if(moment.duration(reqtime.diff(reqtime.clone().set('hour', settings.starttime).set('minute', 0))).asMinutes() % settings.window > 0) {
+    } else if(moment.duration(reqtime.diff(reqtime.clone().set('hour', settings.starttime).set('minute', settings.startminute))).asMinutes() % settings.window > 0) {
       throw new Error('slot not valid');
-    } else if(!reqtime.isBetween(reqtime.clone().set('hour', settings.starttime), reqtime.clone().set('hour', settings.endtime), null, '[)')) {
+    } else if(!reqtime.isBetween(reqtime.clone().set('hour', settings.starttime).set('minute', settings.startminute), reqtime.clone().set('hour', settings.endtime).set('minute', settings.endminute), null, '[)')) {
       throw new Error('slot not valid');
     } else if(!settings.days.includes(reqtime.day())) {
       throw new Error('slot not valid');
@@ -161,7 +161,7 @@ router.post('/slot', cas.block, async (request, response) => {
       },
       transaction: t,
     });
-    if(takenCount >= settings.buffer) {
+    if(takenCount >= (reqtime.hour()<14?4:settings.buffer)) {
       throw new Error('Slot is already full');
     } else {
       slot.time = reqtime.toDate();
