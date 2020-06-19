@@ -109,11 +109,11 @@ export default class About extends Component {
           </p>
           <ul>
             <li><a href={billOfRights}>IGI FAST Bill of Rights</a></li>
-            <li><a href={billOfRightsSpanish}>IGI FAST Bill of Rights En Espanol</a></li>
+            <li><a href={billOfRightsSpanish}>IGI FAST Bill of Rights En Español</a></li>
             <li><a href={infoSheet}>IGI FAST Info Sheet</a></li>
-            <li><a href={infoSheetSpanish}>IGI FAST Info Sheet En Espanol</a></li>
+            <li><a href={infoSheetSpanish}>IGI FAST Info Sheet En Español</a></li>
             <li><a href={informedConsent}>IGI FAST Informed Consent</a></li>
-            <li><a href={informedConsentSpanish}>IGI FAST Informed Consent En Espanol</a></li>
+            <li><a href={informedConsentSpanish}>IGI FAST Informed Consent En Español</a></li>
           </ul>
         </Container>
       </div>
