@@ -10,11 +10,12 @@ module.exports = async (payload, helpers) => {
   const qrUrl = config.host + '/qrcode?uid=' + uid;
   const qrData = await qrcode.toDataURL(scanUrl);
   await sendEmail(email,
-                  `Testing Appointment Confirmation for ${day}`,
+                  `IGI FAST Appointment ${day}`,
                   `<h1>Appointment Confirmation for ${day}</h1>
                    <h2>Please arrive at <a href='${locationLink}'>${location}</a> between ${timeStart} and ${timeEnd}</h2>
                    <h2>Bring your phone or another device to display the QR Code below</h2>
-                   <h2>Make sure to complete the screening questionaire 4 or less hours before your appointment.</h2>
+                   <h2>Make sure to complete the campus symptom screener before coming to campus and arrive wearing a mask.</h2>
+                   <h2>Do not eat, drink, chew gum, or smoke for 30 minutes prior to your appointment.</h2>
                    <b><img src="cid:qrcode" style='width: 100%; max-width: 450px;'/></b>
                    <br />
                    <h3>If the above QR code doesn't show correctly, go to <a href='${qrUrl}'>this</a> link</h3>`,
@@ -28,6 +29,10 @@ module.exports = async (payload, helpers) => {
                     {
                       filename: 'IGI_study_info_sheet.pdf',
                       path: './media/IGI_study_info_sheet.pdf'
+                    },
+                    {
+                      filename: 'IGI_study_info_sheet_Spanish.pdf',
+                      path: './media/IGI_FAST_info_sheet_Spanish.pdf'
                     },
                   ]);
 }
