@@ -32,7 +32,7 @@ export default class About extends Component {
       <div>
         <Navbar authed={!this.state.auth.unauthed}/>
         <Container>
-          <p className='display-4 text-center'>IGI FAST: Free Asymtomatic Saliva Testing</p>
+          <p className='display-4 text-center'>IGI FAST: Free Asymptomatic Saliva Testing</p>
           <p>
             Community spread of COVID-19 is likely exacerbated by transmission from people who
             are infected, but don’t display any symptoms. Regular surveillance testing of these
