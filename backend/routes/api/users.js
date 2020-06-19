@@ -121,7 +121,7 @@ router.post('/profile', cas.block, async (request, response) => {
         questions: request.body.questions,
       }, { transaction: t1 });
       const settings = await Settings.findOne({transaction: t1});
-      if(settings.days[settings.days.length-1] < moment().day() || (settings.days[settings.days.length-1] === moment().day() && settings.endtime <= moment().hour())) {
+      if(settings.days[settings.days.length-1] < moment().day() || (settings.days[settings.days.length-1] === moment().day() && moment().isAfter(moment().set('hour', settings.endtime).set('minute', settings.endminute)))) {
         await user.createSlot({
           calnetid: calnetid,
           time: moment().startOf('week').add(1, 'week').toDate(),
@@ -150,7 +150,7 @@ router.post('/profile', cas.block, async (request, response) => {
     }
     
     try {
-      await scheduleSignupEmail(request.body.email);
+      await scheduleSignupEmail(request.body.email, request.body.firstname);
     } catch (err) {
       pino.error(`Coundn't schedule signup email for user ${calnetid}`);
       pino.error(err);
