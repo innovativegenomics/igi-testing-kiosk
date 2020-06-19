@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import qrcode from 'qrcode';
 import qs from 'qs';
 
+import { getUser } from '../../actions/authActions';
 import Navbar from '../navbar.component';
 
 export default class QRCode extends Component {
@@ -11,8 +12,17 @@ export default class QRCode extends Component {
       img: '',
       authed: false,
       loaded: false,
-      loading: false
+      loading: false,
+      auth: {
+        user: {},
+        loaded: false,
+        unauthed: false,
+        success: false
+      },
     };
+  }
+  componentDidMount = async () => {
+    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
   }
   render() {
     if (this.state.img === '') {
@@ -26,8 +36,8 @@ export default class QRCode extends Component {
       }
     }
     return (
-      <div style={{ backgroundColor: '#eeeeee' }}>
-        <Navbar authed={this.state.authed} />
+      <div>
+        <Navbar authed={!this.state.auth.unauthed} />
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col-md-5'>

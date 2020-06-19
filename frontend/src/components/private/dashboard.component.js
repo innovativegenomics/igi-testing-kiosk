@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
+import { Row, Col, Alert } from 'react-bootstrap';
 import moment from 'moment';
 
 import { getUser } from '../../actions/authActions';
@@ -79,11 +80,24 @@ export default class Dashboard extends Component {
           </div>
           <div className={'row justify-content-center '+(this.state.slot.slot.completed?'':'d-none')}>
             <div className='col col-md-6'>
-              <p className=' alert alert-info'>
+              <p className='lead alert alert-info text-center'>
                 Thanks for completing your appointment! You will be able to reschedule for another appointment starting this Sunday.
               </p>
             </div>
           </div>
+          <Row className='justify-content-center'>
+            <Col md={8} className={!!this.state.slot.slot.location&&!this.state.slot.slot.completed?'':'d-none'}>
+              <Alert variant='success'>
+                <h3 className='font-weight-light text-center'>You have an upcoming appointment!</h3>
+                <p className='lead text-center'>
+                  You should have received an appointment confirmation email/text.
+                  When you arrive for your appointment, please wear your mask, and 
+                  bring the QR code that you received in the confirmation email. You can
+                  also view the qr code <Link to={'/qrcode?uid='+this.state.slot.slot.uid}>here</Link>.
+                </p>
+              </Alert>
+            </Col>
+          </Row>
         </div>
       </div>
     );
