@@ -1,14 +1,30 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 
+import { getUser } from '../../actions/authActions';
+
 import './about.css';
 import Navbar from '../navbar.component';
 
 export default class About extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      auth: {
+        user: {},
+        loaded: false,
+        unauthed: false,
+        success: false
+      },
+    };
+  }
+  componentDidMount = async () => {
+    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
+  }
   render() {
     return (
       <div>
-        <Navbar />
+        <Navbar authed={!this.state.auth.unauthed}/>
         <Container>
           <p className='display-4 text-center'>IGI FAST: Free Asymtomatic Saliva Testing</p>
           <p>
