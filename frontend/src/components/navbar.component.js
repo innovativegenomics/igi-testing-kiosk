@@ -26,8 +26,11 @@ export default class Navbar extends Component {
             <li className={`nav-item pl-5 ${(!this.props.authed && !this.props.admin) ? '' : 'd-none'}`}>
               <a className='text-white lead' href={'/api/admin/login' + (this.props.devuser?'?devuser='+this.props.devuser:'')}>Admin</a>
             </li>
-            <li className={`nav-item pl-5 ${(this.props.authed || this.props.admin) ? '' : 'd-none'}`}>
-              <Link className='text-white lead' to={this.props.admin?'/admin/dashboard':'/dashboard'}>Dashboard</Link>
+            <li className={`nav-item pl-5 ${(this.props.admin) ? '' : 'd-none'}`}>
+              <Link className='text-white lead' to={'/admin/dashboard'}>Dashboard</Link>
+            </li>
+            <li className={`nav-item pl-5 ${(this.props.authed && !this.props.admin) ? '' : 'd-none'}`}>
+              <Link className='text-white lead' to={'/dashboard'}>Appointment</Link>
             </li>
           </ul>
           <form className='form-inline'>
