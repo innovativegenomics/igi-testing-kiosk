@@ -21,10 +21,20 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: 13,
     },
+    startminute: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+    },
     endtime: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 16,
+    },
+    endminute: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
     },
     window: {
       type: DataTypes.INTEGER,
