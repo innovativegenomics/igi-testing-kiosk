@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 
 import { Modal, Button } from 'react-bootstrap';
 import billOfRights from '../../media/IGI_Healthy_Campus_Study_Bill_of_Rights.pdf';
+import billOfRightsSpanish from '../../media/IGI_FAST_Bill_of_Rights_Spanish.pdf';
 
 class Question extends Component {
   render() {
@@ -62,6 +63,7 @@ class ToS extends Component {
     return (
       <div>
         <h5 className='text-center'><i>IGI Healthy Campus Study: An integrated approach to safely reintroduce onsite work during the COVID-19 pandemic</i></h5>
+        <a href={billOfRightsSpanish}>Get this form en Español</a>
         <div className='p-3 border border-dark'>
           <p className='lead text-center w-100'>Key Information</p>
           <ul>

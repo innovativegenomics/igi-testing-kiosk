@@ -339,6 +339,7 @@ export default class Scheduler extends Component {
           </Modal.Footer>
         </Modal>
         <footer className='navbar navbar-light bg-transparent'>
+          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
           <div className='navbar-nav'></div>
           <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
         </footer>
