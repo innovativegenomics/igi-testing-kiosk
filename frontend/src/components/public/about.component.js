@@ -108,12 +108,9 @@ export default class About extends Component {
             No results from this study will enter into your medical record.
           </p>
           <ul>
-            <li><a href={billOfRights}>IGI FAST Bill of Rights</a></li>
-            <li><a href={billOfRightsSpanish}>IGI FAST Bill of Rights En Español</a></li>
-            <li><a href={infoSheet}>IGI FAST Info Sheet</a></li>
-            <li><a href={infoSheetSpanish}>IGI FAST Info Sheet En Español</a></li>
-            <li><a href={informedConsent}>IGI FAST Informed Consent</a></li>
-            <li><a href={informedConsentSpanish}>IGI FAST Informed Consent En Español</a></li>
+            <li><a href={billOfRights}>IGI FAST Bill of Rights</a> - <a href={billOfRights}>English</a>, <a href={billOfRightsSpanish}>Español</a></li>
+            <li><a href={infoSheet}>IGI FAST Info Sheet</a> - <a href={infoSheet}>English</a>, <a href={infoSheetSpanish}>Español</a></li>
+            <li><a href={informedConsent}>IGI FAST Informed Consent</a> - <a href={informedConsent}>English</a>, <a href={informedConsentSpanish}>Español</a></li>
           </ul>
         </Container>
       </div>
