@@ -150,7 +150,7 @@ router.post('/profile', cas.block, async (request, response) => {
     }
     
     try {
-      await scheduleSignupEmail(request.body.email);
+      await scheduleSignupEmail(request.body.email, request.body.firstname);
     } catch (err) {
       pino.error(`Coundn't schedule signup email for user ${calnetid}`);
       pino.error(err);

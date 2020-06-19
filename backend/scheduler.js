@@ -44,8 +44,8 @@ module.exports.scheduleSlotConfirmEmail = async (email, uid, day, timeStart, tim
   });
 }
 
-module.exports.scheduleSignupEmail = async (email) => {
-  await workerUtils.addJob('signupEmail', { email: email });
+module.exports.scheduleSignupEmail = async (email, name) => {
+  await workerUtils.addJob('signupEmail', { email: email, name: name });
 }
 
 module.exports.scheduleRescheduleUsers = async () => {
