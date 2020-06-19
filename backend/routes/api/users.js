@@ -17,21 +17,26 @@ const { scheduleSignupEmail } = require('../../scheduler');
 router.get('/login', cas.bounce, async (request, response) => {
   const calnetid = request.session.cas_user;
   const t = await sequelize.transaction();
-  const user = await User.findOne({ where: { calnetid: calnetid }, transaction: t });
-  if (user) {
-    user.lastlogin = moment().toDate();
-    await user.save();
-    request.session.usertype='patient';
-    response.redirect('/dashboard');
-  } else {
-    if (!require('../../config/keys').newusers) {
-      pino.error(`user with calnetid ${calnetid} not authorized`);
-      request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for user ${calnetid}`); pino.error(err)}});
-      response.status(401).send('Unauthorized user');
-    } else {
+  try {
+    const user = await User.findOne({ where: { calnetid: calnetid }, transaction: t });
+    if (user) {
+      user.lastlogin = moment().toDate();
+      await user.save();
       request.session.usertype='patient';
-      response.redirect('/newuser');
+      response.redirect('/dashboard');
+    } else {
+      if (!require('../../config/keys').newusers) {
+        pino.error(`user with calnetid ${calnetid} not authorized`);
+        request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for user ${calnetid}`); pino.error(err)}});
+        response.status(401).send('Unauthorized user');
+      } else {
+        request.session.usertype='patient';
+        response.redirect('/newuser');
+      }
     }
+    await t.commit();
+  } catch(err) {
+    await t.rollback();
   }
 });
 

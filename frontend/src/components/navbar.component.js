@@ -14,7 +14,7 @@ export default class Navbar extends Component {
   render() {
     return (
       <nav className='navbar navbar-expand-lg navbar-light navbar-bg p-3' style={{ fontFamily: 'Raleway' }}>
-        <div className='navbar-brand igi-header font-weight-light mx-auto'>IGI <i>FAST</i></div>
+        <div className='navbar-brand igi-header font-weight-light mx-auto'><Link to='/'>IGI <i>FAST</i></Link></div>
         <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span className="navbar-toggler-icon"></span>
         </button>
