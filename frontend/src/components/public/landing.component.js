@@ -36,7 +36,7 @@ export default class Landing extends Component {
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col'>
-              <img src={igiFast} className='w-100' alt='IGI FAST' />
+              <img src={igiFast} className='w-100 pt-5 pb-5 pl-md-5 pr-md-5' alt='IGI FAST' />
             </div>
           </div>
           <div className='row justify-content-center'>
