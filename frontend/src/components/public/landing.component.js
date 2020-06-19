@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './landing.css';
 
+import berkeleyLogo from '../../media/berkeley_logo.png';
+
 import igiFast from '../../media/IGI-FAST.png';
 import Navbar from '../navbar.component';
 
@@ -62,6 +64,10 @@ export default class Landing extends Component {
             </div>
           </div>
         </div>
+        <footer className='navbar navbar-light bg-transparent'>
+          <div className='navbar-nav'></div>
+          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
+        </footer>
       </div>
     );
   }
