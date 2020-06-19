@@ -23,7 +23,7 @@ export default function withTracker(WrappedComponent, options = {}) {
           } else {
             ReactGA.set({userId: null});
         }
-        trackPage(nextPage);
+        trackPage(page);
       });
     }
 
