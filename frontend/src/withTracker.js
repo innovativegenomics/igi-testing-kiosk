@@ -18,12 +18,13 @@ export default function withTracker(WrappedComponent, options = {}) {
       console.log('page:' + page);
       getUser().then(res => {
           if(res.success) {
+              console.log('set uid ' + res.user.calnetid);
               ReactGA.set({userId: res.user.calnetid});
           } else {
             ReactGA.set({userId: null});
         }
+        trackPage(nextPage);
       });
-      trackPage(page);
     }
 
     componentDidUpdate(prevProps) {
@@ -34,12 +35,13 @@ export default function withTracker(WrappedComponent, options = {}) {
         console.log('next page:' + nextPage);
         getUser().then(res => {
             if(res.success) {
+                console.log('set uid ' + res.user.calnetid);
                 ReactGA.set({userId: res.user.calnetid});
             } else {
                 ReactGA.set({userId: null});
             }
+            trackPage(nextPage);
         });
-        trackPage(nextPage);
       }
     }
 
