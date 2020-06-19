@@ -55,7 +55,7 @@ export default class Dashboard extends Component {
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col text-center'>
-              <p className='display-4'>Next {(this.state.slot.slot.location) ? '' : 'Open'} Appointment</p>
+              <p className='display-4'>{this.state.slot.slot.completed?'Completed':'Next'} {(this.state.slot.slot.location) ? '' : 'Open'} Appointment</p>
             </div>
           </div>
           <div className='row justify-content-center mb-3'>
@@ -69,12 +69,19 @@ export default class Dashboard extends Component {
           </div>
           <div className='row justify-content-center'>
             <div className='col text-center mb-3'>
-              <Link className='btn btn-outline-success btn-lg' to='/scheduler'>{(this.state.slot.slot.location) ? 'Change time and location' : 'Select time and location'}</Link>
+              <Link className={'btn btn-outline-success btn-lg '+(this.state.slot.slot.completed?'d-none':'')} to='/scheduler'>{(this.state.slot.slot.location) ? 'Change time and location' : 'Select time and location'}</Link>
             </div>
           </div>
           <div className='row justify-content-center'>
             <div className='col text-center mb-3'>
-              <button className={`btn btn-outline-danger btn-lg ${this.state.slot.slot.location ? '' : 'd-none'}`} onClick={this.requestCancel}>Cancel Appointment</button>
+              <button className={`btn btn-outline-danger btn-lg ${!!this.state.slot.slot.location && !this.state.slot.slot.completed ? '' : 'd-none'}`} onClick={this.requestCancel}>Cancel Appointment</button>
+            </div>
+          </div>
+          <div className={'row justify-content-center '+(this.state.slot.slot.completed?'':'d-none')}>
+            <div className='col col-md-6'>
+              <p className=' alert alert-info'>
+                Thanks for completing your appointment! You will be able to reschedule for another appointment starting this Sunday.
+              </p>
             </div>
           </div>
         </div>
