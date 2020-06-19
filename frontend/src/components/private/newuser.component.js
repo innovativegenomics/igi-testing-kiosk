@@ -82,7 +82,7 @@ const USER_INFO = {
   },
   addressLabel: {
     type: 'LABEL',
-    title: 'Address'
+    title: 'Local Residence'
   },
   street: {
     type: 'TEXT',
