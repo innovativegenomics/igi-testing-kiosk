@@ -82,7 +82,7 @@ export default class SlotSearch extends Component {
             </Col> */}
           </Form.Group>
         </Form>
-        <Table hover size='sm'>
+        <Table hover size='sm' responsive>
           <thead>
             <tr>
               <th>#</th>

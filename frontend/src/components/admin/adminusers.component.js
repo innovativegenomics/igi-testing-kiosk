@@ -135,7 +135,7 @@ export default class AdminUsers extends Component {
     return (
       <Container>
         <Button className='m-2' onClick={e => this.setState({showNewUser: true})}>Create new admin</Button>
-        <Table size='sm' hover>
+        <Table size='sm' hover responsive>
           <thead>
             <tr>
               <th>#</th>
@@ -154,7 +154,7 @@ export default class AdminUsers extends Component {
         </div>
 
         <h2 className='font-weight-light mt-5'>Pending Administrators</h2>
-        <Table size='sm' hover>
+        <Table size='sm' hover responsive>
           <thead>
             <tr>
               <th>#</th>
