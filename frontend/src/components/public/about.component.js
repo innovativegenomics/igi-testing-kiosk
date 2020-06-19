@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 
-import { getUser } from '../../actions/authActions';
+import billOfRights from '../../media/IGI_Healthy_Campus_Study_Bill_of_Rights.pdf';
+import billOfRightsSpanish from '../../media/IGI_FAST_Bill_of_Rights_Spanish.pdf';
+import infoSheet from '../../media/IGI_study_info_sheet.pdf';
+import infoSheetSpanish from '../../media/IGI_FAST_info_sheet_Spanish.pdf';
+import informedConsent from '../../media/Informed_Consent_20200610.pdf';
+import informedConsentSpanish from '../../media/IGI_FAST_Informed_Consent_20200612_Spanish.pdf';
 
-import './about.css';
+import { getUser } from '../../actions/authActions';
 import Navbar from '../navbar.component';
 
 export default class About extends Component {
@@ -102,6 +107,14 @@ export default class About extends Component {
           <p>
             No results from this study will enter into your medical record.
           </p>
+          <ul>
+            <li><a href={billOfRights}>IGI FAST Bill of Rights</a></li>
+            <li><a href={billOfRightsSpanish}>IGI FAST Bill of Rights En Espanol</a></li>
+            <li><a href={infoSheet}>IGI FAST Info Sheet</a></li>
+            <li><a href={infoSheetSpanish}>IGI FAST Info Sheet En Espanol</a></li>
+            <li><a href={informedConsent}>IGI FAST Informed Consent</a></li>
+            <li><a href={informedConsentSpanish}>IGI FAST Informed Consent En Espanol</a></li>
+          </ul>
         </Container>
       </div>
     );
