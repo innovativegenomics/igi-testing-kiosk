@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import ReactGA from 'react-ga';
 
+import { getUser } from './actions/authActions';
+
 export default function withTracker(WrappedComponent, options = {}) {
   const trackPage = (page) => {
     ReactGA.set({
@@ -14,6 +16,13 @@ export default function withTracker(WrappedComponent, options = {}) {
     componentDidMount() {
       const page = this.props.location.pathname;
       console.log('page:' + page);
+      getUser().then(res => {
+          if(res.success) {
+              ReactGA.set({userId: res.user.calnetid});
+          } else {
+            ReactGA.set({userId: null});
+        }
+      });
       trackPage(page);
     }
 
@@ -23,6 +32,13 @@ export default function withTracker(WrappedComponent, options = {}) {
 
       if (currentPage !== nextPage) {
         console.log('next page:' + nextPage);
+        getUser().then(res => {
+            if(res.success) {
+                ReactGA.set({userId: res.user.calnetid});
+            } else {
+                ReactGA.set({userId: null});
+            }
+        });
         trackPage(nextPage);
       }
     }

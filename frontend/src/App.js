@@ -20,7 +20,11 @@ import './App.css';
 import withTracker from './withTracker';
 
 const trackingId = 'UA-170146726-1'; // Replace with your Google Analytics tracking ID
-ReactGA.initialize(trackingId);
+ReactGA.initialize(trackingId, {
+  gaOptions: {
+    siteSpeedSampleRate: 100,
+  }
+});
 
 export default class App extends Component {
   render() {
