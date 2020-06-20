@@ -45,8 +45,9 @@ export default class SlotSearch extends Component {
         if(time.hour() === 0) {
           unscheduledCount ++;
           return;
+        } else if(time.day() === 2) {
+          values[index]++;
         }
-        values[index]++;
       });
     }
     const data = {
