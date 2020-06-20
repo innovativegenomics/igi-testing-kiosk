@@ -20,6 +20,7 @@ router.get('/login', cas.bounce, async (request, response) => {
   try {
     const user = await User.findOne({ where: { calnetid: calnetid }, transaction: t });
     if (user) {
+      pino.info({calnetid: calnetid, from: 'get /login'}, 'user exists, updating last login');
       user.lastlogin = moment().toDate();
       await user.save();
       request.session.usertype='patient';
@@ -30,6 +31,7 @@ router.get('/login', cas.bounce, async (request, response) => {
         request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for user ${calnetid}`); pino.error(err)}});
         response.status(401).send('Unauthorized user');
       } else {
+
         request.session.usertype='patient';
         response.redirect('/newuser');
       }

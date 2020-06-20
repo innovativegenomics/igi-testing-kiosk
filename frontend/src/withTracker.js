@@ -15,10 +15,8 @@ export default function withTracker(WrappedComponent, options = {}) {
   const HOC = class extends Component {
     componentDidMount() {
       const page = this.props.location.pathname;
-      console.log('page:' + page);
       getUser().then(res => {
           if(res.success) {
-              console.log('set uid ' + res.user.calnetid);
               ReactGA.set({userId: res.user.calnetid});
           } else {
             ReactGA.set({userId: null});
@@ -32,10 +30,8 @@ export default function withTracker(WrappedComponent, options = {}) {
       const nextPage = this.props.location.pathname;
 
       if (currentPage !== nextPage) {
-        console.log('next page:' + nextPage);
         getUser().then(res => {
             if(res.success) {
-                console.log('set uid ' + res.user.calnetid);
                 ReactGA.set({userId: res.user.calnetid});
             } else {
                 ReactGA.set({userId: null});

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ReactGA from 'react-ga';
 
 import Landing from './components/public/landing.component';
@@ -38,9 +38,7 @@ export default class App extends Component {
             <Route path='/newuser' component={withTracker(NewUser)} />
             <Route path='/dashboard' component={withTracker(Dashboard)} />
             <Route path='/scheduler' component={withTracker(Scheduler)} />
-
-            <Route path='/admin/dashboard' component={withTracker(Admin)} />
-            <Route path='/admin/scanner' component={withTracker(Scanner)} />
+            <Route path='/admin' component={withTracker(Admin)} />
           </div>
         </Router>
     );
