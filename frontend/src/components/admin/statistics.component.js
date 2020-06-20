@@ -33,7 +33,16 @@ export default class SlotSearch extends Component {
     const labels = [];
     const values = [];
     if(!this.state.loading) {
-      
+      this.state.results.forEach((v, i) => {
+        const label = moment(v.time).format('H:mm');
+        const index = labels.indexOf(label);
+        if(index >= 0) {
+          values[index]++;
+        } else {
+          labels.push(label);
+          values.push(1);
+        }
+      });
     }
     const data = {
       labels: labels,
