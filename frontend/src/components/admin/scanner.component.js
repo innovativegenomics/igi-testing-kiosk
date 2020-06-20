@@ -75,7 +75,7 @@ export default class Scanner extends Component {
           </Col>
         </Row>
         <Row className='justify-content-center text-center'>
-          <Col className={(this.state.level>=10&&clear?'':'d-none')}>
+          <Col className={(this.props.level>=10&&clear?'':'d-none')}>
             <Button onClick={e => this.completeSlot()} disabled={this.state.completed}>Show Appointment Details</Button>
           </Col>
         </Row>
