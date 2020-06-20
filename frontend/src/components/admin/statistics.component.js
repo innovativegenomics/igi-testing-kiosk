@@ -34,7 +34,7 @@ export default class SlotSearch extends Component {
     const values = [];
     var unscheduledCount = 0;
     if(!this.state.loading) {
-      for(var i = moment({date: 23, hour: 12});i.isBefore(moment({date: 23, hour: 16}));i = i.add(10, 'minute')) {
+      for(var i = moment({date: 23, hour: 12});i.isBefore(moment({date: 23, hour: 16, minute: 50}));i = i.add(10, 'minute')) {
         labels.push(i.format('H:mm'));
         values.push(0);
       }
