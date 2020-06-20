@@ -132,7 +132,6 @@ router.get('/search', cas.block, async (request, response) => {
       ],
       include: [{
         model: Slot,
-        separate: true,
         order: [['time', 'desc']],
         limit: 1,
       }]
