@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Spinner, Form } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Form, Card } from 'react-bootstrap';
 import { Bar } from 'react-chartjs-2';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
@@ -79,28 +79,32 @@ export default class SlotSearch extends Component {
     return (
       <Container className='mt-3'>
         <Row>
-          <Col md>
-            <Form>
-              <Row>
-                <Col>
-                  <Form.Control as='select' value={(this.state.day?this.state.day:this.state.settings.days[0])} onChange={e => this.setState({day: parseInt(e.target.value)})}>
-                    {this.state.settings.days.map(v => (
-                      <option key={v} value={v}>{moment().set('day', v).format('dddd')}</option>
-                    ))}
-                  </Form.Control>
-                </Col>
-              </Row>
-            </Form>
-            <Bar
-              data={data}
-            />
-            <p className='lead'>Unscheduled Appointments: {unscheduledCount}</p>
-            <div className={this.state.loading?'':'d-none'}>
-              <div className='position-absolute d-block bg-secondary' style={{width: '100%', height: '100%', top: '0px', left: '0px', opacity: 0.3}}></div>
-              <Spinner animation='border' role='status' className='position-absolute d-block' style={{top: '50%', left: '50%'}}/>
-            </div>
+          <Col lg>
+            <Card>
+              <Card.Body>
+                <Form>
+                  <Row>
+                    <Col>
+                      <Form.Control as='select' value={(this.state.day?this.state.day:this.state.settings.days[0])} onChange={e => this.setState({day: parseInt(e.target.value)})}>
+                        {this.state.settings.days.map(v => (
+                          <option key={v} value={v}>{moment().set('day', v).format('dddd')}</option>
+                        ))}
+                      </Form.Control>
+                    </Col>
+                  </Row>
+                </Form>
+                <Bar
+                  data={data}
+                />
+                <p className='lead'>Unscheduled Appointments: {unscheduledCount}</p>
+                <div className={this.state.loading?'':'d-none'}>
+                  <div className='position-absolute d-block bg-secondary' style={{width: '100%', height: '100%', top: '0px', left: '0px', opacity: 0.3}}></div>
+                  <Spinner animation='border' role='status' className='position-absolute d-block' style={{top: '50%', left: '50%'}}/>
+                </div>
+              </Card.Body>
+            </Card>
           </Col>
-          <Col md>
+          <Col lg>
           </Col>
         </Row>
       </Container>
