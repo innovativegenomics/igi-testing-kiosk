@@ -32,16 +32,21 @@ export default class SlotSearch extends Component {
     
     const labels = [];
     const values = [];
+    var unscheduledCount = 0;
     if(!this.state.loading) {
+      for(var i = moment({date: 23, hour: 12});i.isBefore(moment({date: 23, hour: 16}));i = i.add(10, 'minute')) {
+        labels.push(i.format('H:mm'));
+        values.push(0);
+      }
+
       this.state.results.forEach((v, i) => {
-        const label = moment(v.time).format('H:mm');
-        const index = labels.indexOf(label);
-        if(index >= 0) {
-          values[index]++;
-        } else {
-          labels.push(label);
-          values.push(1);
+        const time = moment(v.time);
+        const index = labels.indexOf(time.format('H:mm'));
+        if(time.hour() === 0) {
+          unscheduledCount ++;
+          return;
         }
+        values[index]++;
       });
     }
     const data = {

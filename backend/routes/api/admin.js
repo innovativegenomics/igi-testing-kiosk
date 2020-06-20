@@ -25,7 +25,7 @@ router.get('/login', cas.bounce, async (request, response) => {
     const user = await Admin.findOne({where: {calnetid: calnetid}, transaction: t});
     if(user) {
       request.session.usertype = 'admin';
-      response.redirect('/admin/dashboard');
+      response.redirect('/admin/search');
     } else {
       if(!uid) {
         request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for admin ${calnetid}`); pino.error(err)}});
@@ -128,7 +128,7 @@ router.get('/search', cas.block, async (request, response) => {
         ]
       },
       order: [
-        [sequelize.literal('"slotTime"'), 'desc']
+        [sequelize.literal('"slotTime"'), 'asc']
       ],
       include: [{
         model: Slot,
