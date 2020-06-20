@@ -8,7 +8,6 @@ const Op = Sequelize.Op;
 
 const cas = require('../../cas');
 const { scheduleNewAdminEmail } = require('../../scheduler');
-const { SettingsContext } = require('twilio/lib/rest/voice/v1/dialingPermissions/settings');
 
 /**
  * User admin levels:
