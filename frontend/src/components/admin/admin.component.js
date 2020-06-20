@@ -6,6 +6,7 @@ import Navbar from '../navbar.component';
 import { getAdminLevel } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
 import AdminUsers from './adminusers.component';
+import Statistics from './statistics.component';
 import Scanner from './scanner.component';
 
 export default class Admin extends Component {
@@ -40,6 +41,9 @@ export default class Admin extends Component {
           <Nav.Item>
             <Nav.Link as={Link} eventKey='search' to='search' onClick={e => this.setState({active: 'search'})}>Appointment Search</Nav.Link>
           </Nav.Item>
+          <Nav.Item className={this.state.level>=20?'':'d-none'}>
+            <Nav.Link as={Link} eventKey='stats' to='stats' onClick={e => this.setState({active: 'stats'})}>Statistics</Nav.Link>
+          </Nav.Item>
           <Nav.Item className={this.state.level>=30?'':'d-none'}>
             <Nav.Link as={Link} eventKey='admins' to='admins' onClick={e => this.setState({active: 'admins'})}>Manage Admins</Nav.Link>
           </Nav.Item>
@@ -55,6 +59,12 @@ export default class Admin extends Component {
           path={`${this.props.match.path}/admins`}
           render={(props) => {
             return <AdminUsers {...props} level={this.state.level} />;
+          }}
+        />
+        <Route
+          path={`${this.props.match.path}/stats`}
+          render={(props) => {
+            return <Statistics {...props} level={this.state.level} />;
           }}
         />
         <Route

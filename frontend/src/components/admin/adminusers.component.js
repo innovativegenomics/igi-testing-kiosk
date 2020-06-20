@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Redirect } from 'react-router-dom';
 import { Container, Table, Button, Spinner, Modal, Row, Col, Form } from 'react-bootstrap';
 import { validate as validateEmail } from 'email-validator';
 
@@ -110,6 +111,10 @@ export default class AdminUsers extends Component {
     await this.runGet();
   }
   render() {
+    if(this.props.level < 30) {
+      return <Redirect to='search' />;
+    }
+
     const adminRows = [];
     this.state.admins.forEach((v, i) => {
       adminRows.push(<tr key={i}>

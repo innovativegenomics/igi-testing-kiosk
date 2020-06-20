@@ -112,8 +112,27 @@ router.get('/search', cas.block, async (request, response) => {
           },
         },
       },
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT time
+              FROM "Slots" AS slot
+              WHERE
+                slot.calnetid = "User".calnetid
+              ORDER BY time DESC
+              LIMIT 1
+              )`),
+            'slotTime'
+          ]
+        ]
+      },
+      order: [
+        [sequelize.literal('"slotTime"'), 'desc']
+      ],
       include: [{
         model: Slot,
+        separate: true,
         order: [['time', 'desc']],
         limit: 1,
       }]
