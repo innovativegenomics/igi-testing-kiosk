@@ -44,7 +44,7 @@ const USER_INFO = {
   dob: {
     type: 'DATE',
     title: 'Date of Birth',
-    placeholder: 'MM-DD-YYYY',
+    placeholder: 'MM/DD/YYYY',
     required: true,
     validFunc: v => true
   },
