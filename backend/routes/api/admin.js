@@ -3,11 +3,12 @@ const router = express.Router();
 const moment = require('moment');
 const short = require('short-uuid');
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
-const { Sequelize, sequelize, Admin, Slot, User } = require('../../models');
+const { Sequelize, sequelize, Admin, Slot, User, Settings } = require('../../models');
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
 const { scheduleNewAdminEmail } = require('../../scheduler');
+const { SettingsContext } = require('twilio/lib/rest/voice/v1/dialingPermissions/settings');
 
 /**
  * User admin levels:
@@ -285,6 +286,39 @@ router.get('/admins/pending', cas.block, async (request, response) => {
     }
   } else {
     pino.error(`Not authed`);
+    response.status(401).send();
+  }
+});
+
+router.get('/settings', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  pino.info({
+    route: '/api/admin/settings',
+    calnetid: calnetid,
+    level: level,
+  });
+  if(!!level && level >= 0) {
+    const settings = await Settings.findOne({});
+    response.send({
+      settings: {
+        starttime: settings.starttime,
+        startminute: settings.startminute,
+        endtime: settings.endtime,
+        endminute: settings.endminute,
+        buffer: settings.buffer,
+        window: settings.window,
+        locations: settings.locations,
+        days: settings.days,
+      },
+      success: true,
+    });
+  } else {
+    pino.error({
+      route: '/api/admin/settings',
+      calnetid: calnetid,
+      error: 'Not authed'
+    });
     response.status(401).send();
   }
 });

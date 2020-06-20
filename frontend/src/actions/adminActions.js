@@ -87,3 +87,14 @@ export const createAdmin = async (name, email, level) => {
     return { success: false };
   }
 }
+
+export const getSettings = async () => {
+  try {
+    const response = await axios.get('/api/admin/settings');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get settings`);
+    console.error(err);
+    return { success: false };
+  }
+}
