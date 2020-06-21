@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Modal, Button, ButtonGroup, Row, Col, Form } from 'react-bootstrap';
+import { Modal, Button, ButtonGroup, Row, Col, Form, Spinner } from 'react-bootstrap';
 import moment from 'moment';
 
 import { getUser } from '../../actions/authActions';
@@ -286,13 +286,21 @@ export default class Scheduler extends Component {
       return <Redirect to='/dashboard' />;
     }
     if (!this.state.auth.loaded) {
-      return <div>Loading User</div>;
+      return (
+        <div className='w-100'>
+          <Spinner animation='border' role='status' className='m-auto'/>
+        </div>
+      );
     } else if (this.state.auth.unauthed) {
       return <Redirect to='/' />;
     } else if (!this.state.auth.success) {
       return <Redirect to='/newuser' />;
     } else if (!this.state.schedule.loaded) {
-      return <div>Loading schedule</div>;
+      return (
+        <div className='w-100'>
+          <Spinner animation='border' role='status' className='m-auto'/>
+        </div>
+      );
     } else if (!this.state.schedule.success) {
       return <div>Failed to load the schedule! Please try reloading the page.</div>;
     }

@@ -14,6 +14,8 @@ import Scheduler from './components/private/scheduler.component';
 
 import Admin from './components/admin/admin.component';
 
+import { getUser } from './actions/authActions';
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import './App.css';
@@ -28,11 +30,25 @@ ReactGA.initialize(trackingId, {
 });
 
 export default class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      auth: {
+        user: {},
+        loaded: false,
+        unauthed: true,
+        success: false
+      },
+    }
+  }
+  componentDidMount() {
+    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
+  }
   render() {
     return (
         <Router>
           <div className='App'>
-            <Navigation />
+            <Navigation authed={!this.state.auth.unauthed} />
 
             <Route path='/' exact component={withTracker(Landing)} />
             <Route path='/about' component={withTracker(About)} />

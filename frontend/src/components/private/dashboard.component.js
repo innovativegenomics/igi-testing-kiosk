@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import { Row, Col, Alert } from 'react-bootstrap';
+import { Row, Col, Alert, Spinner } from 'react-bootstrap';
 import moment from 'moment';
 
 import { getUser } from '../../actions/authActions';
@@ -39,13 +39,21 @@ export default class Dashboard extends Component {
   }
   render() {
     if (!this.state.auth.loaded) {
-      return <div>Loading User</div>;
+      return (
+        <div className='w-100'>
+          <Spinner animation='border' role='status' className='m-auto'/>
+        </div>
+      );
     } else if (this.state.auth.unauthed) {
       return <Redirect to='/' />;
     } else if (!this.state.auth.success) {
       return <Redirect to='/newuser' />;
     } else if (!this.state.slot.loaded) {
-      return <div>Loading schedule</div>;
+      return (
+        <div className='w-100'>
+          <Spinner animation='border' role='status' className='m-auto'/>
+        </div>
+      );
     }
     return (
       <div>

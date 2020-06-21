@@ -17,7 +17,7 @@ class LogoutLink extends Component {
 export class Navigation extends Component {
   render() {
     return (
-      <Navbar bg='light' expand='sm'>
+      <Navbar bg='light' expand='sm' className='mb-5'>
         <Navbar.Brand>
           <Link to='/'><img src={igiFast} style={{width: '15rem'}}/></Link>
         </Navbar.Brand>
@@ -25,7 +25,11 @@ export class Navigation extends Component {
         <Navbar.Collapse>
           <Nav className='mr-auto'>
             <Nav.Link as={Link} to='/about'>About</Nav.Link>
+            <Nav.Link as={Link} to='/dashboard' className={this.props.authed?'':'d-none'}>Appointments</Nav.Link>
           </Nav>
+          <Form inline className={this.props.authed?'':'d-none'}>
+            <Nav.Link href='/api/users/logout' className='btn btn-primary text-white'>CalNet Logout</Nav.Link>
+          </Form>
         </Navbar.Collapse>
       </Navbar>
       // <nav className='navbar navbar-expand-lg navbar-light p-3' style={{ fontFamily: 'Raleway' }}>
@@ -61,7 +65,7 @@ export class Footer extends Component {
   render() {
     return (
       <Navbar fixed='bottom' bg='white'>
-        <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report an issue</a>
+        <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue' style={{color: '#5758FF'}}>Report an issue</a>
         <Nav className='mr-auto'></Nav>
         <Form inline>
           <img style={{width:'8rem', left: 0}} src={berkeleyLogo} />
