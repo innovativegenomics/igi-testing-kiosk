@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Redirect, Route, Link } from 'react-router-dom';
 import { Nav } from 'react-bootstrap';
 
-import Navbar from '../navbar.component';
 import { getAdminLevel } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
 import AdminUsers from './adminusers.component';
@@ -36,7 +35,6 @@ export default class Admin extends Component {
 
     return (
       <div>
-        <Navbar admin={this.state.level} showLogout={true} />
         <Nav variant='tabs' activeKey={this.state.active}>
           <Nav.Item>
             <Nav.Link as={Link} eventKey='search' to='search' onClick={e => this.setState({active: 'search'})}>Appointment Search</Nav.Link>

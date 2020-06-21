@@ -5,9 +5,6 @@ import { validate as validateEmail } from 'email-validator';
 import { postcodeValidator } from 'postcode-validator';
 import moment from 'moment';
 
-import berkeleyLogo from '../../media/berkeley_logo.png';
-
-import Navbar from '../navbar.component';
 import ToSModal from './tos.component';
 
 import { getUser, createUser } from '../../actions/authActions';
@@ -379,7 +376,6 @@ export default class NewUser extends Component {
     });
     return (
       <div>
-        <Navbar showLogout={true} />
         <div>
           <div className='container'>
             <div className='row justify-content-center'>
@@ -479,11 +475,6 @@ export default class NewUser extends Component {
             <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
           </Modal.Footer>
         </Modal>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

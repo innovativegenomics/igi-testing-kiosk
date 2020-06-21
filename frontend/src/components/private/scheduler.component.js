@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Modal, Button, ButtonGroup, Row, Col, Form } from 'react-bootstrap';
-import Navbar from '../navbar.component';
 import moment from 'moment';
-
-import berkeleyLogo from '../../media/berkeley_logo.png';
 
 import { getUser } from '../../actions/authActions';
 import { getAvailable, requestSlot } from '../../actions/slotActions';
@@ -306,7 +303,6 @@ export default class Scheduler extends Component {
     const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).map(v => moment(v));
     return (
       <div>
-        <Navbar authed={true} admin={this.state.auth.user.admin} />
         <div className='container'>
           <div className='row justify-content-center m-3'>
             <div className='col-sm-4'>
@@ -338,11 +334,6 @@ export default class Scheduler extends Component {
             <Button variation='primary' onClick={e => window.open('/dashboard', '_self')}>Ok</Button>
           </Modal.Footer>
         </Modal>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

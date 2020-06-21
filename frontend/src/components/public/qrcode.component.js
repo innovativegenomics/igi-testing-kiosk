@@ -3,9 +3,6 @@ import qrcode from 'qrcode';
 import qs from 'qs';
 
 import { getUser } from '../../actions/authActions';
-import berkeleyLogo from '../../media/berkeley_logo.png';
-
-import Navbar from '../navbar.component';
 
 export default class QRCode extends Component {
   constructor(props) {
@@ -39,7 +36,6 @@ export default class QRCode extends Component {
     }
     return (
       <div>
-        <Navbar authed={!this.state.auth.unauthed} />
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col-md-5'>
@@ -47,11 +43,6 @@ export default class QRCode extends Component {
             </div>
           </div>
         </div>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

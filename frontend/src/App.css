@@ -1,4 +1,5 @@
 .App {
+  margin-bottom: 6rem;
 }
 
 .form-group.required .col-form-label:after { 

@@ -2,11 +2,6 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './landing.css';
 
-import berkeleyLogo from '../../media/berkeley_logo.png';
-
-import igiFast from '../../media/IGI-FAST.png';
-import Navbar from '../navbar.component';
-
 export default class Landing extends Component {
   constructor(props) {
     super(props);
@@ -32,11 +27,10 @@ export default class Landing extends Component {
   render() {
     return (
       <div>
-        <Navbar devuser={this.state.devmode?this.state.devuser:null} />
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col'>
-              <img src={igiFast} className='w-100 pt-5 pb-5 pl-md-5 pr-md-5' alt='IGI FAST' />
+              {/* <img src={igiFast} className='w-100 pt-5 pb-5 pl-md-5 pr-md-5' alt='IGI FAST' /> */}
             </div>
           </div>
           <div className='row justify-content-center'>
@@ -64,11 +58,6 @@ export default class Landing extends Component {
             </div>
           </div>
         </div>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }
