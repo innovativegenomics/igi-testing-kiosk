@@ -98,8 +98,8 @@ export default class SlotSearch extends Component {
                 <Bar
                   data={data}
                 />
-                <p>Scheduled Appointments: {scheduledCount}</p>
-                <p className='lead'>Unscheduled Appointments: {unscheduledCount}</p>
+                <p className='lead m-0'>Scheduled Appointments: {scheduledCount}</p>
+                <p className='lead m-0'>Unscheduled Appointments: {unscheduledCount}</p>
                 <div className={this.state.loading?'':'d-none'}>
                   <div className='position-absolute d-block bg-secondary' style={{width: '100%', height: '100%', top: '0px', left: '0px', opacity: 0.3}}></div>
                   <Spinner animation='border' role='status' className='position-absolute d-block' style={{top: '50%', left: '50%'}}/>
