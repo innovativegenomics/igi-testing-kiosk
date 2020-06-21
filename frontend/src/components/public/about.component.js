@@ -66,7 +66,7 @@ export default class About extends Component {
             </li>
             <li>
               Campus clearance message - As with all campus activities, you must complete
-              the campus symptom screener before coming to campus. You will be asked to
+              the <a href='https://calberkeley.ca1.qualtrics.com/jfe/form/SV_3xTgcs162K19qRv'>campus symptom screener</a> before coming to campus. You will be asked to
               present the clearance message at the testing kiosk. If you do not pass this
               screener (i.e. you have symptoms), you should not come to a kiosk for testing
               and instead contact UHS at <a href='tel:+15106437197'>510-643-7197</a>.
