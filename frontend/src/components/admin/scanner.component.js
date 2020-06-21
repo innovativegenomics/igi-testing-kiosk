@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Container, Row, Col, Alert, Button } from 'react-bootstrap';
+import { Container, Row, Col, Alert, Button, Spinner } from 'react-bootstrap';
 import qs from 'qs';
 import moment from 'moment';
 
@@ -27,7 +27,11 @@ export default class Scanner extends Component {
   }
   render() {
     if(!this.state.slotLoaded) {
-      return <div>Loading...</div>
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     }
 
     var clear = true;
@@ -79,13 +83,14 @@ export default class Scanner extends Component {
           </Col>
         </Row>
         <Row className='justify-content-center text-center'>
-          {(this.state.completed)?
+          {(this.state.completed||this.state.slot.completed)?
           <Col md='6'>
             <h3 className='text-center font-weight-light'>
               <u>Appointment Details</u>
             </h3>
             <p className='lead'>Name: {this.state.slot.name}</p>
             <p className='lead'>Time: {moment(this.state.slot.time).format('dddd, MMMM D h:mm A')}</p>
+            <p className={'lead '+(this.state.slot.completed?'':'d-none')}>Completed: {moment(this.state.slot.completed).format('dddd, MMMM D h:mm A')}</p>
             <p className='lead'>Location: {this.state.slot.location}</p>
           </Col>
           :

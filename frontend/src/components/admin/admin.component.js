@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect, Route, Link } from 'react-router-dom';
-import { Nav } from 'react-bootstrap';
+import { Nav, Spinner } from 'react-bootstrap';
 
 import { getAdminLevel } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
@@ -24,7 +24,11 @@ export default class Admin extends Component {
   }
   render() {
     if(!this.state.loaded) {
-      return <div>Loading...</div>;
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     } else if(this.state.loaded && !this.state.level) {
       return <Redirect to='/' />
     } else if(this.props.match.path === this.props.location.pathname) {
