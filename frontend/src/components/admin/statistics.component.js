@@ -43,6 +43,7 @@ export default class SlotSearch extends Component {
     
     const labels = [];
     const values = [];
+    var scheduledCount = 0;
     var unscheduledCount = 0;
     if(!this.state.loading) {
       for(var i = moment().set('day', this.state.day||this.state.settings.days[0]).set('hour', this.state.settings.starttime).set('minute', this.state.settings.startminute);i.isBefore(moment().set('day', this.state.day||this.state.settings.days[0]).set('hour', this.state.settings.endtime).set('minute', this.state.settings.endminute));i = i.add(this.state.settings.window, 'minute')) {
@@ -57,6 +58,7 @@ export default class SlotSearch extends Component {
           unscheduledCount ++;
           return;
         } else if(time.day() === (this.state.day?this.state.day:this.state.settings.days[0])) {
+          scheduledCount++;
           values[index]++;
         }
       });
@@ -96,6 +98,7 @@ export default class SlotSearch extends Component {
                 <Bar
                   data={data}
                 />
+                <p>Scheduled Appointments: {scheduledCount}</p>
                 <p className='lead'>Unscheduled Appointments: {unscheduledCount}</p>
                 <div className={this.state.loading?'':'d-none'}>
                   <div className='position-absolute d-block bg-secondary' style={{width: '100%', height: '100%', top: '0px', left: '0px', opacity: 0.3}}></div>
