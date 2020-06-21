@@ -54,7 +54,7 @@ const USER_INFO = {
   },
   pbuilding: {
     type: 'TEXT',
-    title: 'Primary Building',
+    title: 'Primary Work Building',
     required: true,
     validFunc: v => v.length < 256
   },

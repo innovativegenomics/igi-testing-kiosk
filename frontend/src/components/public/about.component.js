@@ -32,11 +32,16 @@ export default class About extends Component {
           <p className='display-4 text-center'>IGI FAST: Free Asymptomatic Saliva Testing</p>
           <p>
             Community spread of COVID-19 is likely exacerbated by transmission from people who
-            are infected, but don’t display any symptoms. Regular surveillance testing of these
+            are infected, but don’t display any symptoms. Regular testing of these
             asymptomatic individuals can help to mitigate this spread. As a UC Berkeley employee
             approved to work on campus during the pandemic, you are invited to participate in a
             study that provides regular asymptomatic testing using an experimental saliva-based
             test for COVID-19 on the UC Berkeley campus.
+          </p>
+          <p>
+          This test is for people without symptoms. If you do not pass the campus screener the 
+          day of an appointment, please do not come to campus, cancel your appointment, and contact 
+          UHS at 510-643-7197 to arrange for clinical testing.
           </p>
           <p>
             For more information and to enroll, see <a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a> or contact the study

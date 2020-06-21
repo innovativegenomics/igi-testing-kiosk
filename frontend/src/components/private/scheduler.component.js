@@ -314,6 +314,7 @@ export default class Scheduler extends Component {
         <div className='container'>
           <div className='row justify-content-center m-3'>
             <div className='col-sm-4'>
+              <p className='lead'>Location:</p>
               <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null })}>
                 <option value=''>--location--</option>
                 {locationOptions}
