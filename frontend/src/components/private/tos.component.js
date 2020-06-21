@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { Modal, Button } from 'react-bootstrap';
-import billOfRights from '../../media/IGI_Healthy_Campus_Study_Bill_of_Rights.pdf';
-import informedConsentSpanish from '../../media/IGI_FAST_Informed_Consent_20200612_Spanish.pdf';
+import billOfRights from '../../media/billOfRightsEnglish.pdf';
+import informedConsentSpanish from '../../media/informedConsentSpanish.pdf';
 
 class Question extends Component {
   render() {

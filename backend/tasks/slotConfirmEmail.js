@@ -28,11 +28,11 @@ module.exports = async (payload, helpers) => {
                     },
                     {
                       filename: 'IGI_study_info_sheet.pdf',
-                      path: './media/IGI_study_info_sheet.pdf'
+                      path: './media/infoSheetEnglish.pdf'
                     },
                     {
                       filename: 'IGI_study_info_sheet_Spanish.pdf',
-                      path: './media/IGI_FAST_info_sheet_Spanish.pdf'
+                      path: './media/infoSheetSpanish.pdf'
                     },
                   ]);
 }

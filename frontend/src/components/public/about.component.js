@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Container } from 'react-bootstrap';
 
-import billOfRights from '../../media/IGI_Healthy_Campus_Study_Bill_of_Rights.pdf';
-import billOfRightsSpanish from '../../media/IGI_FAST_Bill_of_Rights_Spanish.pdf';
-import infoSheet from '../../media/IGI_study_info_sheet.pdf';
-import infoSheetSpanish from '../../media/IGI_FAST_info_sheet_Spanish.pdf';
-import informedConsent from '../../media/Informed_Consent_20200610.pdf';
-import informedConsentSpanish from '../../media/IGI_FAST_Informed_Consent_20200612_Spanish.pdf';
+import billOfRights from '../../media/billOfRightsEnglish.pdf';
+import billOfRightsSpanish from '../../media/billOfRightsSpanish.pdf';
+import infoSheet from '../../media/infoSheetEnglish.pdf';
+import infoSheetSpanish from '../../media/infoSheetSpanish.pdf';
+import informedConsent from '../../media/informedConsentEnglish.pdf';
+import informedConsentSpanish from '../../media/informedConsentSpanish.pdf';
 
 import { getUser } from '../../actions/authActions';
 
