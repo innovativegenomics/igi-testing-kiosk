@@ -1,5 +1,6 @@
 module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
+  const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
   const short = require('short-uuid');
   const sendEmail = require('../email');
 
@@ -35,29 +36,38 @@ module.exports = async (payload, helpers) => {
     const beginning = moment().startOf('week');
     for(var user of expired) {
       if(moment(user.Slots[0].time).isBefore(beginning)) {
-        await user.createSlot({
-          calnetid: user.calnetid,
-          time: beginning.clone().add(1, 'week').toDate(),
-          uid: short().new()
-        }, {transaction: t});
+        if(user.Slots[0].location) {
+          await user.createSlot({
+            calnetid: user.calnetid,
+            time: beginning.clone().add(1, 'week').toDate(),
+            uid: short().new()
+          }, {transaction: t});
+        } else {
+          await user.createSlot({
+            calnetid: user.calnetid,
+            time: beginning.clone().toDate(),
+            uid: short().new()
+          }, {transaction: t});
+        }
         try {
+          const nextDate = (user.Slots[0].location?beginning.clone().add(1, 'week').format('dddd, MMMM D'):beginning.format('dddd, MMMM D'));
           const success = await sendEmail(user.email,
-                                          `IGI FAST - Appointment Available Week of ${beginning.format('dddd, MMMM D')}`,
-                                          `<h3>New testing appointment available for you during the week of ${beginning.format('dddd, MMMM D')}</h3>
+                                          `IGI FAST - Appointment Available Week of ${nextDate}`,
+                                          `<h3>New testing appointment available for you during the week of ${nextDate}</h3>
                                           <p>You can schedule a specific time and location on our website <a href='${config.host}'>${config.host}</a>.</p>`);
           if(!success) {
             throw new Error('unsuccessful email');
           }
         } catch(err) {
-          console.error(`error sending reschedule email to user ${user.calnetid}`);
-          console.error(err);
+          pino.warn(`error sending reschedule email to user ${user.calnetid}`);
+          pino.warn(err);
         }
       }
     }
     t.commit();
   } catch(err) {
-    console.error(`Can't update schedules`);
-    console.error(err);
+    pino.error(`Can't update schedules`);
+    pino.error(err);
     await t.rollback();
   }
   const workerUtils = await makeWorkerUtils({pgPool: pool});
