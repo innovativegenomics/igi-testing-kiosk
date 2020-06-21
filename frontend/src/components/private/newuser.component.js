@@ -68,7 +68,7 @@ const USER_INFO = {
     type: 'PHONE',
     title: 'Phone',
     placeholder: '(123) 456 7891',
-    required: false,
+    required: true,
     validFunc: v => {
       try {
         return PhoneNumberUtil.getInstance().isValidNumber(PhoneNumberUtil.getInstance().parse(v, 'US'));
