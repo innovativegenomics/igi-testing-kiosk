@@ -40,8 +40,8 @@ export default class Dashboard extends Component {
   render() {
     if (!this.state.auth.loaded) {
       return (
-        <div className='w-100'>
-          <Spinner animation='border' role='status' className='m-auto'/>
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
         </div>
       );
     } else if (this.state.auth.unauthed) {
@@ -50,8 +50,8 @@ export default class Dashboard extends Component {
       return <Redirect to='/newuser' />;
     } else if (!this.state.slot.loaded) {
       return (
-        <div className='w-100'>
-          <Spinner animation='border' role='status' className='m-auto'/>
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
         </div>
       );
     }

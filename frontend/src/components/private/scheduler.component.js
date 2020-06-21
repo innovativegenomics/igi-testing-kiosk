@@ -149,7 +149,7 @@ class ConfirmModal extends Component {
     this.state = {
       question1: 0,
       question2: 0,
-      question3: '',
+      question3: 'None',
       question4: 'None',
       question5: 'No',
     }
@@ -195,14 +195,14 @@ class ConfirmModal extends Component {
                   <Form.Control type='number' value={this.state.question2} min={0} step={1} pattern='\d+' onChange={e => this.setState({question2: parseInt(e.target.value)})}/>
                 </Col>
               </Row>
-              <Row>
+              {/* <Row>
                 <Col md={7}>
                   <p>When you are working on campus, what building is your primary work space in?</p>
                 </Col>
                 <Col md={4}>
                   <Form.Control type='text' placeholder='Building' value={this.state.question3} onChange={e => this.setState({question3: e.target.value})}/>
                 </Col>
-              </Row>
+              </Row> */}
               <Row>
                 <Col md={9}>
                   <p>Are you using a mobile contact tracing application? If so, which one?</p>
@@ -287,8 +287,8 @@ export default class Scheduler extends Component {
     }
     if (!this.state.auth.loaded) {
       return (
-        <div className='w-100'>
-          <Spinner animation='border' role='status' className='m-auto'/>
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
         </div>
       );
     } else if (this.state.auth.unauthed) {
@@ -297,8 +297,8 @@ export default class Scheduler extends Component {
       return <Redirect to='/newuser' />;
     } else if (!this.state.schedule.loaded) {
       return (
-        <div className='w-100'>
-          <Spinner animation='border' role='status' className='m-auto'/>
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
         </div>
       );
     } else if (!this.state.schedule.success) {
