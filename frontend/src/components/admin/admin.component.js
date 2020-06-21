@@ -26,7 +26,8 @@ export default class Admin extends Component {
     if(!this.state.loaded) {
       return <div>Loading...</div>;
     } else if(this.state.loaded && !this.state.level) {
-      return <Redirect to='/' />
+      window.open('/api/admin/login', '_self');
+      return <br />;
     } else if(this.props.match.path === this.props.location.pathname) {
       return <Redirect to={`${this.props.match.path}/search`} />
     }

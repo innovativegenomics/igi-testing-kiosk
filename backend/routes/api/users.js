@@ -4,7 +4,8 @@ const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 const short = require('short-uuid');
 
-const { sequelize, User, Slot, Settings } = require('../../models');
+const { sequelize, Sequelize, User, Slot, Settings } = require('../../models');
+const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
 const { scheduleSignupEmail } = require('../../scheduler');
@@ -128,8 +129,28 @@ router.post('/profile', cas.block, async (request, response) => {
         phone: request.body.phone,
         questions: request.body.questions,
       }, { transaction: t1 });
+
       const settings = await Settings.findOne({transaction: t1});
+
+      const totalSlots = settings.days.length*settings.buffer*(moment.duration({hours: settings.endtime-settings.starttime, minutes: settings.endminute-settings.startminute}).asMinutes()/settings.window)      - 3*4*12;
+      const takenCount = await Slot.count({
+        where: {
+          time: {
+            [Op.gte]: moment().startOf('week').toDate(),
+            [Op.lt]: moment().startOf('week').add(1, 'week')
+          }
+        },
+        transaction: t1
+      });
+      pino.debug(totalSlots);
+      pino.debug(takenCount);
       if(settings.days[settings.days.length-1] < moment().day() || (settings.days[settings.days.length-1] === moment().day() && moment().isAfter(moment().set('hour', settings.endtime).set('minute', settings.endminute)))) {
+        await user.createSlot({
+          calnetid: calnetid,
+          time: moment().startOf('week').add(1, 'week').toDate(),
+          uid: short().new()
+        }, { transaction: t1 });
+      } else if(takenCount >= totalSlots) {
         await user.createSlot({
           calnetid: calnetid,
           time: moment().startOf('week').add(1, 'week').toDate(),

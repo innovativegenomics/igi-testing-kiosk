@@ -67,7 +67,7 @@ class NewUserModal extends Component {
           <Button variant="secondary" onClick={e => this.props.handleClose()}>
             Close
           </Button>
-          <Button variant="primary" onClick={e => this.props.createNewUser(this.state.name, this.state.email, this.state.level)} disabled={!valid}>Create</Button>
+          <Button variant="primary" onClick={e => this.props.createNewUser(this.state.name, this.state.email, this.state.level).then(e => this.setState({name: '', email: '', level: 0}))} disabled={!valid}>Create</Button>
         </Modal.Footer>
       </Modal>
     );
