@@ -62,7 +62,7 @@ class ToS extends Component {
   render() {
     return (
       <div>
-        <h5 className='text-center'><i>IGI Healthy Campus Study: An integrated approach to safely reintroduce onsite work during the COVID-19 pandemic</i></h5>
+        <h5 className='text-center'><i>IGI Campus Recovery Initiative: An integrated approach to safely reintroduce onsite work during the COVID-19 pandemic</i></h5>
         <a href={informedConsentSpanish}>En Español</a>
         <div className='p-3 border border-dark'>
           <p className='lead text-center w-100'>Key Information</p>
@@ -253,7 +253,7 @@ class ToS extends Component {
                     You have the right to decline to participate or to
                     withdraw at any point in this study without penalty or loss of benefits to which you are otherwise entitled.
                     You will not be penalized for missing appointments. If you want to withdraw from the study, please
-                    contact <a href='mailto:igistudy@berkeley.edu'>igistudy@berkeley.edu</a>.
+                    contact <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a>.
                 </p>
         <p>
           If you withdraw from the research, the data collected about you up to the point of withdrawal will remain
@@ -262,7 +262,7 @@ class ToS extends Component {
         <p className='lead text-center'>Questions</p>
         <p>
           If you have any questions or concerns about this study, you may contact the study coordinator, Alexander
-                    Ehrenberg, at <a href='mailto:igistudy@berkeley.edu'>igistudy@berkeley.edu</a>.
+                    Ehrenberg, at <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a>.
                 </p>
         <p>
           If you have any questions or concerns about your rights and treatment as a research subject, you may

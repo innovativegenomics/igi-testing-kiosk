@@ -2,11 +2,6 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import './landing.css';
 
-import berkeleyLogo from '../../media/berkeley_logo.png';
-
-import igiFast from '../../media/IGI-FAST.png';
-import Navbar from '../navbar.component';
-
 export default class Landing extends Component {
   constructor(props) {
     super(props);
@@ -32,23 +27,30 @@ export default class Landing extends Component {
   render() {
     return (
       <div>
-        <Navbar devuser={this.state.devmode?this.state.devuser:null} />
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col'>
-              <img src={igiFast} className='w-100 pt-5 pb-5 pl-md-5 pr-md-5' alt='IGI FAST' />
+              {/* <img src={igiFast} className='w-100 pt-5 pb-5 pl-md-5 pr-md-5' alt='IGI FAST' /> */}
             </div>
           </div>
           <div className='row justify-content-center'>
             <div className='col'>
               <p className='h2 font-weight-light text-center'>
-                IGI Free Asymptomatic Saliva Testing 
+                Free Asymptomatic Saliva Testing (FAST) Study
               </p>
               <p>
+                The Innovative Genomics Institute (IGI) at UC Berkeley is piloting a new, saliva-based test for 
+                COVID-19. The FAST study aims to establish a testing model for our campus. If you are a UC 
+                Berkeley employee approved to work on campus during the pandemic, you are invited.
               </p>
-              <p className='h3 font-weight-light text-center'>
-                To enroll and schedule appointments:
+              <p>
+                <i>
+                  Please note that this test is experimental. All positive and inconclusive results will be validated 
+                  with clinically-approved tests. Additionally, we cannot guarantee that an individual with a 
+                  negative test result is truly negative for SARS-CoV-2 or will later become infected with COVID-19.
+                </i>
               </p>
+              <p className='lead text-center'>To enroll and schedule an appointment:</p>
             </div>
           </div>
           <div className={`row justify-content-center ${(this.state.devmode) ? '' : 'd-none'}`}>
@@ -59,16 +61,11 @@ export default class Landing extends Component {
           <div className='row justify-content-center mb-2'>
             <div className='col text-center'>
               <button className='btn btn-lg btn-primary text-light' onClick={this.handleLoginButton}>
-                Login with CalNet ID
+                Log in with CalNet ID
               </button>
             </div>
           </div>
         </div>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

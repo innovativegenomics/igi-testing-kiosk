@@ -5,9 +5,6 @@ import { validate as validateEmail } from 'email-validator';
 import { postcodeValidator } from 'postcode-validator';
 import moment from 'moment';
 
-import berkeleyLogo from '../../media/berkeley_logo.png';
-
-import Navbar from '../navbar.component';
 import ToSModal from './tos.component';
 
 import { getUser, createUser } from '../../actions/authActions';
@@ -57,12 +54,12 @@ const USER_INFO = {
   },
   pbuilding: {
     type: 'TEXT',
-    title: 'Primary Building',
+    title: 'Primary Work Building',
     required: true,
     validFunc: v => v.length < 256
   },
   email: {
-    type: 'TEXT',
+    type: 'EMAIL',
     title: 'Email',
     required: true,
     validFunc: v => validateEmail(v)
@@ -134,6 +131,40 @@ class TextInput extends Component {
 }
 
 TextInput.propTypes = {
+  required: PropTypes.bool,
+  name: PropTypes.string.isRequired,
+  title: PropTypes.string.isRequired,
+  valid: PropTypes.bool.isRequired,
+  value: PropTypes.string.isRequired,
+  placeholder: PropTypes.string,
+  update: PropTypes.func.isRequired,
+  validFunc: PropTypes.func.isRequired
+}
+
+class EmailInput extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      confirm: ''
+    };
+  }
+  isValid = v => {
+    return (!this.props.required && v === '') || (v !== '' && this.props.validFunc(v));
+  }
+  render() {
+    return (
+      <div className={`form-group row ${this.props.required ? 'required' : ''}`}>
+        <label htmlFor={this.props.name} className='col-md-3 col-form-label'>{this.props.title}</label>
+        <div className='col-md-9'>
+          <input type='text' className={`form-control ${(this.isValid(this.props.value) || this.props.value === '') ? '' : 'border-danger'}`} id={this.props.name} placeholder='Email' onChange={e => this.props.update(e.target.value, this.isValid(e.target.value)&&this.state.confirm===e.target.value)} value={this.props.value} autoComplete='off' autoCorrect='off' />
+          <input type='text' className={`form-control ${(this.state.confirm===this.props.value || this.state.confirm === '') ? '' : 'border-danger'}`} id={this.props.name+'confirm'} placeholder='Confirm Email' onChange={e => {this.setState({confirm: e.target.value}); this.props.updateValid(this.isValid(this.props.value)&&e.target.value===this.props.value)}} value={this.state.confirm} autoComplete='off' autoCorrect='off' />
+        </div>
+      </div>
+    );
+  }
+}
+
+EmailInput.propTypes = {
   required: PropTypes.bool,
   name: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
@@ -273,7 +304,11 @@ export default class NewUser extends Component {
         console.log(this.state.user[k].value);
         payload[k] = moment.utc(this.state.user[k].value).set('hour', 0).set('minute', 0).set('second', 0);
       } else if(this.state.user[k].type === 'PHONE') {
-        payload[k] = PhoneNumberUtil.getInstance().format(PhoneNumberUtil.getInstance().parse(this.state.user[k].value, 'US'), PhoneNumberFormat.E164);
+        try {
+          payload[k] = PhoneNumberUtil.getInstance().format(PhoneNumberUtil.getInstance().parse(this.state.user[k].value, 'US'), PhoneNumberFormat.E164);
+        } catch(err) {
+          payload[k] = null;
+        }
       } else {
         payload[k] = this.state.user[k].value;
       }
@@ -316,6 +351,27 @@ export default class NewUser extends Component {
             update={(value, valid) => {
               const update = { ...this.state.user };
               update[k].value = value;
+              update[k].valid = valid;
+              this.setState({ user: update });
+            }}
+            placeholder={this.state.user[k].placeholder}
+            name={k}
+            key={k} />);
+          break;
+        case 'EMAIL':
+          formItems.push(<EmailInput required={this.state.user[k].required}
+            title={this.state.user[k].title}
+            validFunc={this.state.user[k].validFunc}
+            valid={this.state.user[k].valid}
+            value={this.state.user[k].value}
+            update={(value, valid) => {
+              const update = { ...this.state.user };
+              update[k].value = value;
+              update[k].valid = valid;
+              this.setState({ user: update });
+            }}
+            updateValid={valid => {
+              const update = { ...this.state.user };
               update[k].valid = valid;
               this.setState({ user: update });
             }}
@@ -379,7 +435,6 @@ export default class NewUser extends Component {
     });
     return (
       <div>
-        <Navbar showLogout={true} />
         <div>
           <div className='container'>
             <div className='row justify-content-center'>
@@ -479,11 +534,6 @@ export default class NewUser extends Component {
             <Button variant='primary' onClick={e => window.open('/api/users/logout', '_self')}>Ok</Button>
           </Modal.Footer>
         </Modal>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Modal, Button, ButtonGroup, Row, Col, Form } from 'react-bootstrap';
-import Navbar from '../navbar.component';
+import { Modal, Button, ButtonGroup, Row, Col, Form, Spinner } from 'react-bootstrap';
 import moment from 'moment';
-
-import berkeleyLogo from '../../media/berkeley_logo.png';
 
 import { getUser } from '../../actions/authActions';
 import { getAvailable, requestSlot } from '../../actions/slotActions';
@@ -152,7 +149,7 @@ class ConfirmModal extends Component {
     this.state = {
       question1: 0,
       question2: 0,
-      question3: '',
+      question3: 'None',
       question4: 'None',
       question5: 'No',
     }
@@ -198,14 +195,14 @@ class ConfirmModal extends Component {
                   <Form.Control type='number' value={this.state.question2} min={0} step={1} pattern='\d+' onChange={e => this.setState({question2: parseInt(e.target.value)})}/>
                 </Col>
               </Row>
-              <Row>
+              {/* <Row>
                 <Col md={7}>
                   <p>When you are working on campus, what building is your primary work space in?</p>
                 </Col>
                 <Col md={4}>
                   <Form.Control type='text' placeholder='Building' value={this.state.question3} onChange={e => this.setState({question3: e.target.value})}/>
                 </Col>
-              </Row>
+              </Row> */}
               <Row>
                 <Col md={9}>
                   <p>Are you using a mobile contact tracing application? If so, which one?</p>
@@ -289,13 +286,21 @@ export default class Scheduler extends Component {
       return <Redirect to='/dashboard' />;
     }
     if (!this.state.auth.loaded) {
-      return <div>Loading User</div>;
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     } else if (this.state.auth.unauthed) {
       return <Redirect to='/' />;
     } else if (!this.state.auth.success) {
       return <Redirect to='/newuser' />;
     } else if (!this.state.schedule.loaded) {
-      return <div>Loading schedule</div>;
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     } else if (!this.state.schedule.success) {
       return <div>Failed to load the schedule! Please try reloading the page.</div>;
     }
@@ -306,10 +311,10 @@ export default class Scheduler extends Component {
     const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).map(v => moment(v));
     return (
       <div>
-        <Navbar authed={true} admin={this.state.auth.user.admin} />
         <div className='container'>
           <div className='row justify-content-center m-3'>
             <div className='col-sm-4'>
+              <p className='lead'>Location:</p>
               <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null })}>
                 <option value=''>--location--</option>
                 {locationOptions}
@@ -338,11 +343,6 @@ export default class Scheduler extends Component {
             <Button variation='primary' onClick={e => window.open('/dashboard', '_self')}>Ok</Button>
           </Modal.Footer>
         </Modal>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

@@ -1,14 +1,10 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import { Row, Col, Alert } from 'react-bootstrap';
+import { Row, Col, Alert, Spinner } from 'react-bootstrap';
 import moment from 'moment';
-
-import berkeleyLogo from '../../media/berkeley_logo.png';
 
 import { getUser } from '../../actions/authActions';
 import { getSlot, cancelSlot } from '../../actions/slotActions';
-
-import Navbar from '../navbar.component';
 
 export default class Dashboard extends Component {
   constructor(props) {
@@ -43,18 +39,24 @@ export default class Dashboard extends Component {
   }
   render() {
     if (!this.state.auth.loaded) {
-      return <div>Loading User</div>;
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     } else if (this.state.auth.unauthed) {
       return <Redirect to='/' />;
     } else if (!this.state.auth.success) {
       return <Redirect to='/newuser' />;
     } else if (!this.state.slot.loaded) {
-      return <div>Loading schedule</div>;
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     }
-    console.log(this.state.slot);
     return (
       <div>
-        <Navbar authed={true} />
         <div className='container'>
           <div className='row justify-content-center'>
             <div className='col text-center'>
@@ -101,11 +103,6 @@ export default class Dashboard extends Component {
             </Col>
           </Row>
         </div>
-        <footer className='navbar navbar-light bg-transparent'>
-          <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue'>Report a problem</a>
-          <div className='navbar-nav'></div>
-          <img src={berkeleyLogo} className='form-inline' style={{height: '5rem'}}/>
-        </footer>
       </div>
     );
   }

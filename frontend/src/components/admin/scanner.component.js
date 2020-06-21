@@ -4,7 +4,6 @@ import { Container, Row, Col, Alert, Button } from 'react-bootstrap';
 import qs from 'qs';
 import moment from 'moment';
 
-import Navbar from '../navbar.component';
 import { getSlotInfo, completeSlot } from '../../actions/adminActions';
 
 export default class Scanner extends Component {
