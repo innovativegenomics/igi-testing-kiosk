@@ -99,7 +99,7 @@ class AppointmentTable extends Component {
     for (var i in slots) {
       const m = moment(i);
       if (m.isSame(this.props.day, 'day'))
-        body.push(<tr key={`${i}`}><td><button data-toggle='modal' data-target='#confirmModal' onClick={e => this.props.request(m)} className={`btn ${(slots[i] > 0) ? 'btn-primary' : 'btn-secondary'}`} disabled={!(slots[i] > 0)}>{m.format('h:mm A')}</button></td></tr>);
+        body.push(<tr key={`${i}`}><td><button data-toggle='modal' data-target='#confirmModal' onClick={e => this.props.request(m)} className={`btn ${(slots[i] > 0) ? 'btn-primary' : 'd-none'}`} disabled={!(slots[i] > 0)}>{m.format('h:mm A')}</button></td></tr>);
     }
     return (
       <table className='table'>
@@ -308,7 +308,9 @@ export default class Scheduler extends Component {
     Object.keys(this.state.schedule.available).forEach(k => {
       locationOptions.push(<option key={k}>{k}</option>);
     });
-    const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).map(v => moment(v));
+    const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).filter(v => {
+      return this.state.schedule.available[this.state.location][v] > 0;
+    }).map(v => moment(v));
     return (
       <div>
         <div className='container'>
