@@ -99,7 +99,7 @@ class AppointmentTable extends Component {
     for (var i in slots) {
       const m = moment(i);
       if (m.isSame(this.props.day, 'day'))
-        body.push(<tr key={`${i}`}><td><button data-toggle='modal' data-target='#confirmModal' onClick={e => this.props.request(m)} className={`btn ${(slots[i] > 0) ? 'btn-primary' : 'd-none'}`} disabled={!(slots[i] > 0)}>{m.format('h:mm A')}</button></td></tr>);
+        body.push(<tr key={`${i}`} className={(slots[i] > 0?'':'d-none')}><td><button data-toggle='modal' data-target='#confirmModal' onClick={e => this.props.request(m)} className={`btn ${(slots[i] > 0) ? 'btn-primary' : 'd-none'}`} disabled={!(slots[i] > 0)}>{m.format('h:mm A')}</button></td></tr>);
     }
     return (
       <table className='table'>
