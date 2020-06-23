@@ -26,6 +26,7 @@ export class Navigation extends Component {
           <Nav className='mr-auto'>
             <Nav.Link as={Link} to='/about'>About</Nav.Link>
             <Nav.Link as={Link} to='/dashboard' className={this.props.authed?'':'d-none'}>Appointments</Nav.Link>
+            <Nav.Link as={Link} to='/accessing-results' className={this.props.authed?'':'d-none'}>Accessing Results</Nav.Link>
           </Nav>
           <Form inline className={this.props.authed?'':'d-none'}>
             <Nav.Link href='/api/users/logout' className='btn btn-primary text-white'>CalNet Logout</Nav.Link>
