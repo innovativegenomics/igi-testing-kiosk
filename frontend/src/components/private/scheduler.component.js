@@ -47,6 +47,7 @@ class Calendar extends Component {
   }
 
   render() {
+    console.log("START RENDER");
     const lastMonth = this.state.month.clone().subtract(1, 'month');
     const startDay = this.state.month.day();
     let btns = [];
@@ -58,7 +59,8 @@ class Calendar extends Component {
           btnRow.push(<DateButton grey={true} day={lastMonth.daysInMonth() - startDay + 1 + day} key={day} />);
         } else if (day >= startDay && day < this.state.month.daysInMonth() + startDay) {
           const active = !this.props.days.every(e => !e.startOf('day').isSame(this.state.month.clone().set('date', day - startDay + 1).startOf('day')));
-          const dayMoment = this.state.month.clone().set('day', day - startDay + 1);
+          const dayMoment = this.state.month.clone().set('date', day - startDay + 1);
+          console.log(dayMoment.format() + ':' + active);
           btnRow.push(<DateButton active={active} selected={dayMoment.isSame(this.props.day)} day={day - startDay + 1} onClick={e => this.props.setDay(dayMoment)} key={day} />);
         } else {
           btnRow.push(<DateButton invisible={true} day={day - startDay + 1} key={day} />);
