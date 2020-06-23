@@ -14,6 +14,7 @@ export default class Scanner extends Component {
       slotLoaded: false,
       completed: false,
     };
+    this.nameRef = React.createRef();
   }
   completeSlot = async () => {
     console.log('here');
@@ -88,7 +89,8 @@ export default class Scanner extends Component {
             <h3 className='text-center font-weight-light'>
               <u>Appointment Details</u>
             </h3>
-            <p className='lead'>Name: {this.state.slot.name}</p>
+            <textarea className='position-fixed' style={{top: '-100px'}} value={this.state.slot.name} ref={this.nameRef}/>
+            <p className='lead'>Name: <a onClick={e => {this.nameRef.current.select();document.execCommand('copy')}} href='#'>{this.state.slot.name}</a></p>
             <p className='lead'>Time: {moment(this.state.slot.time).format('dddd, MMMM D h:mm A')}</p>
             <p className={'lead '+(this.state.slot.completed?'':'d-none')}>Completed: {moment(this.state.slot.completed).format('dddd, MMMM D h:mm A')}</p>
             <p className='lead'>Location: {this.state.slot.location}</p>
