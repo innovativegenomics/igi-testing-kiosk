@@ -48,6 +48,10 @@ module.exports.scheduleSignupEmail = async (email, name) => {
   await workerUtils.addJob('signupEmail', { email: email, name: name });
 }
 
+module.exports.scheduleResultInstructionsEmail = async (email) => {
+  await workerUtils.addJob('resultInstructionsEmail', { email: email });
+}
+
 module.exports.scheduleRescheduleUsers = async () => {
   await workerUtils.addJob('rescheduleUsers', {}, { runAt: moment().startOf('week').add(1, 'week').add(1, 'minute').toDate(), jobKey: 'reschedule', queueName: 'rescheduleQueue' });
 }
