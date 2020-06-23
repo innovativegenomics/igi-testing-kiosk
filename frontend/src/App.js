@@ -7,6 +7,7 @@ import { Navigation, Footer } from './components/navigation.component';
 import Landing from './components/public/landing.component';
 import About from './components/public/about.component';
 import QRCode from './components/public/qrcode.component';
+import AccessingResults from './components/public/accessing-results.component';
 
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
@@ -53,6 +54,7 @@ export default class App extends Component {
             <Route path='/' exact component={withTracker(Landing)} />
             <Route path='/about' component={withTracker(About)} />
             <Route path='/qrcode' component={withTracker(QRCode)} />
+            <Route path='/accessing-results' component={withTracker(AccessingResults)}/>
 
             <Route path='/newuser' component={withTracker(NewUser)} />
             <Route path='/dashboard' component={withTracker(Dashboard)} />
