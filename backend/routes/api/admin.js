@@ -96,24 +96,12 @@ router.get('/slot', cas.block, async (request, response) => {
   }
 });
 
-/**
- * request:
- * {
- *   term: string,
- *   perpage: number of results to return
- *   page: which page to return, starting at 0
- * }
- */
 router.get('/search', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
   if(!!level && level >= 0) {
     const term = request.query.term || '';
-    const perpage = parseInt(request.query.perpage);
-    const page = parseInt(request.query.page);
-    const { count, rows } = await User.findAndCountAll({
-      limit: perpage,
-      offset: perpage*page,
+    const users = await User.findAll({
       where: {
         [Op.or]: {
           firstname: {
@@ -149,7 +137,7 @@ router.get('/search', cas.block, async (request, response) => {
       }]
     });
     const res = [];
-    rows.forEach(v => {
+    users.forEach(v => {
       res.push({
         time: v.Slots[0].time,
         location: v.Slots[0].location,
@@ -159,57 +147,7 @@ router.get('/search', cas.block, async (request, response) => {
         calnetid: v.calnetid,
       });
     });
-    response.send({success: true, results: res, count: count});
-  } else {
-    pino.info('unauthed');
-    response.status(401).send('Unauthorized');
-  }
-});
-
-/**
- * request:
- * {
- *   starttime: moment.Moment,
- *   endtime: moment.Moment
- * }
- * response:
- * {
- *   success: true,
- *   scheduled: {
- *     moment.Moment: 
- *   }
- * }
- */
-router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
-  const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
-  if(!!level && level >= 20) {
-    pino.debug(request.query.starttime);
-    const starttime = moment(request.query.starttime);
-    const endtime = moment(request.query.endtime);
-    try {
-    const res = await Slot.findAll({
-      attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],
-      group: ['time'],
-      order: [['time', 'asc']],
-      where: {
-        time: {
-          [Op.lt]: endtime.toDate(),
-          [Op.gte]: starttime.toDate()
-        },
-        location: {
-          [Op.not]: null
-        },
-        completed: null
-      }
-    });
-    pino.debug(res);
-    response.send({success: true, scheduled: res});
-  } catch(err) {
-    pino.error(`Can't get scheduled slots`);
-    pino.error(err);
-    response.send({success: false});
-  }
+    response.send({success: true, results: res});
   } else {
     pino.info('unauthed');
     response.status(401).send('Unauthorized');
