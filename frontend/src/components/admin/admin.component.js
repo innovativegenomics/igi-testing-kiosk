@@ -25,7 +25,7 @@ export default class Admin extends Component {
     getSettings().then(res => this.setState({settings: res.settings}));
   }
   render() {
-    if(!this.state.loaded || !this.state.settings) {
+    if(!this.state.loaded) {
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
@@ -34,6 +34,12 @@ export default class Admin extends Component {
     } else if(this.state.loaded && !this.state.level) {
       window.open('/api/admin/login', '_self');
       return <br />;
+    } else if(!this.state.settings) {
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     } else if(this.props.match.path === this.props.location.pathname) {
       return <Redirect to={`${this.props.match.path}/search`} />
     }
