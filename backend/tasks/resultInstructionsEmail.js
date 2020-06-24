@@ -60,5 +60,12 @@ message.
   `;
   await sendEmail(email,
                   `RE: Getting your IGI FAST results`,
-                  html);
+                  html,
+                  [
+                    {
+                      filename: 'logo.png',
+                      path: './media/IGI-FAST.png',
+                      cid: 'logo',
+                    }
+                  ]);
 }
