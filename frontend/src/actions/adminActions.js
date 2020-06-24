@@ -33,9 +33,20 @@ export const completeSlot = async uid => {
   }
 }
 
-export const searchSlots = async (term, sort, order) => {
+export const searchSlots = async (term, perpage, page) => {
   try {
-    const response = await axios.get('/api/admin/search', { params: { term: term, sort: sort, order: order } });
+    const response = await axios.get('/api/admin/search', { params: { term: term, perpage: perpage, page: page } });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't search slots`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const getScheduledSlotsStat = async (starttime, endtime) => {
+  try {
+    const response = await axios.get('/api/admin/stats/slots/scheduled', { params: { starttime: starttime.format(), endtime: endtime.format() } });
     return response.data;
   } catch(err) {
     console.error(`Can't search slots`);

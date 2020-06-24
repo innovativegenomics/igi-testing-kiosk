@@ -4,29 +4,37 @@ import { Bar } from 'react-chartjs-2';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
 
-import { searchSlots, getSettings } from '../../actions/adminActions';
+import { getScheduledSlotsStat, getSettings } from '../../actions/adminActions';
 
 export default class SlotSearch extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      results: [],
+      scheduled: [],
       settings: null,
       loading: false,
       success: false,
       day: null,
+      starttime: moment().startOf('hour').set('hour', 12),
+      endtime: moment().startOf('hour').set('hour', 16).set('minute', 40),
     };
   }
-  runSearch = async (term, sort, order) => {
+  runScheduledStats = async (starttime, endtime) => {
     this.setState({loading: true});
-    const res = await searchSlots(term, sort, order);
+    const res = await getScheduledSlotsStat(starttime, endtime);
     this.setState({...res, loading: false});
   }
+  updateDay = async day => {
+    const newStarttime = this.state.starttime.clone().set('day', day);
+    const newEndtime = this.state.endtime.clone().set('day', day);
+    this.setState({day: day, starttime: newStarttime, endtime: newEndtime});
+    this.runScheduledStats(newStarttime, newEndtime);
+  }
   componentDidMount = () => {
-    this.runSearch('', 'Appointment Time', 'asc');
+    this.runScheduledStats(this.state.starttime, this.state.endtime);
     getSettings().then(res => {
       if(res.success) {
-        this.setState({settings: res.settings});
+        this.setState({settings: res.settings, day: res.settings.days[0], starttime: moment().startOf('week').set('day', res.settings.days[0]).set('hour', res.settings.starttime).set('minute', res.settings.startminute), endtime: moment().startOf('week').set('day', res.settings.days[0]).set('hour', res.settings.endtime).set('minute', res.settings.endminute)});
       }
     });
   }
@@ -46,21 +54,16 @@ export default class SlotSearch extends Component {
     var scheduledCount = 0;
     var unscheduledCount = 0;
     if(!this.state.loading) {
-      for(var i = moment().set('day', this.state.day||this.state.settings.days[0]).set('hour', this.state.settings.starttime).set('minute', this.state.settings.startminute);i.isBefore(moment().set('day', this.state.day||this.state.settings.days[0]).set('hour', this.state.settings.endtime).set('minute', this.state.settings.endminute));i = i.add(this.state.settings.window, 'minute')) {
+      for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.state.settings.window, 'minute')) {
+        console.log(i.format('H:mm'));
         labels.push(i.format('H:mm'));
         values.push(0);
       }
 
-      this.state.results.forEach((v, i) => {
+      this.state.scheduled.forEach((v, i) => {
         const time = moment(v.time);
         const index = labels.indexOf(time.format('H:mm'));
-        if(time.hour() === 0) {
-          unscheduledCount ++;
-          return;
-        } else if(time.day() === (this.state.day?this.state.day:this.state.settings.days[0])) {
-          scheduledCount++;
-          values[index]++;
-        }
+        values[index] = v.count;
       });
     }
     const data = {
@@ -87,7 +90,7 @@ export default class SlotSearch extends Component {
                 <Form>
                   <Row>
                     <Col>
-                      <Form.Control as='select' value={(this.state.day?this.state.day:this.state.settings.days[0])} onChange={e => this.setState({day: parseInt(e.target.value)})}>
+                      <Form.Control as='select' value={(this.state.day?this.state.day:this.state.settings.days[0])} onChange={e => this.updateDay(parseInt(e.target.value))}>
                         {this.state.settings.days.map(v => (
                           <option key={v} value={v}>{moment().set('day', v).format('dddd')}</option>
                         ))}

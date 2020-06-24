@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Table, Button, Row, Col, Form, Spinner } from 'react-bootstrap';
+import { Container, Table, Button, Row, Col, Form, Spinner, Pagination } from 'react-bootstrap';
 import moment from 'moment';
 
 import { searchSlots, completeSlot } from '../../actions/adminActions';
@@ -9,38 +9,52 @@ export default class SlotSearch extends Component {
     super(props);
     this.state = {
       results: [],
+      count: 0,
+      page: 0,
+      perpage: 25,
       success: false,
-      sortBy: 'Appointment Time',
-      sortOrder: 'asc',
       search: '',
       loading: false,
     };
   }
-  updateSortBy = async v => {
-    this.setState({sortBy: v});
-    await this.runSearch(this.state.search, v, this.state.sortOrder);
-  }
-  updateSortOrder = async v => {
-    this.setState({sortOrder: v});
-    await this.runSearch(this.state.search, this.state.sortBy, v);
-  }
   updateSearch = async v => {
     this.setState({search: v});
-    await this.runSearch(v, this.state.sortBy, this.state.sortOrder);
+    const c = await this.runSearch(v, this.state.perpage, this.state.page);
   }
-  runSearch = async (term, sort, order) => {
+  runSearch = async (term, perpage, page) => {
     this.setState({loading: true});
-    const res = await searchSlots(term, sort, order);
+    const res = await searchSlots(term, perpage, page);
     this.setState({...res, loading: false});
+    return res.count;
   }
   markAsComplete = async uid => {
     await completeSlot(uid);
-    await this.runSearch(this.state.search, this.state.sortBy, this.state.sortOrder);
+    await this.runSearch(this.state.search, this.state.perpage, this.state.page);
+  }
+  updatePage = async p => {
+    this.setState({page: p});
+    await this.runSearch(this.state.search, this.state.perpage, p);
+  }
+  updatePerPage = async c => {
+    const page = (c*this.state.page>this.state.count?(Math.floor((this.state.count-c)/c)<0?0:Math.floor((this.state.count-c)/c)):this.state.page);
+    this.setState({perpage: c, page: page});
+    await this.runSearch(this.state.search, c, page);
   }
   componentDidMount = async () => {
-    await this.runSearch(this.state.search, this.state.sortBy, this.state.sortOrder);
+    await this.runSearch(this.state.search, this.state.perpage, this.state.page);
   }
   render() {
+    console.log(this.state);
+
+    const pageButtons = [];
+    for(let i = 0;i<this.state.count/this.state.perpage;i++) {
+      pageButtons.push(
+        <Pagination.Item key={i} active={this.state.page===i} onClick={e => this.updatePage(i)}>
+          {i+1}
+        </Pagination.Item>
+      );
+    }
+
     const resultRows = [];
     this.state.results.forEach((v, i) => {
       resultRows.push(<tr key={i}>
@@ -66,20 +80,19 @@ export default class SlotSearch extends Component {
             <Col sm={4}>
               <Form.Control placeholder='Search' value={this.state.search} onChange={e => this.updateSearch(e.target.value)} />
             </Col>
-            {/* <Form.Label column sm={1} className='lead'>Sort By</Form.Label>
-            <Col sm={3}>
-              <Form.Control as='select' value={this.state.sortBy} onChange={e => this.updateSortBy(e.target.value)}>
-                <option>Appointment Time</option>
-                <option>First Name</option>
-                <option>Last Name</option>
+            <Form.Label column sm={1} className='lead'>Page</Form.Label>
+            <Col>
+              <Pagination>
+                {pageButtons}
+              </Pagination>
+            </Col>
+            <Form.Label column sm={2} className='lead'>Items per page</Form.Label>
+            <Col sm={2}>
+              <Form.Control as='select' onChange={e => this.updatePerPage(parseInt(e.target.value))} value={this.state.perpage}>
+                <option>25</option>
+                <option>50</option>
               </Form.Control>
             </Col>
-            <Col sm={2}>
-              <Form.Control as='select' value={this.state.sortOrder} onChange={e => this.updateSortOrder(e.target.value)}>
-                <option value='asc'>Ascending</option>
-                <option value='desc'>Descending</option>
-              </Form.Control>
-            </Col> */}
           </Form.Group>
         </Form>
         <Table hover size='sm' responsive>
