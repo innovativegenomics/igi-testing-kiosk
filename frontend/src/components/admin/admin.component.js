@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Redirect, Route, Link } from 'react-router-dom';
 import { Nav, Spinner } from 'react-bootstrap';
 
-import { getAdminLevel } from '../../actions/adminActions';
+import { getAdminLevel, getSettings } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
 import AdminUsers from './adminusers.component';
 import Statistics from './statistics.component';
@@ -13,6 +13,7 @@ export default class Admin extends Component {
     super(props);
     const path = props.location.pathname.split('/');
     this.state = {
+      settings: null,
       loaded: false,
       level: null,
       active: path[path.length-1],
@@ -21,9 +22,10 @@ export default class Admin extends Component {
   componentDidMount = async () => {
     const admin = getAdminLevel();
     this.setState({loaded: true, level: (await admin).level});
+    getSettings().then(res => this.setState({settings: res.settings}));
   }
   render() {
-    if(!this.state.loaded) {
+    if(!this.state.loaded || !this.state.settings) {
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
@@ -55,25 +57,25 @@ export default class Admin extends Component {
         <Route
           path={`${this.props.match.path}/search`}
           render={(props) => {
-            return <SlotSearch {...props} level={this.state.level} />;
+            return <SlotSearch {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
           path={`${this.props.match.path}/admins`}
           render={(props) => {
-            return <AdminUsers {...props} level={this.state.level} />;
+            return <AdminUsers {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
           path={`${this.props.match.path}/stats`}
           render={(props) => {
-            return <Statistics {...props} level={this.state.level} />;
+            return <Statistics {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
           path={`${this.props.match.path}/scanner`}
           render={(props) => {
-            return <Scanner {...props} level={this.state.level} />;
+            return <Scanner {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
       </div>

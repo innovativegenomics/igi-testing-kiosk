@@ -66,6 +66,24 @@ describe('Create users', () => {
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .expect({success: true});
+      
+      const available = await agent
+        .get('/api/slots/available')
+        .expect(200)
+        .expect('Content-Type', /json/);
+      
+      const kosh = available.body.available['Koshland'];
+      var a = 0;
+      var time = null;
+      while(a<1) {
+        const key = Object.keys(kosh)[Math.floor(Math.random()*Object.keys(kosh).length)];
+        a = kosh[key];
+        time = key;
+      }
+      await agent
+        .post('/api/slots/slot')
+        .send({time: time, location: 'Koshland', questions: [0, 0, null, false, false]})
+        .expect(200);
     }
   });
 });
