@@ -14,8 +14,8 @@ export default class SlotSearch extends Component {
       loading: false,
       success: false,
       day: null,
-      starttime: moment().startOf('hour').set('hour', 12),
-      endtime: moment().startOf('hour').set('hour', 16).set('minute', 40),
+      starttime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.starttime).set('minute', props.settings.startminute),
+      endtime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.endtime).set('minute', props.settings.endminute),
     };
   }
   runScheduledStats = async (starttime, endtime) => {
