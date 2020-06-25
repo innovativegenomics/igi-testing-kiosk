@@ -50,6 +50,7 @@ export default class SlotSearch extends Component {
     for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.props.settings.window, 'minute')) {
       labels.push(i.format('H:mm'));
       scheduledValues.push(0);
+      completedValues.push(0);
     }
 
     this.state.scheduled.forEach((v, i) => {
