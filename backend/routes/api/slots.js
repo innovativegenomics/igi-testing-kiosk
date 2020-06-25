@@ -53,6 +53,13 @@ router.get('/available', cas.block, async (request, response) => {
     for (var location of settings.locations) {
       open[location] = {};
       for (var day of settings.days) {
+
+
+        if (week.clone().set('day', day).get('date') === 3) {
+          continue;
+        }
+
+
         if (now.isAfter(week.clone().set('day', day), 'day')) {
           continue;
         } else {
