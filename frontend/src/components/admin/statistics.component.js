@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Spinner, Form, Card } from 'react-bootstrap';
+import { Container, Row, Col, Spinner, Form, Card, InputGroup, Button, Tooltip, OverlayTrigger } from 'react-bootstrap';
+import { BsArrowClockwise } from 'react-icons/bs';
 import { Bar } from 'react-chartjs-2';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
@@ -31,6 +32,9 @@ export default class SlotSearch extends Component {
     this.setState({day: day, starttime: newStarttime, endtime: newEndtime});
     this.runSlotsStats(newStarttime, newEndtime);
   }
+  refreshButton = async () => {
+    await this.runSlotsStats(this.state.starttime, this.state.endtime);
+  }
   componentDidMount = () => {
     this.runSlotsStats(this.state.starttime, this.state.endtime);
   }
@@ -44,23 +48,21 @@ export default class SlotSearch extends Component {
     const completedValues = [];
     var scheduledCount = 0;
     var unscheduledCount = 0;
-    if(!this.state.loading) {
-      for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.props.settings.window, 'minute')) {
-        labels.push(i.format('H:mm'));
-        scheduledValues.push(0);
-      }
-
-      this.state.scheduled.forEach((v, i) => {
-        const time = moment(v.time);
-        const index = labels.indexOf(time.format('H:mm'));
-        scheduledValues[index] = v.count;
-      });
-      this.state.completed.forEach((v, i) => {
-        const time = moment(v.time);
-        const index = labels.indexOf(time.format('H:mm'));
-        completedValues[index] = v.count;
-      });
+    for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.props.settings.window, 'minute')) {
+      labels.push(i.format('H:mm'));
+      scheduledValues.push(0);
     }
+
+    this.state.scheduled.forEach((v, i) => {
+      const time = moment(v.time);
+      const index = labels.indexOf(time.format('H:mm'));
+      scheduledValues[index] = v.count;
+    });
+    this.state.completed.forEach((v, i) => {
+      const time = moment(v.time);
+      const index = labels.indexOf(time.format('H:mm'));
+      completedValues[index] = v.count;
+    });
     const data = {
       labels: labels,
       datasets: [
@@ -116,11 +118,22 @@ export default class SlotSearch extends Component {
                 <Form>
                   <Row>
                     <Col>
-                      <Form.Control as='select' value={(this.state.day?this.state.day:this.props.settings.days[0])} onChange={e => this.updateDay(parseInt(e.target.value))}>
-                        {this.props.settings.days.map(v => (
-                          <option key={v} value={v}>{moment().set('day', v).format('dddd')}</option>
-                        ))}
-                      </Form.Control>
+                      <InputGroup>
+                        <InputGroup.Prepend>
+                          <OverlayTrigger
+                            placement='top'
+                            delay={{ show: 200, hide: 50 }}
+                            overlay={props => <Tooltip {...props}>Refresh</Tooltip>}
+                          >
+                            <Button variant='light' onClick={this.refreshButton}><BsArrowClockwise /></Button>
+                          </OverlayTrigger>
+                        </InputGroup.Prepend>
+                        <Form.Control as='select' value={(this.state.day?this.state.day:this.props.settings.days[0])} onChange={e => this.updateDay(parseInt(e.target.value))}>
+                          {this.props.settings.days.map(v => (
+                            <option key={v} value={v}>{moment().set('day', v).format('dddd')}</option>
+                          ))}
+                        </Form.Control>
+                      </InputGroup>
                     </Col>
                   </Row>
                 </Form>
