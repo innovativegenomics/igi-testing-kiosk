@@ -216,6 +216,58 @@ router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
   }
 });
 
+/**
+ * request:
+ * {
+ *   starttime: moment.Moment,
+ *   endtime: moment.Moment
+ * }
+ * response:
+ * {
+ *   success: true,
+ *   scheduled: {
+ *     moment.Moment: 
+ *   }
+ * }
+ */
+router.get('/stats/slots/completed', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 20) {
+    pino.debug(request.query.starttime);
+    const starttime = moment(request.query.starttime);
+    const endtime = moment(request.query.endtime);
+    try {
+      const res = await Slot.findAll({
+        attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],
+        group: ['time'],
+        order: [['time', 'asc']],
+        where: {
+          time: {
+            [Op.lt]: endtime.toDate(),
+            [Op.gte]: starttime.toDate()
+          },
+          location: {
+            [Op.not]: null
+          },
+          completed: {
+            [Op.not]: null
+          }
+        }
+      });
+      pino.debug(res);
+      response.send({success: true, completed: res});
+    } catch(err) {
+      pino.error(`Can't get scheduled slots`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.post('/complete', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;

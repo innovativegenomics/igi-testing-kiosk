@@ -4,13 +4,14 @@ import { Bar } from 'react-chartjs-2';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
 
-import { getScheduledSlotsStat } from '../../actions/adminActions';
+import { getScheduledSlotsStat, getCompletedSlotsStat } from '../../actions/adminActions';
 
 export default class SlotSearch extends Component {
   constructor(props) {
     super(props);
     this.state = {
       scheduled: [],
+      completed: [],
       loading: false,
       success: false,
       day: null,
@@ -18,24 +19,20 @@ export default class SlotSearch extends Component {
       endtime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.endtime).set('minute', props.settings.endminute),
     };
   }
-  runScheduledStats = async (starttime, endtime) => {
+  runSlotsStats = async (starttime, endtime) => {
     this.setState({loading: true});
-    const res = await getScheduledSlotsStat(starttime, endtime);
-    this.setState({...res, loading: false});
+    const scheduled = await getScheduledSlotsStat(starttime, endtime);
+    const completed = await getCompletedSlotsStat(starttime, endtime);
+    this.setState({...scheduled, ...completed, success: scheduled.success && completed.success, loading: false});
   }
   updateDay = async day => {
     const newStarttime = this.state.starttime.clone().set('day', day);
     const newEndtime = this.state.endtime.clone().set('day', day);
     this.setState({day: day, starttime: newStarttime, endtime: newEndtime});
-    this.runScheduledStats(newStarttime, newEndtime);
+    this.runSlotsStats(newStarttime, newEndtime);
   }
   componentDidMount = () => {
-    this.runScheduledStats(this.state.starttime, this.state.endtime);
-    // getSettings().then(res => {
-    //   if(res.success) {
-    //     this.setState({settings: res.settings, day: res.settings.days[0], starttime: moment().startOf('week').set('day', res.settings.days[0]).set('hour', res.settings.starttime).set('minute', res.settings.startminute), endtime: moment().startOf('week').set('day', res.settings.days[0]).set('hour', res.settings.endtime).set('minute', res.settings.endminute)});
-    //   }
-    // });
+    this.runSlotsStats(this.state.starttime, this.state.endtime);
   }
   render() {
     if(this.props.level < 20) {
@@ -43,19 +40,25 @@ export default class SlotSearch extends Component {
     }
     
     const labels = [];
-    const values = [];
+    const scheduledValues = [];
+    const completedValues = [];
     var scheduledCount = 0;
     var unscheduledCount = 0;
     if(!this.state.loading) {
       for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.props.settings.window, 'minute')) {
         labels.push(i.format('H:mm'));
-        values.push(0);
+        scheduledValues.push(0);
       }
 
       this.state.scheduled.forEach((v, i) => {
         const time = moment(v.time);
         const index = labels.indexOf(time.format('H:mm'));
-        values[index] = v.count;
+        scheduledValues[index] = v.count;
+      });
+      this.state.completed.forEach((v, i) => {
+        const time = moment(v.time);
+        const index = labels.indexOf(time.format('H:mm'));
+        completedValues[index] = v.count;
       });
     }
     const data = {
@@ -68,7 +71,16 @@ export default class SlotSearch extends Component {
           borderWidth: 1,
           hoverBackgroundColor: 'rgba(255,99,132,0.4)',
           hoverBorderColor: 'rgba(255,99,132,1)',
-          data: values
+          data: scheduledValues
+        },
+        {
+          label: 'Number of completed appointments',
+          backgroundColor: 'rgba(132,99,255,0.2)',
+          borderColor: 'rgba(132,99,255,1)',
+          borderWidth: 1,
+          hoverBackgroundColor: 'rgba(132,99,255,0.4)',
+          hoverBorderColor: 'rgba(132,99,255,1)',
+          data: completedValues
         }
       ]
     };
@@ -76,6 +88,7 @@ export default class SlotSearch extends Component {
       scales: {
         yAxes: [
           {
+            stacked: true,
             ticks: {
               beginAtZero: true,
               max: this.props.settings.buffer,
@@ -85,6 +98,7 @@ export default class SlotSearch extends Component {
         ],
         xAxes: [
           {
+            stacked: true,
             gridLines: {
               display: false
             },
