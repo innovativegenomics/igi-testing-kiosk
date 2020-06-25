@@ -73,8 +73,8 @@ describe('Create users', () => {
         .expect('Content-Type', /json/);
       
       const kosh = available.body.available['Koshland'];
-      var a = 0;
-      var time = null;
+      let a = 0;
+      let time = null;
       while(a<1) {
         const key = Object.keys(kosh)[Math.floor(Math.random()*Object.keys(kosh).length)];
         a = kosh[key];

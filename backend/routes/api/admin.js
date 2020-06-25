@@ -363,14 +363,8 @@ router.get('/settings', cas.block, async (request, response) => {
     const settings = await Settings.findOne({});
     response.send({
       settings: {
-        starttime: settings.starttime,
-        startminute: settings.startminute,
-        endtime: settings.endtime,
-        endminute: settings.endminute,
-        buffer: settings.buffer,
-        window: settings.window,
         locations: settings.locations,
-        days: settings.days,
+        locationlinks: settings.locationlinks
       },
       success: true,
     });

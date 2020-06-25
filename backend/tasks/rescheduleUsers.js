@@ -34,7 +34,7 @@ module.exports = async (payload, helpers) => {
       transaction: t,
     });
     const beginning = moment().startOf('week');
-    for(var user of expired) {
+    for(let user of expired) {
       if(moment(user.Slots[0].time).isBefore(beginning)) {
         if(user.Slots[0].location) {
           await user.createSlot({

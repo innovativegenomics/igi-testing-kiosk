@@ -58,13 +58,13 @@ router.get('/available', cas.block, async (request, response) => {
     });
     const now = moment();
     const open = {};
-    for (var location of settings.locations) {
+    for (let location of settings.locations) {
       open[location] = {};
-      for (var day of days) {
+      for (let day of days) {
         if (now.isAfter(moment(day.date), 'day')) {
           continue;
         } else {
-          for (var i = moment(day.date).set('hour', day.starthour).set('minute', day.startminute); i.isBefore(i.clone().set('hour', day.endhour).set('minute', day.endminute)); i = i.add(day.window, 'minute')) {
+          for (let i = moment(day.date).set('hour', day.starthour).set('minute', day.startminute); i.isBefore(i.clone().set('hour', day.endhour).set('minute', day.endminute)); i = i.add(day.window, 'minute')) {
             // pino.debug(`slot: ${i}`);
             if (i.isBefore(now)) {
               continue;
@@ -75,7 +75,7 @@ router.get('/available', cas.block, async (request, response) => {
         }
       }
     }
-    for (var slot of taken) {
+    for (let slot of taken) {
       if (open[slot.location][moment(slot.time)] !== undefined) {
         open[slot.location][moment(slot.time)]--;
       }
@@ -223,7 +223,7 @@ router.post('/slot', cas.block, async (request, response) => {
                                         slot.uid, 
                                         moment(slot.time).format('dddd'),
                                         moment(slot.time).format('h:mm A'),
-                                        moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
+                                        moment(slot.time).add(day.window, 'minute').format('h:mm A'),
                                         slot.location,
                                         settings.locationlinks[settings.locations.indexOf(slot.location)]);
           await scheduleAppointmentReminderText(user.phone, moment(slot.time));
