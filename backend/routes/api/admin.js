@@ -3,7 +3,7 @@ const router = express.Router();
 const moment = require('moment');
 const short = require('short-uuid');
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
-const { Sequelize, sequelize, Admin, Slot, User, Settings } = require('../../models');
+const { Sequelize, sequelize, Admin, Slot, User, Day, Settings } = require('../../models');
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
@@ -184,9 +184,16 @@ router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
   if(!!level && level >= 20) {
-    pino.debug(request.query.starttime);
-    const starttime = moment(request.query.starttime);
-    const endtime = moment(request.query.endtime);
+    const day = await Day.findOne({
+      where: {
+        date: {
+          [Op.gte]: moment(request.query.day).startOf('day'),
+          [Op.lt]: moment(request.query.day).startOf('day').add(1, 'day'),
+        }
+      }
+    });
+    const starttime = moment(day.starthour);
+    const endtime = moment(day.endhour);
     try {
       const res = await Slot.findAll({
         attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],

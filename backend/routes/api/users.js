@@ -135,7 +135,7 @@ router.post('/profile', cas.block, async (request, response) => {
       while(true) {
         const days = await Day.findAll({
           where: {
-            time: {
+            date: {
               [Op.gte]: week.toDate(),
               [Op.lt]: week.clone().add(1, 'week').toDate()
             }

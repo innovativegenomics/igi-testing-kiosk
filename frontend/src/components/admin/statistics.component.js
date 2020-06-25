@@ -13,29 +13,20 @@ export default class SlotSearch extends Component {
       scheduled: [],
       loading: false,
       success: false,
-      day: null,
-      starttime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.starttime).set('minute', props.settings.startminute),
-      endtime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.endtime).set('minute', props.settings.endminute),
+      day: moment().get('day'),
     };
   }
-  runScheduledStats = async (starttime, endtime) => {
+  runScheduledStats = async m => {
     this.setState({loading: true});
-    const res = await getScheduledSlotsStat(starttime, endtime);
+    const res = await getScheduledSlotsStat(m);
     this.setState({...res, loading: false});
   }
   updateDay = async day => {
-    const newStarttime = this.state.starttime.clone().set('day', day);
-    const newEndtime = this.state.endtime.clone().set('day', day);
-    this.setState({day: day, starttime: newStarttime, endtime: newEndtime});
-    this.runScheduledStats(newStarttime, newEndtime);
+    this.setState({day: day});
+    this.runScheduledStats(moment().set('day', day));
   }
   componentDidMount = () => {
-    this.runScheduledStats(this.state.starttime, this.state.endtime);
-    // getSettings().then(res => {
-    //   if(res.success) {
-    //     this.setState({settings: res.settings, day: res.settings.days[0], starttime: moment().startOf('week').set('day', res.settings.days[0]).set('hour', res.settings.starttime).set('minute', res.settings.startminute), endtime: moment().startOf('week').set('day', res.settings.days[0]).set('hour', res.settings.endtime).set('minute', res.settings.endminute)});
-    //   }
-    // });
+    this.runScheduledStats(moment().set('day', this.state.day));
   }
   render() {
     if(this.props.level < 20) {
