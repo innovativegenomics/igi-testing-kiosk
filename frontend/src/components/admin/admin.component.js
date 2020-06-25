@@ -20,9 +20,8 @@ export default class Admin extends Component {
     };
   }
   componentDidMount = async () => {
-    const admin = getAdminLevel();
-    this.setState({loaded: true, level: (await admin).level});
-    getSettings().then(res => this.setState({settings: res.settings}));
+    const [admin, settings] = await Promise.all([getAdminLevel(), getSettings()]);
+    this.setState({loaded: true, level: admin.level, settings: settings.settings});
   }
   render() {
     if(!this.state.loaded) {
@@ -61,24 +60,28 @@ export default class Admin extends Component {
         </Nav>
 
         <Route
+          exact
           path={`${this.props.match.path}/search`}
           render={(props) => {
             return <SlotSearch {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
+          exact
           path={`${this.props.match.path}/admins`}
           render={(props) => {
             return <AdminUsers {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
+          exact
           path={`${this.props.match.path}/stats`}
           render={(props) => {
             return <Statistics {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
+          exact
           path={`${this.props.match.path}/scanner`}
           render={(props) => {
             return <Scanner {...props} level={this.state.level} settings={this.state.settings} />;

@@ -48,7 +48,6 @@ export default class SlotSearch extends Component {
     var unscheduledCount = 0;
     if(!this.state.loading) {
       for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.props.settings.window, 'minute')) {
-        console.log(i.format('H:mm'));
         labels.push(i.format('H:mm'));
         values.push(0);
       }
@@ -71,7 +70,27 @@ export default class SlotSearch extends Component {
           hoverBorderColor: 'rgba(255,99,132,1)',
           data: values
         }
-      ],
+      ]
+    };
+    const chartOptions = {
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              beginAtZero: true,
+              max: this.props.settings.buffer,
+              stepSize: 1
+            }
+          }
+        ],
+        xAxes: [
+          {
+            gridLines: {
+              display: false
+            },
+          }
+        ]
+      }
     };
 
     return (
@@ -93,6 +112,7 @@ export default class SlotSearch extends Component {
                 </Form>
                 <Bar
                   data={data}
+                  options={chartOptions}
                 />
                 <p className='lead m-0'>Scheduled Appointments: {scheduledCount}</p>
                 <p className='lead m-0'>Unscheduled Appointments: {unscheduledCount}</p>

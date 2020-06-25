@@ -67,7 +67,7 @@ export default class SlotSearch extends Component {
         {this.props.level>=10?
           <td><Button size='sm' className={!!v.location?'':'d-none'} variant={!!v.completed?'secondary':'primary'} onClick={e => this.markAsComplete(v.uid)} disabled={!!v.completed}>{!!v.completed?`Completed`:`Mark as Complete`}</Button></td>
           :
-          <br />
+          <td></td>
         }
       </tr>);
     });
@@ -109,7 +109,7 @@ export default class SlotSearch extends Component {
               {this.props.level>=10?
                 <th>Mark as Complete</th>
                 :
-                <br />
+                <th></th>
               }
             </tr>
           </thead>
