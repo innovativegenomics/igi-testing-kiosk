@@ -132,7 +132,7 @@ router.post('/profile', cas.block, async (request, response) => {
 
       const settings = await Settings.findOne({transaction: t1});
 
-      const totalSlots = settings.days.length*settings.buffer*(moment.duration({hours: settings.endtime-settings.starttime, minutes: settings.endminute-settings.startminute}).asMinutes()/settings.window)      - 3*4*12;
+      const totalSlots = settings.days.length*settings.buffer*(moment.duration({hours: settings.endtime-settings.starttime, minutes: settings.endminute-settings.startminute}).asMinutes()/settings.window);
       const takenCount = await Slot.count({
         where: {
           time: {

@@ -68,7 +68,7 @@ router.get('/available', cas.block, async (request, response) => {
             if (i.isBefore(now)) {
               continue;
             } else {
-              open[location][i.clone()] = (i.hour() < 14?4:settings.buffer);
+              open[location][i.clone()] = settings.buffer;
             }
           }
         }
@@ -172,7 +172,7 @@ router.post('/slot', cas.block, async (request, response) => {
       },
       transaction: t,
     });
-    if(takenCount >= (reqtime.hour()<14?4:settings.buffer)) {
+    if(takenCount >= settings.buffer) {
       throw new Error('Slot is already full');
     } else {
       slot.time = reqtime.toDate();
