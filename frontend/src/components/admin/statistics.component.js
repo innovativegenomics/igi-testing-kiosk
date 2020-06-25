@@ -22,8 +22,7 @@ export default class SlotSearch extends Component {
   }
   runSlotsStats = async (starttime, endtime) => {
     this.setState({loading: true});
-    const scheduled = await getScheduledSlotsStat(starttime, endtime);
-    const completed = await getCompletedSlotsStat(starttime, endtime);
+    const [scheduled, completed] = await Promise.all([getScheduledSlotsStat(starttime, endtime), getCompletedSlotsStat(starttime, endtime)]);
     this.setState({...scheduled, ...completed, success: scheduled.success && completed.success, loading: false});
   }
   updateDay = async day => {
@@ -86,6 +85,7 @@ export default class SlotSearch extends Component {
         }
       ]
     };
+    console.log(data);
     const chartOptions = {
       scales: {
         yAxes: [
