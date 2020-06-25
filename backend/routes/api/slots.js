@@ -3,7 +3,7 @@ const router = express.Router();
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
-const { sequelize, Sequelize, Slot, User, Settings } = require('../../models');
+const { sequelize, Sequelize, Slot, User, Day, Settings } = require('../../models');
 const { scheduleSlotConfirmEmail,
   scheduleSlotConfirmText,
   scheduleAppointmentReminderEmail,
@@ -36,6 +36,14 @@ router.get('/available', cas.block, async (request, response) => {
       attributes: ['time'],
       transaction: t,
     }))[0].time).startOf('week');
+    const days = await Day.findAll({
+      where: {
+        date: {
+          [Op.gte]: week.toDate(),
+          [Op.lt]: week.clone().add(1, 'week').toDate()
+        }
+      }
+    });
     const taken = await Slot.findAll({
       where: {
         location: {
@@ -52,16 +60,16 @@ router.get('/available', cas.block, async (request, response) => {
     const open = {};
     for (var location of settings.locations) {
       open[location] = {};
-      for (var day of settings.days) {
-        if (now.isAfter(week.clone().set('day', day), 'day')) {
+      for (var day of days) {
+        if (now.isAfter(moment(day.date), 'day')) {
           continue;
         } else {
-          for (var i = week.clone().set('day', day).set('hour', settings.starttime).set('minute', settings.startminute); i.isBefore(i.clone().set('hour', settings.endtime).set('minute', settings.endminute)); i = i.add(settings.window, 'minute')) {
+          for (var i = moment(day.date).set('hour', day.starthour).set('minute', day.startminute); i.isBefore(i.clone().set('hour', day.endhour).set('minute', day.endminute)); i = i.add(day.window, 'minute')) {
             // pino.debug(`slot: ${i}`);
             if (i.isBefore(now)) {
               continue;
             } else {
-              open[location][i.clone()] = (i.hour() < 14?4:settings.buffer);
+              open[location][i.clone()] = day.buffer;
             }
           }
         }
@@ -141,18 +149,34 @@ router.post('/slot', cas.block, async (request, response) => {
       order: [['time', 'desc']],
       transaction: t,
     }))[0];
+    const day = await Day.findOne({
+      where: {
+        date: {
+          [Op.gte]: reqtime.clone().startOf('day').toDate(),
+          [Op.lt]: reqtime.clone().startOf('day').add(1, 'day').toDate()
+        }
+      },
+      transaction: t
+    });
+
+    if(!day) {
+      throw new Error('no matching day found!');
+    }
 
     if(!moment(slot.time).startOf('week').isSame(reqtime.clone().startOf('week'))) {
       throw new Error('slot not valid');
     } else if(!settings.locations.includes(reqlocation)) {
       throw new Error('location not valid');
-    } else if(moment.duration(reqtime.diff(reqtime.clone().set('hour', settings.starttime).set('minute', settings.startminute))).asMinutes() % settings.window > 0) {
+    }
+    
+
+    else if(moment.duration(reqtime.diff(reqtime.clone().set('hour', day.starthour).set('minute', day.startminute))).asMinutes() % day.window > 0) {
       throw new Error('slot not valid');
-    } else if(!reqtime.isBetween(reqtime.clone().set('hour', settings.starttime).set('minute', settings.startminute), reqtime.clone().set('hour', settings.endtime).set('minute', settings.endminute), null, '[)')) {
+    } else if(!reqtime.isBetween(reqtime.clone().set('hour', day.starthour).set('minute', day.startminute), reqtime.clone().set('hour', day.endhour).set('minute', day.endminute), null, '[)')) {
       throw new Error('slot not valid');
-    } else if(!settings.days.includes(reqtime.day())) {
-      throw new Error('slot not valid');
-    } else if(reqtime.isBefore(moment())) {
+    }
+    
+    else if(reqtime.isBefore(moment())) {
       throw new Error('slot is before current time');
     } else if(slot.completed) {
       throw new Error('slot is already completed');
