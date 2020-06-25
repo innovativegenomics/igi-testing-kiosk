@@ -190,7 +190,7 @@ router.post('/slot', cas.block, async (request, response) => {
         const user = await User.findOne({where: {calnetid: calnetid}});
         await scheduleSlotConfirmEmail(user.email, 
                                       slot.uid, 
-                                      moment(slot.time).format('dddd'),
+                                      moment(slot.time).format('dddd, MMMM Do'),
                                       moment(slot.time).format('h:mm A'),
                                       moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
                                       slot.location,
@@ -204,7 +204,7 @@ router.post('/slot', cas.block, async (request, response) => {
         if(user.phone) {
           await scheduleSlotConfirmText(user.phone, 
                                         slot.uid, 
-                                        moment(slot.time).format('dddd'),
+                                        moment(slot.time).format('dddd, MMMM Do'),
                                         moment(slot.time).format('h:mm A'),
                                         moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
                                         slot.location,
