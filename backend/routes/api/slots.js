@@ -189,7 +189,7 @@ router.post('/slot', cas.block, async (request, response) => {
       },
       transaction: t,
     });
-    if(takenCount >= (reqtime.hour()<14?4:settings.buffer)) {
+    if(takenCount >= (reqtime.hour()<14?4:day.buffer)) {
       throw new Error('Slot is already full');
     } else {
       slot.time = reqtime.toDate();
@@ -209,7 +209,7 @@ router.post('/slot', cas.block, async (request, response) => {
                                       slot.uid, 
                                       moment(slot.time).format('dddd'),
                                       moment(slot.time).format('h:mm A'),
-                                      moment(slot.time).add(settings.window, 'minute').format('h:mm A'),
+                                      moment(slot.time).add(day.window, 'minute').format('h:mm A'),
                                       slot.location,
                                       settings.locationlinks[settings.locations.indexOf(slot.location)]);
         await scheduleAppointmentReminderEmail(user.email, moment(slot.time));
