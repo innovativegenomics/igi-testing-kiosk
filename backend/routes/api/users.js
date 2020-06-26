@@ -129,7 +129,7 @@ router.post('/profile', cas.block, async (request, response) => {
         phone: request.body.phone,
         questions: request.body.questions,
       }, { transaction: t1 });
-
+      const settings = await Settings.findOne({});
       // Figure out which week this person should be assigned to
       let week = moment().startOf('week');
       while(true) {
@@ -145,7 +145,7 @@ router.post('/profile', cas.block, async (request, response) => {
         });
         let available = 0;
         days.forEach(v => {
-          available += v.buffer * Math.floor(moment.duration({hours: v.endhour-v.starthour, minutes: v.endminute-v.startminute}).asMinutes() / v.window);
+          available += settings.locations.length * v.buffer * Math.floor(moment.duration({hours: v.endhour-v.starthour, minutes: v.endminute-v.startminute}).asMinutes() / v.window);
         });
         const taken = await Slot.count({
           where: {
@@ -156,12 +156,17 @@ router.post('/profile', cas.block, async (request, response) => {
           },
           transaction: t1
         });
+        pino.debug(`available: ${available} taken: ${taken} between ${week.format()} and ${week.clone().add(1, 'week').format()}`);
+        if(available === 0) {
+          break;
+        }
         if(taken < available) {
           let lastDay = days[days.length-1];
           if(moment(lastDay.date).set('hour', lastDay.endhour).set('minute', lastDay.endminute).isBefore(moment())) {
             week = week.add(1, 'week');
+          } else {
+            break;
           }
-          break;
         } else {
           week = week.add(1, 'week');
         }
