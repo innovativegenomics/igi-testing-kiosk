@@ -192,8 +192,8 @@ router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
         }
       }
     });
-    const starttime = moment(day.starthour);
-    const endtime = moment(day.endhour);
+    const starttime = moment(day.date).set('hour', day.starthour).set('minute', day.startminute);
+    const endtime = moment(day.date).set('hour', day.endhour).set('minute', day.endminute);
     try {
       const res = await Slot.findAll({
         attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],
@@ -241,9 +241,16 @@ router.get('/stats/slots/completed', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
   if(!!level && level >= 20) {
-    pino.debug(request.query.starttime);
-    const starttime = moment(request.query.starttime);
-    const endtime = moment(request.query.endtime);
+    const day = await Day.findOne({
+      where: {
+        date: {
+          [Op.gte]: moment(request.query.day).startOf('day'),
+          [Op.lt]: moment(request.query.day).startOf('day').add(1, 'day'),
+        }
+      }
+    });
+    const starttime = moment(day.date).set('hour', day.starthour).set('minute', day.startminute);
+    const endtime = moment(day.date).set('hour', day.endhour).set('minute', day.endminute);
     try {
       const res = await Slot.findAll({
         attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],
@@ -265,7 +272,31 @@ router.get('/stats/slots/completed', cas.block, async (request, response) => {
       pino.debug(res);
       response.send({success: true, completed: res});
     } catch(err) {
-      pino.error(`Can't get scheduled slots`);
+      pino.error(`Can't get completed slots`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
+router.get('/settings/day', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 20) {
+    pino.debug(request.query.day);
+    const d = moment(request.query.day).startOf('day').toDate();
+    try {
+      const day = await Day.findOne({
+        where: {
+          date: d
+        }
+      });
+      response.send({success: true, day: day});
+    } catch(err) {
+      pino.error(`Can't get day`);
       pino.error(err);
       response.send({success: false});
     }
