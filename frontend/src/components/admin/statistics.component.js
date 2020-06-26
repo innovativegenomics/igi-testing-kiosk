@@ -68,20 +68,20 @@ export default class SlotSearch extends Component {
       datasets: [
         {
           label: 'Number of scheduled appointments',
-          backgroundColor: 'rgba(255,99,132,0.2)',
-          borderColor: 'rgba(255,99,132,1)',
+          backgroundColor: 'rgba(220,53,69,0.2)',
+          borderColor: 'rgba(220,53,69,1)',
           borderWidth: 1,
-          hoverBackgroundColor: 'rgba(255,99,132,0.4)',
-          hoverBorderColor: 'rgba(255,99,132,1)',
+          hoverBackgroundColor: 'rgba(220,53,69,0.4)',
+          hoverBorderColor: 'rgba(220,53,69,1)',
           data: scheduledValues
         },
         {
           label: 'Number of completed appointments',
-          backgroundColor: 'rgba(132,99,255,0.2)',
-          borderColor: 'rgba(132,99,255,1)',
+          backgroundColor: 'rgba(0,123,255,0.2)',
+          borderColor: 'rgba(0,123,255,1)',
           borderWidth: 1,
-          hoverBackgroundColor: 'rgba(132,99,255,0.4)',
-          hoverBorderColor: 'rgba(132,99,255,1)',
+          hoverBackgroundColor: 'rgba(0,123,255,0.4)',
+          hoverBorderColor: 'rgba(0,123,255,1)',
           data: completedValues
         }
       ]
@@ -126,7 +126,10 @@ export default class SlotSearch extends Component {
                             delay={{ show: 200, hide: 50 }}
                             overlay={props => <Tooltip {...props}>Refresh</Tooltip>}
                           >
-                            <Button variant='light' onClick={this.refreshButton}><BsArrowClockwise /></Button>
+                            <Button variant='light' className='border' onClick={this.refreshButton}>
+                              <Spinner animation='border' role='status' className={''+(this.state.loading?'':'d-none')} size='sm'/>
+                              <BsArrowClockwise className={''+(this.state.loading?'d-none':'')}/>
+                            </Button>
                           </OverlayTrigger>
                         </InputGroup.Prepend>
                         <Form.Control as='select' value={(this.state.day?this.state.day:this.props.settings.days[0])} onChange={e => this.updateDay(parseInt(e.target.value))}>
@@ -144,10 +147,6 @@ export default class SlotSearch extends Component {
                 />
                 <p className='lead m-0'>Scheduled Appointments: {scheduledCount}</p>
                 <p className='lead m-0'>Unscheduled Appointments: {unscheduledCount}</p>
-                <div className={this.state.loading?'':'d-none'}>
-                  <div className='position-absolute d-block bg-secondary' style={{width: '100%', height: '100%', top: '0px', left: '0px', opacity: 0.3}}></div>
-                  <Spinner animation='border' role='status' className='position-absolute d-block' style={{top: '50%', left: '50%'}}/>
-                </div>
               </Card.Body>
             </Card>
           </Col>
