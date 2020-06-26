@@ -55,6 +55,17 @@ export const getScheduledSlotsStat = async m => {
   }
 }
 
+export const getCompletedSlotsStat = async (starttime, endtime) => {
+  try {
+    const response = await axios.get('/api/admin/stats/slots/completed', { params: { starttime: starttime.format(), endtime: endtime.format() } });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't search slots`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 export const getAdmins = async () => {
   try {
     const response = await axios.get('/api/admin/admins');

@@ -189,7 +189,7 @@ router.post('/slot', cas.block, async (request, response) => {
       },
       transaction: t,
     });
-    if(takenCount >= (reqtime.hour()<14?4:day.buffer)) {
+    if(takenCount >= day.buffer) {
       throw new Error('Slot is already full');
     } else {
       slot.time = reqtime.toDate();
@@ -207,7 +207,7 @@ router.post('/slot', cas.block, async (request, response) => {
         const user = await User.findOne({where: {calnetid: calnetid}});
         await scheduleSlotConfirmEmail(user.email, 
                                       slot.uid, 
-                                      moment(slot.time).format('dddd'),
+                                      moment(slot.time).format('dddd, MMMM Do'),
                                       moment(slot.time).format('h:mm A'),
                                       moment(slot.time).add(day.window, 'minute').format('h:mm A'),
                                       slot.location,
@@ -221,7 +221,7 @@ router.post('/slot', cas.block, async (request, response) => {
         if(user.phone) {
           await scheduleSlotConfirmText(user.phone, 
                                         slot.uid, 
-                                        moment(slot.time).format('dddd'),
+                                        moment(slot.time).format('dddd, MMMM Do'),
                                         moment(slot.time).format('h:mm A'),
                                         moment(slot.time).add(day.window, 'minute').format('h:mm A'),
                                         slot.location,
