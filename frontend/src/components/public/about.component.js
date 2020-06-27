@@ -31,8 +31,8 @@ export default class About extends Component {
           <p>
             This test is for people without symptoms who are approved to work on campus or
             campus satellite locations. If you do not pass the campus screener the day of an
-            appointment, please do not come to campus, cancel your appointment, and contact
-            UHS at <a href='tel:+15106437197'>510-643-7197</a> to arrange for clinical testing. Additionally, if you are concerned
+            appointment, please do not come to campus, cancel your appointment, and visit <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a> for guidance. 
+            Additionally, if you are concerned 
             that you may have been exposed to someone with COVID-19, contact UHS.
           </p>
           <p>
@@ -46,7 +46,7 @@ export default class About extends Component {
           </p>
           <p className='lead'><b>How do I schedule my tests?</b></p>
           <p>
-            All test scheduling will be done on this website (<a>igi-fast.berkeley.edu</a>). You will be
+            All test scheduling will be done on this website (<a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>). You will be
             assigned to a regular testing schedule and will receive emails every-other week inviting
             you to schedule your next test day, time, and location. You will need to answer a few
             questions when making each appointment.
@@ -74,10 +74,9 @@ export default class About extends Component {
             </li>
             <li>
               Campus clearance message - As with all campus activities, you must complete
-              the campus symptom screener before coming to campus. You will be asked to present
+              the <a href='https://calberkeley.ca1.qualtrics.com/jfe/form/SV_3xTgcs162K19qRv'>campus symptom screener</a> before coming to campus. You will be asked to present
               the clearance message at the testing kiosk. If you do not pass this screener (i.e. you
-              have symptoms), you should not come to a kiosk for testing and instead contact UHS
-              at <a href='tel:+15106437197'>510-643-7197</a>.
+              have symptoms), you should not come to a kiosk for testing and visit <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a> for guidance.
             </li>
             <li>
               Eating and drinking - Do not eat or drink anything (even water), do not chew gum, and
@@ -97,6 +96,42 @@ export default class About extends Component {
             physical limitations, please contact the study coordinator at <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a> as
             soon as possible.
           </p>
+          <p className='lead'><b>How do I give a high-quality saliva sample?</b></p>
+          <p>
+            Occasionally, samples return from the lab with an “Invalid” or “Specimen Insufficient”
+            note. This can be due to any number of reasons. Most commonly, it is due to collection
+            issues such as the introduction of food particles to the sample, excessive mucous
+            (sometimes called sputum) present, failure of the funnel cap to “pop” when it is closed,
+            or insufficient or excessive saliva volume.
+          </p>
+          <p>
+            To maximize the chances of successful sampling, we have the following general
+            recommendations for saliva collection:
+          </p>
+          <ul>
+            <li>
+              Make sure to hydrate well during the day, but not eat, drink (including water),
+              smoke, or vape for at least 30 minutes prior to your appointment.
+            </li>
+            <li>
+              Do not attempt to cough up mucous or sputum to add to the volume in your
+              sample. The viscosity of mucous interferes with the volume in the lab.
+            </li>
+            <li>
+              Make sure to fill your tube up to, but not exceeding the line. A kiosk volunteer is
+              happy to check the levels you have if you are unsure.
+            </li>
+            <li>
+              Make sure to fully close the funnel cap until you hear a pop or click, which
+              indicates that a preservative fluid has been released into your sample. Kiosk
+              personnel can help confirm whether or not this has happened.
+            </li>
+            <li>
+              Take as much time as you need at the kiosk. Saliva production rates can vary
+              throughout the day and by person-to-person. You do not need to feel rushed at
+              any point.
+            </li>
+          </ul>
           <p className='lead'><b>What kind of test is this?</b></p>
           <p>
             Your sample will be analyzed by the Innovative Genomics Institute’s SARS-CoV-2
