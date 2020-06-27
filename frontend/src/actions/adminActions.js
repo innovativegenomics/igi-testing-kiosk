@@ -44,9 +44,9 @@ export const searchSlots = async (term, perpage, page) => {
   }
 }
 
-export const getScheduledSlotsStat = async (starttime, endtime) => {
+export const getScheduledSlotsStat = async m => {
   try {
-    const response = await axios.get('/api/admin/stats/slots/scheduled', { params: { starttime: starttime.format(), endtime: endtime.format() } });
+    const response = await axios.get('/api/admin/stats/slots/scheduled', { params: { day: m } });
     return response.data;
   } catch(err) {
     console.error(`Can't search slots`);
@@ -55,12 +55,23 @@ export const getScheduledSlotsStat = async (starttime, endtime) => {
   }
 }
 
-export const getCompletedSlotsStat = async (starttime, endtime) => {
+export const getCompletedSlotsStat = async m => {
   try {
-    const response = await axios.get('/api/admin/stats/slots/completed', { params: { starttime: starttime.format(), endtime: endtime.format() } });
+    const response = await axios.get('/api/admin/stats/slots/completed', { params: { day: m } });
     return response.data;
   } catch(err) {
     console.error(`Can't search slots`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const getSettingsDay = async d => {
+  try {
+    const response = await axios.get('/api/admin/settings/day', { params: { day: d } });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get day`);
     console.error(err);
     return { success: false };
   }

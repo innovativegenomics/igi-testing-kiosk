@@ -4,7 +4,7 @@ const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 const short = require('short-uuid');
 
-const { sequelize, Sequelize, User, Slot, Settings } = require('../../models');
+const { sequelize, Sequelize, User, Slot, Day, Settings } = require('../../models');
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
@@ -129,46 +129,55 @@ router.post('/profile', cas.block, async (request, response) => {
         phone: request.body.phone,
         questions: request.body.questions,
       }, { transaction: t1 });
-
-      const settings = await Settings.findOne({transaction: t1});
-
-      const totalSlots = settings.days.length*settings.buffer*(moment.duration({hours: settings.endtime-settings.starttime, minutes: settings.endminute-settings.startminute}).asMinutes()/settings.window);
-      const takenCount = await Slot.count({
-        where: {
-          time: {
-            [Op.gte]: moment().startOf('week').toDate(),
-            [Op.lt]: moment().startOf('week').add(1, 'week')
+      const settings = await Settings.findOne({});
+      // Figure out which week this person should be assigned to
+      let week = moment().startOf('week');
+      while(true) {
+        const days = await Day.findAll({
+          where: {
+            date: {
+              [Op.gte]: week.toDate(),
+              [Op.lt]: week.clone().add(1, 'week').toDate()
+            }
+          },
+          order: [['date', 'asc']],
+          transaction: t1
+        });
+        let available = 0;
+        days.forEach(v => {
+          available += settings.locations.length * v.buffer * Math.floor(moment.duration({hours: v.endhour-v.starthour, minutes: v.endminute-v.startminute}).asMinutes() / v.window);
+        });
+        const taken = await Slot.count({
+          where: {
+            time: {
+              [Op.gte]: week.toDate(),
+              [Op.lt]: week.clone().add(1, 'week').toDate()
+            }
+          },
+          transaction: t1
+        });
+        pino.debug(`available: ${available} taken: ${taken} between ${week.format()} and ${week.clone().add(1, 'week').format()}`);
+        if(available === 0) {
+          break;
+        }
+        if(taken < available) {
+          let lastDay = days[days.length-1];
+          if(moment(lastDay.date).set('hour', lastDay.endhour).set('minute', lastDay.endminute).isBefore(moment())) {
+            week = week.add(1, 'week');
+          } else {
+            break;
           }
-        },
-        transaction: t1
-      });
-      pino.debug(totalSlots);
-      pino.debug(takenCount);
-      if(settings.days[settings.days.length-1] < moment().day() || (settings.days[settings.days.length-1] === moment().day() && moment().isAfter(moment().set('hour', settings.endtime).set('minute', settings.endminute)))) {
-        await user.createSlot({
-          calnetid: calnetid,
-          time: moment().startOf('week').add(1, 'week').toDate(),
-          uid: short().new()
-        }, { transaction: t1 });
-      } else if(takenCount >= totalSlots) {
-        await user.createSlot({
-          calnetid: calnetid,
-          time: moment().startOf('week').add(1, 'week').toDate(),
-          uid: short().new()
-        }, { transaction: t1 });
-      } else if(require('../../config/keys').nextweek) {
-        await user.createSlot({
-          calnetid: calnetid,
-          time: moment().startOf('week').add(1, 'week').toDate(),
-          uid: short().new()
-        }, { transaction: t1 });
-      } else {
-        await user.createSlot({
-          calnetid: calnetid,
-          time: moment().startOf('week').toDate(),
-          uid: short().new()
-        }, { transaction: t1 });
+        } else {
+          week = week.add(1, 'week');
+        }
       }
+
+      await user.createSlot({
+        calnetid: calnetid,
+        time: week.toDate(),
+        uid: short().new()
+      }, { transaction: t1 });
+
       await t1.commit();
       response.send({ success: true });
     } catch (err) {

@@ -5,7 +5,7 @@ import { Bar } from 'react-chartjs-2';
 import { Redirect } from 'react-router-dom';
 import moment from 'moment';
 
-import { getScheduledSlotsStat, getCompletedSlotsStat } from '../../actions/adminActions';
+import { getScheduledSlotsStat, getCompletedSlotsStat, getSettingsDay } from '../../actions/adminActions';
 
 export default class SlotSearch extends Component {
   constructor(props) {
@@ -15,27 +15,31 @@ export default class SlotSearch extends Component {
       completed: [],
       loading: false,
       success: false,
-      day: null,
-      starttime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.starttime).set('minute', props.settings.startminute),
-      endtime: moment().startOf('week').set('day', props.settings.days[0]).set('hour', props.settings.endtime).set('minute', props.settings.endminute),
+      starttime: moment(),
+      endtime: moment(),
+      window: 10,
+      buffer: 8,
+      day: moment().get('day'),
     };
   }
-  runSlotsStats = async (starttime, endtime) => {
+  runSlotsStats = async (day) => {
     this.setState({loading: true});
-    const [scheduled, completed] = await Promise.all([getScheduledSlotsStat(starttime, endtime), getCompletedSlotsStat(starttime, endtime)]);
-    this.setState({...scheduled, ...completed, success: scheduled.success && completed.success, loading: false});
+    console.log('starting loading');
+    const [scheduled, completed, sDay] = await Promise.all([getScheduledSlotsStat(day.format()), getCompletedSlotsStat(day.format()), getSettingsDay(day.format())]);
+    console.log('end load');
+    console.log(day);
+    console.log(scheduled);
+    this.setState({...scheduled, ...completed, success: scheduled.success && completed.success, starttime: day.clone().set('hour', sDay.day.starthour).set('minute', sDay.day.startminute), endtime: day.clone().set('hour', sDay.day.endhour).set('minute', sDay.day.endminute), window: sDay.day.window, buffer: sDay.day.buffer, loading: false});
   }
   updateDay = async day => {
-    const newStarttime = this.state.starttime.clone().set('day', day);
-    const newEndtime = this.state.endtime.clone().set('day', day);
-    this.setState({day: day, starttime: newStarttime, endtime: newEndtime});
-    this.runSlotsStats(newStarttime, newEndtime);
+    this.setState({day: day});
+    this.runSlotsStats(moment().set('day', day));
   }
   refreshButton = async () => {
-    await this.runSlotsStats(this.state.starttime, this.state.endtime);
+    await this.runSlotsStats(moment().set('day', this.state.day));
   }
   componentDidMount = () => {
-    this.runSlotsStats(this.state.starttime, this.state.endtime);
+    this.runSlotsStats(moment().set('day', this.state.day));
   }
   render() {
     if(this.props.level < 20) {
@@ -47,7 +51,9 @@ export default class SlotSearch extends Component {
     const completedValues = [];
     var scheduledCount = 0;
     var unscheduledCount = 0;
-    for(var i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.props.settings.window, 'minute')) {
+    console.log('start loop');
+    for(let i = this.state.starttime.clone();i.isBefore(this.state.endtime);i = i.add(this.state.window, 'minute')) {
+      console.log('loop' + i);
       labels.push(i.format('H:mm'));
       scheduledValues.push(0);
       completedValues.push(0);
@@ -94,7 +100,7 @@ export default class SlotSearch extends Component {
             stacked: true,
             ticks: {
               beginAtZero: true,
-              max: this.props.settings.buffer,
+              max: this.state.buffer,
               stepSize: 1
             }
           }
@@ -132,10 +138,12 @@ export default class SlotSearch extends Component {
                             </Button>
                           </OverlayTrigger>
                         </InputGroup.Prepend>
-                        <Form.Control as='select' value={(this.state.day?this.state.day:this.props.settings.days[0])} onChange={e => this.updateDay(parseInt(e.target.value))}>
-                          {this.props.settings.days.map(v => (
-                            <option key={v} value={v}>{moment().set('day', v).format('dddd')}</option>
-                          ))}
+                        <Form.Control as='select' value={(this.state.day)} onChange={e => this.updateDay(parseInt(e.target.value))}>
+                          <option value={1}>Monday</option>
+                          <option value={2}>Tuesday</option>
+                          <option value={3}>Wednesday</option>
+                          <option value={4}>Thursday</option>
+                          <option value={5}>Friday</option>
                         </Form.Control>
                       </InputGroup>
                     </Col>
