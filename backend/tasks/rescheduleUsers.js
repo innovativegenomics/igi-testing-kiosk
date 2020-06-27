@@ -23,6 +23,7 @@ module.exports = async (payload, helpers) => {
   const t = await sequelize.transaction();
   try {
     const expired = await User.findAll({
+      where: sequelize.literal(`(select max(time) from "Slots" as s where s.calnetid="User".calnetid)<'${moment().startOf('week').format()}'`),
       include: [
         {
           model: Slot,
@@ -34,8 +35,9 @@ module.exports = async (payload, helpers) => {
       transaction: t,
     });
     const beginning = moment().startOf('week');
-    for(let user of expired) {
-      if(moment(user.Slots[0].time).isBefore(beginning)) {
+    const promises = [];
+    expired.forEach(user => {
+      promises.push((async () => {
         if(user.Slots[0].location) {
           await user.createSlot({
             calnetid: user.calnetid,
@@ -62,9 +64,10 @@ module.exports = async (payload, helpers) => {
           pino.warn(`error sending reschedule email to user ${user.calnetid}`);
           pino.warn(err);
         }
-      }
-    }
-    t.commit();
+      })());
+    });
+    await Promise.all(promises);
+    await t.commit();
   } catch(err) {
     pino.error(`Can't update schedules`);
     pino.error(err);
