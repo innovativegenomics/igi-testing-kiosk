@@ -123,8 +123,7 @@ class ToS extends Component {
         <p>
           If you agree to participate in this study, you will be given access to regular (every two weeks) saliva-
           based COVID-19 testing using an experimental test focused exclusively on asymptomatic individuals. If
-          at any point in the study you experience symptoms of COVID-19, you should contact University Health
-          Services using the 24/7 phone triage at 510-643-7197 to be clinically tested. You should not return for
+          at any point in the study you experience symptoms of COVID-19, please visit <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a> for guidance. You should not return for
           asymptomatic testing until you test negative and your symptoms resolve.
                 </p>
         <p>
