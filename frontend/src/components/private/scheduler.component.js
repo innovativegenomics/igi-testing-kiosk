@@ -42,12 +42,14 @@ class Calendar extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      month: moment().startOf('month').startOf('day')
+      month: (props.days[0]?props.days[0].clone().startOf('month').startOf('day'):moment().startOf('month').startOf('day')),
+      // month: moment().startOf('month').startOf('day')
     };
   }
 
   render() {
     console.log("START RENDER");
+    console.log(this.props);
     const lastMonth = this.state.month.clone().subtract(1, 'month');
     const startDay = this.state.month.day();
     let btns = [];
@@ -313,6 +315,7 @@ export default class Scheduler extends Component {
     const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).filter(v => {
       return this.state.schedule.available[this.state.location][v] > 0;
     }).map(v => moment(v));
+    console.log(slots);
     return (
       <div>
         <div className='container'>
