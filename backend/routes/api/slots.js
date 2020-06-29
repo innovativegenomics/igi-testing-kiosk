@@ -34,6 +34,7 @@ router.get('/available', cas.block, async (request, response) => {
       limit: 1,
       where: { calnetid: calnetid },
       attributes: ['time'],
+      order: [['time', 'desc']],
       transaction: t,
     }))[0].time).startOf('week');
     const days = await Day.findAll({
