@@ -39,19 +39,11 @@ class DateButton extends Component {
 }
 
 class Calendar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      month: (props.days[0]?props.days[0].clone().startOf('month').startOf('day'):moment().startOf('month').startOf('day')),
-      // month: moment().startOf('month').startOf('day')
-    };
-  }
-
   render() {
     console.log("START RENDER");
     console.log(this.props);
-    const lastMonth = this.state.month.clone().subtract(1, 'month');
-    const startDay = this.state.month.day();
+    const lastMonth = this.props.month.clone().subtract(1, 'month');
+    const startDay = this.props.month.day();
     let btns = [];
     for (var i = 0; i < 6; i++) {
       let btnRow = [];
@@ -59,9 +51,9 @@ class Calendar extends Component {
         let day = i * 7 + d;
         if (day < startDay) {
           btnRow.push(<DateButton grey={true} day={lastMonth.daysInMonth() - startDay + 1 + day} key={day} />);
-        } else if (day >= startDay && day < this.state.month.daysInMonth() + startDay) {
-          const active = !this.props.days.every(e => !e.startOf('day').isSame(this.state.month.clone().set('date', day - startDay + 1).startOf('day')));
-          const dayMoment = this.state.month.clone().set('date', day - startDay + 1);
+        } else if (day >= startDay && day < this.props.month.daysInMonth() + startDay) {
+          const active = !this.props.days.every(e => !e.startOf('day').isSame(this.props.month.clone().set('date', day - startDay + 1).startOf('day')));
+          const dayMoment = this.props.month.clone().set('date', day - startDay + 1);
           console.log(dayMoment.format() + ':' + active);
           btnRow.push(<DateButton active={active} selected={dayMoment.isSame(this.props.day)} day={day - startDay + 1} onClick={e => this.props.setDay(dayMoment)} key={day} />);
         } else {
@@ -74,9 +66,9 @@ class Calendar extends Component {
       <div className='card text-center' style={{ width: '22rem' }}>
         <div className='card-header'>
           <div className='btn-group'>
-            <button className='btn btn-light' onClick={() => this.setState({ month: this.state.month.subtract(1, 'month') })}><BsChevronLeft /></button>
-            <p className='lead p-2 m-0' style={{ lineHeight: 1.2 }}>{this.state.month.format('MMMM YYYY')}</p>
-            <button className='btn btn-light' onClick={() => this.setState({ month: this.state.month.add(1, 'month') })}><BsChevronRight /></button>
+            <button className='btn btn-light' onClick={() => this.props.setMonth(this.props.month.subtract(1, 'month'))}><BsChevronLeft /></button>
+            <p className='lead p-2 m-0' style={{ lineHeight: 1.2 }}>{this.props.month.format('MMMM YYYY')}</p>
+            <button className='btn btn-light' onClick={() => this.props.setMonth(this.props.month.add(1, 'month'))}><BsChevronRight /></button>
           </div>
         </div>
         <div className='card-body'>
@@ -262,6 +254,7 @@ export default class Scheduler extends Component {
       },
       location: '',
       day: null,
+      month: moment().startOf('month').startOf('day'),
       selected: null,
       success: false,
       showSymtomaticModal: false
@@ -322,14 +315,14 @@ export default class Scheduler extends Component {
           <div className='row justify-content-center m-3'>
             <div className='col-sm-4'>
               <p className='lead'>Location:</p>
-              <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null })}>
+              <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null, month: moment(Object.keys(this.state.schedule.available[e.target.value])[0]).startOf('month').startOf('day') })}>
                 <option value=''>--location--</option>
                 {locationOptions}
               </select>
             </div>
           </div>
           <div className='row justify-content-center'>
-            <Calendar days={slots} setDay={d => this.setState({ day: d })} day={this.state.day} />
+            <Calendar month={this.state.month} setMonth={m => this.setState({month: m})} days={slots} setDay={d => this.setState({ day: d })} day={this.state.day} />
           </div>
           <div className='row justify-content-center'>
             <div className='col-sm-8'>
