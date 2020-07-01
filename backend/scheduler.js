@@ -1,5 +1,3 @@
-const { request } = require("express");
-
 const { Pool } = require('pg');
 const env = process.env.NODE_ENV || 'development';
 const config = require('./config/config.json')[env];
@@ -79,4 +77,9 @@ module.exports.scheduleAppointmentReminderText = async (number, slot) => {
     jobKey: `${number}`,
     queueName: '30minutes'
   });
+}
+
+module.exports.deleteAppointmentReminders = async (email, number) => {
+  await pool.query('select graphile_worker.remove_job($1)', [email]);
+  await pool.query('select graphile_worker.remove_job($1)', [number]);
 }

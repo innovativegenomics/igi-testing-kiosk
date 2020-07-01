@@ -8,7 +8,8 @@ const { scheduleSlotConfirmEmail,
   scheduleSlotConfirmText,
   scheduleAppointmentReminderEmail,
   scheduleAppointmentReminderText,
-  scheduleResultInstructionsEmail } = require('../../scheduler');
+  scheduleResultInstructionsEmail, 
+  deleteAppointmentReminders,} = require('../../scheduler');
 const Op = Sequelize.Op;
 const cas = require('../../cas');
 
@@ -262,6 +263,18 @@ router.delete('/slot', cas.block, async (request, response) => {
       slot.scheduled = null;
       slot.time = moment(slot.time).startOf('week').toDate();
       await slot.save();
+      const user = await User.findOne({
+        where: {
+          calnetid: calnetid
+        },
+        transaction: t
+      });
+      try {
+        await deleteAppointmentReminders(user.email, user.phone);
+      } catch(err) {
+        pino.error(`Couldn't delete appointment reminders for user ${calnetid}`);
+        pino.error(err);
+      }
       response.send({ success: true });
     } else {
       response.send({ success: false });
