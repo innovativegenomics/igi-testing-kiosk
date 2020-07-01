@@ -468,4 +468,21 @@ router.get('/settings', cas.block, async (request, response) => {
   }
 });
 
+
+router.get('/study/apptsurvey', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 40) {
+    response.download()
+  } else {
+    pino.error({
+      route: '/api/admin/study/apptsurvey',
+      calnetid: calnetid,
+      error: 'Not authed'
+    });
+    response.status(401).send();
+  }
+});
+
+
 module.exports = router;
