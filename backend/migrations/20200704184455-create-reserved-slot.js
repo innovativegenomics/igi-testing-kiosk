@@ -8,6 +8,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
+      calnetid: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        unique: true,
+      },
       time: {
         type: Sequelize.DATE,
         allowNull: false,

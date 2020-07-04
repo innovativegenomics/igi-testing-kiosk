@@ -3,7 +3,7 @@ const router = express.Router();
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
-const { sequelize, Sequelize, Slot, User, Day, Settings } = require('../../models');
+const { sequelize, Sequelize, Slot, User, Day, ReservedSlot, Settings } = require('../../models');
 const { scheduleSlotConfirmEmail,
   scheduleSlotConfirmText,
   scheduleAppointmentReminderEmail,
@@ -58,6 +58,17 @@ router.get('/available', cas.block, async (request, response) => {
       attributes: ['time', 'location'],
       transaction: t,
     });
+    const reserved = await ReservedSlot.findAll({
+      where: {
+        time: {
+          [Op.between]: [week.toDate(), week.clone().add(1, 'week').toDate()],
+        },
+        expires: {
+          [Op.gt]: moment().toDate()
+        }
+      },
+      transaction: t,
+    });
     const now = moment();
     const open = {};
     for (let location of settings.locations) {
@@ -82,6 +93,11 @@ router.get('/available', cas.block, async (request, response) => {
         open[slot.location][moment(slot.time)]--;
       }
     }
+    reserved.forEach(v => {
+      if (open[v.location][moment(v.time)] !== undefined) {
+        open[v.location][moment(v.time)]--;
+      }
+    });
     await t.commit();
     response.send({ success: true, available: open });
   } catch (err) {
@@ -184,16 +200,38 @@ router.post('/slot', cas.block, async (request, response) => {
       throw new Error('slot is already completed');
     }
 
-    const takenCount = await Slot.count({
+    const takenCount = (await Slot.count({
       where: {
         time: reqtime.toDate(),
         location: reqlocation,
       },
       transaction: t,
-    });
+    })) + (await ReservedSlot.count({
+      where: {
+        time: reqtime.toDate(),
+        location: reqlocation,
+        expires: {
+          [Op.gt]: moment().toDate()
+        }
+      },
+      transaction: t,
+    }));
     if(takenCount >= day.buffer) {
       throw new Error('Slot is already full');
     } else {
+      try {
+        await (await ReservedSlot.findOne({
+          where: {
+            calnetid: calnetid
+          },
+          transaction: t
+        })).destroy();
+      } catch(err) {
+        // No slot for the given user
+        pino.debug(`Can't delete reserved slot for user ${calnetid}`);
+        pino.debug(err);
+      }
+
       slot.time = reqtime.toDate();
       slot.location = reqlocation;
       slot.scheduled = moment().toDate();
@@ -285,6 +323,72 @@ router.delete('/slot', cas.block, async (request, response) => {
     pino.error(err);
     await t.rollback();
     response.send({ success: false });
+  }
+});
+
+router.post('/reserve', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const time = moment(request.body.time);
+  const location = request.body.location;
+  if(!!time && !!location) {
+    const t = await sequelize.transaction({
+      isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+    });
+    try {
+      const settings = await Settings.findOne({transaction: t});
+      const taken = (await Slot.count({
+        where: {
+          location: location,
+          time: time.toDate(),
+        },
+        transaction: t
+      })) + (await ReservedSlot.count({
+        where: {
+          calnetid: {
+            [Op.ne]: calnetid
+          },
+          time: time.toDate(),
+          location: location,
+          expires: {
+            [Op.gt]: moment().toDate()
+          }
+        },
+        transaction: t
+      }));
+      pino.debug(`${taken}`);
+      if(taken < settings.buffer) {
+        await ReservedSlot.upsert({
+          calnetid: calnetid,
+          time: time.toDate(),
+          location: location,
+          expires: moment().add(settings.ReservedSlotTimeout, 'seconds').toDate(),
+        }, {transaction: t});
+        response.send({success: true});
+      } else {
+        response.send({success: false});
+      }
+      await t.commit();
+    } catch(err) {
+      pino.error(`couldn't create reservation for user ${calnetid}`);
+      pino.error(err);
+      await t.rollback();
+      response.send({success: false});
+    }
+  } else {
+    pino.info({route: `/api/slots/reserve`, calnetid: calnetid, msg: `Invalid request`});
+    response.status(400).send();
+  }
+});
+
+router.delete('/reserve', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  try {
+    await (await ReservedSlot.findOne({where: {calnetid: calnetid}})).destroy();
+    response.send({success: true});
+  } catch(err) {
+    pino.error(`couldn't delete reservation for user ${calnetid}`);
+    pino.error(err);
+    response.send({success: false});
   }
 });
 
