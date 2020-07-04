@@ -27,7 +27,7 @@ const postNewPatient = async (accesstoken, payload) => {
       throw { response: { data: resp } };
     }
   } catch (err) {
-    pino.warn(err.response.data[0].errorCode);
+    pino.warn(err);
     throw { error: err.response.data[0].errorCode };
   }
 }

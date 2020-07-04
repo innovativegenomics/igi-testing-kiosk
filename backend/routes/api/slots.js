@@ -328,6 +328,7 @@ router.delete('/slot', cas.block, async (request, response) => {
 
 router.post('/reserve', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
+  pino.debug(request.body);
   const time = moment(request.body.time);
   const location = request.body.location;
   if(!!time && !!location) {

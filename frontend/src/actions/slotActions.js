@@ -52,3 +52,30 @@ export const cancelSlot = async () => {
     return { success: false };
   }
 }
+
+/**
+ * 
+ * @param {moment.Moment} time 
+ * @param {string} location 
+ */
+export const reserveSlot = async (time, location) => {
+  try {
+    const response = await axios.post('/api/slots/reserve', {time: time, location: location});
+    return response.data;
+  } catch (err) {
+    console.error('error reserving slot');
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const deleteReservedSlot = async () => {
+  try {
+    const response = await axios.delete('/api/slots/reserve');
+    return response.data;
+  } catch (err) {
+    console.error('error deleting reserved slot');
+    console.error(err);
+    return { success: false };
+  }
+}
