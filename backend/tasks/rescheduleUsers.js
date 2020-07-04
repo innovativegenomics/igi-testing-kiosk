@@ -36,6 +36,7 @@ module.exports = async (payload, helpers) => {
     });
     const beginning = moment().startOf('week');
     const promises = [];
+    let promiseChain = Promise.resolve();
     expired.forEach(user => {
       promises.push((async () => {
         if(user.Slots[0].location) {
@@ -51,22 +52,25 @@ module.exports = async (payload, helpers) => {
             uid: short().new()
           }, {transaction: t});
         }
-        try {
-          const nextDate = (user.Slots[0].location?beginning.clone().add(1, 'week').format('dddd, MMMM D'):beginning.format('dddd, MMMM D'));
-          const success = await sendEmail(user.email,
-                                          `IGI FAST - Appointment Available Week of ${nextDate}`,
-                                          `<h3>New testing appointment available for you during the week of ${nextDate}</h3>
-                                          <p>You can schedule a specific time and location on our website <a href='${config.host}'>${config.host}</a>.</p>`);
-          if(!success) {
-            throw new Error('unsuccessful email');
+        promiseChain = promiseChain.then(async r => {
+          try {
+            const nextDate = (user.Slots[0].location?beginning.clone().add(1, 'week').format('dddd, MMMM D'):beginning.format('dddd, MMMM D'));
+            const success = await sendEmail(user.email,
+              `IGI FAST - Appointment Available Week of ${nextDate}`,
+              `<h3>New testing appointment available for you during the week of ${nextDate}</h3>
+              <p>You can schedule a specific time and location on our website <a href='${config.host}'>${config.host}</a>.</p>`);
+            if(!success) {
+              throw new Error('unsuccessful email');
+            }
+          } catch(err) {
+            pino.warn(`error sending reschedule email to user ${user.calnetid} with email ${user.email}`);
+            pino.warn(err);
           }
-        } catch(err) {
-          pino.warn(`error sending reschedule email to user ${user.calnetid}`);
-          pino.warn(err);
-        }
+        });
       })());
     });
     await Promise.all(promises);
+    await promiseChain;
     await t.commit();
   } catch(err) {
     pino.error(`Can't update schedules`);
