@@ -12,7 +12,7 @@ module.exports = async (payload, helpers) => {
       host: pgconfig.host,
       database: pgconfig.database,
       password: pgconfig.password,
-      port: pgconfig.port || 5432,
+      port: pgconfig.port || process.env.POSTGRES_PORT || 5432,
   });
   const moment = require('moment');
   const { makeWorkerUtils } = require('graphile-worker');
