@@ -3,7 +3,7 @@ const router = express.Router();
 const QRCode = require('qrcode');
 
 router.get('/qrimg', async (request, response) => {
-  const url = await QRCode.toDataURL(request.query.uid);
+  const url = await QRCode.toDataURL(`${require('../../config/keys').host}/admin/scanner?uid=${request.query.uid}`);
   response.header('Content-Type', 'image/png');
   response.send(Buffer.from(url.split('base64,')[1], 'base64'));
 });
