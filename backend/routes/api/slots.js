@@ -341,6 +341,12 @@ router.post('/reserve', cas.block, async (request, response) => {
     });
     try {
       const settings = await Settings.findOne({transaction: t});
+      const day = await Day.findOne({
+        where: {
+          date: time.clone().startOf('day').toDate()
+        },
+        transaction: t
+      });
       const taken = (await Slot.count({
         where: {
           location: location,
@@ -361,7 +367,7 @@ router.post('/reserve', cas.block, async (request, response) => {
         transaction: t
       }));
       pino.debug(`${taken}`);
-      if(taken < settings.buffer) {
+      if(taken < day.buffer) {
         await ReservedSlot.upsert({
           calnetid: calnetid,
           time: time.toDate(),
