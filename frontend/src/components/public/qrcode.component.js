@@ -29,7 +29,7 @@ export default class QRCode extends Component {
       if (query.uid) {
         const scanUrl = window.location.protocol + '//' + window.location.host + '/admin/scanner?uid=' + query.uid;
         console.log(scanUrl);
-        qrcode.toDataURL(scanUrl, { errorCorrectionLevel: 'H' }).then(res => {
+        qrcode.toDataURL(scanUrl).then(res => {
           this.setState({ img: res });
         });
       }

@@ -10,6 +10,7 @@ const { sequelize } = require('./models');
 const users = require('./routes/api/users');
 const slots = require('./routes/api/slots');
 const admin = require('./routes/api/admin');
+const emails = require('./routes/api/emails');
 
 const { verifyTasks, scheduleRescheduleUsers } = require('./scheduler');
 
@@ -53,6 +54,7 @@ module.exports = (async () => {
     app.use('/api/users', users);
     app.use('/api/slots', slots);
     app.use('/api/admin', admin);
+    app.use('/api/emails', emails);
     return app;
   } catch (err) {
     pino.fatal('Database initialization error!');
