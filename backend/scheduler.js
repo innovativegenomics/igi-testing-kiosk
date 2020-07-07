@@ -6,7 +6,7 @@ const pool = new Pool({
   host: config.host,
   database: config.database,
   password: config.password,
-  port: config.port || 5432,
+  port: config.port || process.env.POSTGRES_PORT || 5432,
 });
 const { makeWorkerUtils } = require('graphile-worker');
 const moment = require('moment');

@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/innovativegenomics/igi-testing-kiosk#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.2.1",
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "cas-authentication": "0.0.8",
@@ -44,6 +45,7 @@
     "sequelize": "^5.21.12",
     "short-uuid": "^3.1.1",
     "twilio": "^3.44.0",
+    "umzug": "^2.3.0",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {
@@ -54,6 +56,7 @@
     "nodemon": "^2.0.4",
     "pino-pretty": "^4.0.0",
     "sequelize-cli": "^5.5.1",
-    "supertest": "^4.0.2"
+    "supertest": "^4.0.2",
+    "testcontainers": "^2.15.0"
   }
 }

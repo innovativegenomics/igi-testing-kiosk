@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Navbar, Nav, Form } from 'react-bootstrap';
+import { Navbar, Nav, Form, Card } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 import igiFast from '../media/IGI-FAST.png';
@@ -65,13 +65,18 @@ export class Navigation extends Component {
 export class Footer extends Component {
   render() {
     return (
-      <Navbar fixed='bottom' bg='white'>
-        <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue' style={{color: '#5758FF'}}>Report an issue</a>
-        <Nav className='mr-auto'></Nav>
-        <Form inline>
-          <img style={{width:'8rem', left: 0}} src={berkeleyLogo} />
-        </Form>
-      </Navbar>
+      <div>
+        <Card className='position-fixed fixed-bottom d-table p-0 border-0'>
+          <Card.Body className='p-3'>
+            <a href='mailto:igi-fast@berkeley.edu?subject=Website Issue' style={{color: '#5758FF'}}>Report an issue</a>
+          </Card.Body>
+        </Card>
+        <Card className='position-fixed fixed-bottom d-table p-0 border-0' style={{left: 'auto', right: '0'}}>
+          <Card.Body className='p-0'>
+            <img style={{width:'8rem', left: 0}} src={berkeleyLogo} />
+          </Card.Body>
+        </Card>
+      </div>
     );
   }
 }

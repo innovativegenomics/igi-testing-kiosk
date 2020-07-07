@@ -62,6 +62,11 @@ module.exports = (sequelize, DataTypes) => {
     EmailRefreshToken: {
       type: DataTypes.STRING
     },
+    ReservedSlotTimeout: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 180,
+    }
   }, {});
   Settings.associate = function(models) {
     // associations can be defined here

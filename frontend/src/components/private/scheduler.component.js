@@ -4,7 +4,7 @@ import { Modal, Button, ButtonGroup, Row, Col, Form, Spinner } from 'react-boots
 import moment from 'moment';
 
 import { getUser } from '../../actions/authActions';
-import { getAvailable, requestSlot } from '../../actions/slotActions';
+import { getAvailable, requestSlot, reserveSlot, deleteReservedSlot } from '../../actions/slotActions';
 
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 
@@ -40,8 +40,6 @@ class DateButton extends Component {
 
 class Calendar extends Component {
   render() {
-    console.log("START RENDER");
-    console.log(this.props);
     const lastMonth = this.props.month.clone().subtract(1, 'month');
     const startDay = this.props.month.day();
     let btns = [];
@@ -54,7 +52,6 @@ class Calendar extends Component {
         } else if (day >= startDay && day < this.props.month.daysInMonth() + startDay) {
           const active = !this.props.days.every(e => !e.startOf('day').isSame(this.props.month.clone().set('date', day - startDay + 1).startOf('day')));
           const dayMoment = this.props.month.clone().set('date', day - startDay + 1);
-          console.log(dayMoment.format() + ':' + active);
           btnRow.push(<DateButton active={active} selected={dayMoment.isSame(this.props.day)} day={day - startDay + 1} onClick={e => this.props.setDay(dayMoment)} key={day} />);
         } else {
           btnRow.push(<DateButton invisible={true} day={day - startDay + 1} key={day} />);
@@ -161,78 +158,71 @@ class ConfirmModal extends Component {
     const symtomatic = false;
 
     return (
-      <div className="modal fade" id='confirmModal' tabIndex="-1" role="dialog">
-        <div className="modal-dialog modal-lg" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <h5 className="modal-title">Confirm appointment</h5>
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div className="modal-body">
-              <p>Confirm that you would like to reserve this time slot</p>
-              <p className='lead'>{this.props.selected ? this.props.selected.format('dddd, MMMM D h:mm A') : ''} at {this.props.location}</p>
-              <h3>Please answer the following survey before you confirm your appointment</h3>
-              
-              <Row>
-                <Col md={9}>
-                  <p>In the two weeks leading up to this appointment, how many days have/will you work on campus?</p>
-                </Col>
-                <Col md={2}>
-                  <Form.Control type='number' value={this.state.question1} min={0} step={1} pattern='\d+' onChange={e => this.setState({question1: parseInt(e.target.value)})}/>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={9}>
-                  <p>For the days you are/have been on campus in the two weeks leading up to this appointment, how many hours are you on campus, on average?</p>
-                </Col>
-                <Col md={2}>
-                  <Form.Control type='number' value={this.state.question2} min={0} step={1} pattern='\d+' onChange={e => this.setState({question2: parseInt(e.target.value)})}/>
-                </Col>
-              </Row>
-              {/* <Row>
-                <Col md={7}>
-                  <p>When you are working on campus, what building is your primary work space in?</p>
-                </Col>
-                <Col md={4}>
-                  <Form.Control type='text' placeholder='Building' value={this.state.question3} onChange={e => this.setState({question3: e.target.value})}/>
-                </Col>
-              </Row> */}
-              <Row>
-                <Col md={9}>
-                  <p>Are you using a mobile contact tracing application? If so, which one?</p>
-                </Col>
-                <Col md={2}>
-                  <ButtonGroup>
-                    <Button variant={this.state.question4==='None'?'secondary':'primary'} onClick={e => this.setState({question4: ''})}>Yes</Button>
-                    <Button variant={this.state.question4==='None'?'primary':'secondary'} onClick={e => this.setState({question4: 'None'})}>No</Button>
-                  </ButtonGroup>
-                </Col>
-                <Col md={4}>
-                  <Form.Control type='text' className={this.state.question4==='None'?'d-none':''} placeholder='App Name' value={this.state.question4} onChange={e => this.setState({question4: e.target.value})}/>
-                </Col>
-              </Row>
-              <Row>
-                <Col md={7}>
-                  <p>Have you ever been diagnosed with COVID-19?</p>
-                </Col>
-                <Col md={5}>
-                  <ButtonGroup>
-                    <Button variant={this.state.question5==='Yes'?'primary':'secondary'} onClick={e => this.setState({question5: 'Yes'})}>Yes</Button>
-                    <Button variant={this.state.question5==='No'?'primary':'secondary'} onClick={e => this.setState({question5: 'No'})}>No</Button>
-                    <Button variant={this.state.question5==='Decline to state'?'primary':'secondary'} onClick={e => this.setState({question5: 'Decline to state'})}>Decline to state</Button>
-                  </ButtonGroup>
-                </Col>
-              </Row>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-primary" data-dismiss="modal" disabled={!isComplete} onClick={e => this.props.onSubmit(this.state)}>Confirm</button>
-              <button type="button" className="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <Modal size='lg' onHide={this.props.onClose} show={this.props.show}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm appointment</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Confirm that you would like to reserve this time slot</p>
+          <p className='lead'>{this.props.selected ? this.props.selected.format('dddd, MMMM D h:mm A') : ''} at {this.props.location}</p>
+          <h3>Please answer the following survey before you confirm your appointment</h3>
+
+          <Row>
+            <Col md={9}>
+              <p>In the two weeks leading up to this appointment, how many days have/will you work on campus?</p>
+            </Col>
+            <Col md={2}>
+              <Form.Control type='number' value={this.state.question1} min={0} step={1} pattern='\d+' onChange={e => this.setState({question1: parseInt(e.target.value)})}/>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={9}>
+              <p>For the days you are/have been on campus in the two weeks leading up to this appointment, how many hours are you on campus, on average?</p>
+            </Col>
+            <Col md={2}>
+              <Form.Control type='number' value={this.state.question2} min={0} step={1} pattern='\d+' onChange={e => this.setState({question2: parseInt(e.target.value)})}/>
+            </Col>
+          </Row>
+          {/* <Row>
+            <Col md={7}>
+              <p>When you are working on campus, what building is your primary work space in?</p>
+            </Col>
+            <Col md={4}>
+              <Form.Control type='text' placeholder='Building' value={this.state.question3} onChange={e => this.setState({question3: e.target.value})}/>
+            </Col>
+          </Row> */}
+          <Row>
+            <Col md={9}>
+              <p>Are you using a mobile contact tracing application? If so, which one?</p>
+            </Col>
+            <Col md={2}>
+              <ButtonGroup>
+                <Button variant={this.state.question4==='None'?'secondary':'primary'} onClick={e => this.setState({question4: ''})}>Yes</Button>
+                <Button variant={this.state.question4==='None'?'primary':'secondary'} onClick={e => this.setState({question4: 'None'})}>No</Button>
+              </ButtonGroup>
+            </Col>
+            <Col md={4}>
+              <Form.Control type='text' className={this.state.question4==='None'?'d-none':''} placeholder='App Name' value={this.state.question4} onChange={e => this.setState({question4: e.target.value})}/>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={7}>
+              <p>Have you ever been diagnosed with COVID-19?</p>
+            </Col>
+            <Col md={5}>
+              <ButtonGroup>
+                <Button variant={this.state.question5==='Yes'?'primary':'secondary'} onClick={e => this.setState({question5: 'Yes'})}>Yes</Button>
+                <Button variant={this.state.question5==='No'?'primary':'secondary'} onClick={e => this.setState({question5: 'No'})}>No</Button>
+                <Button variant={this.state.question5==='Decline to state'?'primary':'secondary'} onClick={e => this.setState({question5: 'Decline to state'})}>Decline to state</Button>
+              </ButtonGroup>
+            </Col>
+          </Row>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant='primary' disabled={!isComplete} onClick={e => this.props.onSubmit(this.state)}>Confirm</Button>
+          <Button variant='secondary' onClick={this.props.onClose}>Close</Button>
+        </Modal.Footer>
+      </Modal>
     );
   }
 }
@@ -257,19 +247,38 @@ export default class Scheduler extends Component {
       month: moment().startOf('month').startOf('day'),
       selected: null,
       success: false,
-      showSymtomaticModal: false
+      showConfirmModal: false,
+      showTakenModal: false,
+      showSymtomaticModal: false,
     };
   }
   componentDidMount() {
     getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
+    getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true }, location: Object.keys(res.available)[0] }));
+  }
+  handleRequest = async selected => {
+    this.setState({selected: selected});
+    const { success } = await reserveSlot(moment(selected), this.state.location);
+    if(success) {
+      this.setState({showConfirmModal: true});
+    } else {
+      /////// SHOW FAILURE MODAL!!!!!
+      this.setState({showTakenModal: true});
+    }
+  }
+  handleConfirmClose = async () => {
+    this.setState({schedule: {...this.state.schedule, loaded: false}, showConfirmModal: false});
+    deleteReservedSlot();
+    getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true } }));
+  }
+  handleTakenClose = async () => {
+    this.setState({schedule: {...this.state.schedule, loaded: false}, showTakenModal: false});
     getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true } }));
   }
   submitRequest = qs => {
     // if (s) {
     //   return this.setState({ showSymtomaticModal: true });
     // }
-    console.log(this.state.selected);
-    console.log(this.state.location);
     requestSlot(this.state.selected, this.state.location, qs).then(res => {
       if (!res.success) {
         alert('Unable to assign you that slot. Please try again!');
@@ -308,14 +317,13 @@ export default class Scheduler extends Component {
     const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).filter(v => {
       return this.state.schedule.available[this.state.location][v] > 0;
     }).map(v => moment(v));
-    console.log(slots);
     return (
       <div>
         <div className='container'>
           <div className='row justify-content-center m-3'>
             <div className='col-sm-4'>
               <p className='lead'>Location:</p>
-              <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null, month: moment(Object.keys(this.state.schedule.available[e.target.value])[0]).startOf('month').startOf('day') })}>
+              <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null, month: moment(Object.keys(this.state.schedule.available[e.target.value])[0]).startOf('month').startOf('day') })} value={this.state.location}>
                 <option value=''>--location--</option>
                 {locationOptions}
               </select>
@@ -326,12 +334,26 @@ export default class Scheduler extends Component {
           </div>
           <div className='row justify-content-center'>
             <div className='col-sm-8'>
-              {this.state.day ? <AppointmentTable slots={this.state.schedule.available[this.state.location]} location={this.state.location} day={this.state.day} request={e => this.setState({ selected: e })} /> : <br />}
+              {this.state.day ? <AppointmentTable slots={this.state.schedule.available[this.state.location]} location={this.state.location} day={this.state.day} request={this.handleRequest} /> : <br />}
             </div>
           </div>
         </div>
-        <ConfirmModal selected={this.state.selected} location={this.state.location} onSubmit={this.submitRequest} />
-        <Modal show={this.state.showSymtomaticModal} backdrop='static' keyboard={false}>
+        <ConfirmModal selected={this.state.selected} location={this.state.location} onSubmit={this.submitRequest} onClose={this.handleConfirmClose} show={this.state.showConfirmModal}/>
+        <Modal show={this.state.showTakenModal} onHide={this.handleTakenClose}>
+          <Modal.Header>
+            <Modal.Title>Appointment Time Taken</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p className='lead'>
+              This appointment time has already been taken. Please try selecting a different time!
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={this.handleTakenClose}>Ok</Button>
+          </Modal.Footer>
+        </Modal>
+
+        {/* <Modal show={this.state.showSymtomaticModal} backdrop='static' keyboard={false}>
           <Modal.Header>
             <Modal.Title>Alert</Modal.Title>
           </Modal.Header>
@@ -342,7 +364,7 @@ export default class Scheduler extends Component {
           <Modal.Footer>
             <Button variation='primary' onClick={e => window.open('/dashboard', '_self')}>Ok</Button>
           </Modal.Footer>
-        </Modal>
+        </Modal> */}
       </div>
     );
   }
