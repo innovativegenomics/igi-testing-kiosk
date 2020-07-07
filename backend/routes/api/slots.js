@@ -44,7 +44,8 @@ router.get('/available', cas.block, async (request, response) => {
           [Op.gte]: week.toDate(),
           [Op.lt]: week.clone().add(1, 'week').toDate()
         }
-      }
+      },
+      transaction: t
     });
     const taken = await Slot.findAll({
       where: {
@@ -208,6 +209,9 @@ router.post('/slot', cas.block, async (request, response) => {
       transaction: t,
     })) + (await ReservedSlot.count({
       where: {
+        calnetid: {
+          [Op.ne]: calnetid,
+        },
         time: reqtime.toDate(),
         location: reqlocation,
         expires: {
