@@ -200,7 +200,6 @@ export default class Days extends Component {
                   <td>{v.endhour>12?v.endhour-12:v.endhour}:{v.endminute<10?`0${v.endminute}`:v.endminute} {v.endhour>12?'PM':'AM'}</td>
                   <td>{v.window}</td>
                   <td>{v.buffer}</td>
-                  <td>{v.id}</td>
                 </tr>
               ))
             }
