@@ -40,7 +40,17 @@ export default class App extends Component {
         unauthed: true,
         success: false
       },
-    }
+    };
+    this.landing = withTracker(Landing);
+    this.about = withTracker(About);
+    this.qrcode = withTracker(QRCode);
+    this.accessingResults = withTracker(AccessingResults);
+
+    this.newUser = withTracker(NewUser);
+    this.dashboard = withTracker(Dashboard);
+    this.scheduler = withTracker(Scheduler);
+
+    this.admin = withTracker(Admin);
   }
   componentDidMount() {
     getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
@@ -51,15 +61,16 @@ export default class App extends Component {
           <div className='App'>
             <Navigation authed={!this.state.auth.unauthed} />
 
-            <Route path='/' exact component={withTracker(Landing)} />
-            <Route path='/about' component={withTracker(About)} />
-            <Route path='/qrcode' component={withTracker(QRCode)} />
-            <Route path='/accessing-results' component={withTracker(AccessingResults)}/>
+            <Route path='/' exact component={this.landing} />
+            <Route path='/about' component={this.about} />
+            <Route path='/qrcode' component={this.qrcode} />
+            <Route path='/accessing-results' component={this.accessingResults}/>
 
-            <Route path='/newuser' component={withTracker(NewUser)} />
-            <Route path='/dashboard' component={withTracker(Dashboard)} />
-            <Route path='/scheduler' component={withTracker(Scheduler)} />
-            <Route path='/admin' component={withTracker(Admin)} />
+            <Route path='/newuser' component={this.newUser} />
+            <Route path='/dashboard' component={this.dashboard} />
+            <Route path='/scheduler' component={this.scheduler} />
+            
+            <Route path='/admin' component={this.admin} />
 
             <Footer/>
           </div>

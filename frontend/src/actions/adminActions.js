@@ -66,7 +66,21 @@ export const getCompletedSlotsStat = async m => {
   }
 }
 
-export const getSettingsDay = async d => {
+/**
+ * returns array of day dates
+ */
+export const getAvailableDays = async () => {
+  try {
+    const response = await axios.get('/api/admin/settings/days');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get days`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const getDaySettings = async d => {
   try {
     const response = await axios.get('/api/admin/settings/day', { params: { day: d } });
     return response.data;

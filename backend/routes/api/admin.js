@@ -307,6 +307,30 @@ router.get('/settings/day', cas.block, async (request, response) => {
   }
 });
 
+router.get('/settings/days', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 0) {
+    try {
+      const days = await Day.findAll({
+        attributes: ['date'],
+        order: [['date', 'desc']]
+      });
+      response.send({
+        success: true,
+        days: days.map(v => v.date)
+      });
+    } catch(err) {
+      pino.error('error getting available days');
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.post('/complete', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;

@@ -203,12 +203,12 @@ class ToS extends Component {
           Your personal information may be released if required by law. Authorized representatives from the
           following organizations may review your research data for purposes such as monitoring or managing the
           conduct of this study:
-                    <ul>
+        </p>
+        <ul>
             <li>University of California</li>
             <li>Food and Drug Administration (FDA) and other government agencies involved in keeping research
                             safe for people.</li>
-          </ul>
-        </p>
+        </ul>
         <p>
           Identifiers might be removed from the identifiable private information or identifiable biospecimens. After
           such removal, the information or biospecimens could be used for future research studies or distributed to
@@ -231,12 +231,12 @@ class ToS extends Component {
         <p className='lead text-center'>Alternatives</p>
         <p>
           Your other choices may include:
-                    <ul>
-            <li>Getting no asymptomatic testing</li>
-            <li>Getting standard testing outside of this study.</li>
-            <li>Participating in another study providing asymptomatic testing.</li>
-          </ul>
         </p>
+        <ul>
+          <li>Getting no asymptomatic testing</li>
+          <li>Getting standard testing outside of this study.</li>
+          <li>Participating in another study providing asymptomatic testing.</li>
+        </ul>
         <p className='lead text-center'>Compensation/Payment</p>
         <p>
           You will not be paid for participation in this study, nor will you or your insurance carriers be asked to pay

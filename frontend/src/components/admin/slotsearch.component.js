@@ -44,17 +44,6 @@ export default class SlotSearch extends Component {
     await this.runSearch(this.state.search, this.state.perpage, this.state.page);
   }
   render() {
-    console.log(this.state);
-
-    // const pageButtons = [];
-    // for(let i = 0;i<this.state.count/this.state.perpage;i++) {
-    //   pageButtons.push(
-    //     <Pagination.Item key={i} active={this.state.page===i} onClick={e => this.updatePage(i)}>
-    //       {i+1}
-    //     </Pagination.Item>
-    //   );
-    // }
-
     const resultRows = [];
     this.state.results.forEach((v, i) => {
       resultRows.push(<tr key={i}>

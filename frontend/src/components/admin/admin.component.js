@@ -5,7 +5,7 @@ import { Nav, Spinner } from 'react-bootstrap';
 import { getAdminLevel, getSettings } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
 import AdminUsers from './adminusers.component';
-import Statistics from './statistics.component';
+import Statistics from './stats/statistics.component';
 import Scanner from './scanner.component';
 import Study from './study.component';
 
