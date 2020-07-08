@@ -48,16 +48,16 @@ export default class Participants extends Component {
     const resultRows = [];
     this.state.results.forEach((v, i) => {
       resultRows.push(<tr key={i}>
-        <td>{i+1+(this.state.page*this.state.perpage)}</td>
-        <td>{v.calnetid}</td>
-        <td>{v.firstname} {v.middlename} {v.lastname}</td>
-        <td>{v.dob}</td>
-        <td>{v.email}</td>
-        <td>{v.phone}</td>
-        <td>{v.sex}</td>
-        <td>{v.pbuilding}</td>
-        <td>{v.patientid}</td>
-        <td>{moment(v.datejoined).format('YYYY-MM-DD h:mm A')}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{i+1+(this.state.page*this.state.perpage)}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.calnetid}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.firstname} {v.middlename} {v.lastname}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.dob}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.email}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.phone}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.sex}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.pbuilding}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{v.patientid}</td>
+        <td style={{whiteSpace: 'nowrap'}}>{moment(v.datejoined).format('YYYY-MM-DD h:mm A')}</td>
       </tr>);
     });
 
