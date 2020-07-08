@@ -49,7 +49,7 @@ export default class Slots extends Component {
   }
   componentDidMount = async () => {
     this.setState({loading: true});
-    const days = (await getAvailableDays()).days.map(v => moment(v));
+    const days = (await getAvailableDays()).days.map(v => moment(v.date));
     const day = days.find(v => v.clone().startOf('week').isSame(moment().startOf('week')));
     this.setState({
       availableDays: days,

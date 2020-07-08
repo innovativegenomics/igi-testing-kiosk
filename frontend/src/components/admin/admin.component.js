@@ -8,6 +8,7 @@ import AdminUsers from './adminusers.component';
 import Statistics from './stats/statistics.component';
 import Scanner from './scanner.component';
 import Study from './study.component';
+import Days from './days.component';
 import Participants from './participants.component';
 
 export default class Admin extends Component {
@@ -60,6 +61,9 @@ export default class Admin extends Component {
             <Nav.Link as={Link} eventKey='participants' to='participants' onClick={e => this.setState({active: 'participants'})}>Participants</Nav.Link>
           </Nav.Item>
           <Nav.Item className={this.state.level>=30?'':'d-none'}>
+            <Nav.Link as={Link} eventKey='days' to='days' onClick={e => this.setState({active: 'days'})}>Days</Nav.Link>
+          </Nav.Item>
+          <Nav.Item className={this.state.level>=30?'':'d-none'}>
             <Nav.Link as={Link} eventKey='admins' to='admins' onClick={e => this.setState({active: 'admins'})}>Manage Admins</Nav.Link>
           </Nav.Item>
           <Nav.Item className={this.state.level>=40?'':'d-none'}>
@@ -72,6 +76,13 @@ export default class Admin extends Component {
           path={`${this.props.match.path}/search`}
           render={(props) => {
             return <SlotSearch {...props} level={this.state.level} settings={this.state.settings} />;
+          }}
+        />
+        <Route
+          exact
+          path={`${this.props.match.path}/days`}
+          render={(props) => {
+            return <Days {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route

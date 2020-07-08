@@ -113,6 +113,27 @@ export const getAvailableDays = async () => {
   }
 }
 
+export const createDay = async data => {
+  try {
+    const response = await axios.post('/api/admin/settings/day', {...data, date: data.date.format()});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't create day`);
+    console.error(err);
+    return { success: false };
+  }
+}
+export const deleteDay = async id => {
+  try {
+    const response = await axios.delete('/api/admin/settings/day', {params: {id: id}});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't delete day`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 export const getDaySettings = async d => {
   try {
     const response = await axios.get('/api/admin/settings/day', { params: { day: d } });

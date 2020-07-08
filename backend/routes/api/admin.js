@@ -401,23 +401,81 @@ router.get('/settings/day', cas.block, async (request, response) => {
   }
 });
 
+router.post('/settings/day', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 30) {
+    const starthour = parseInt(request.body.starthour);
+    const startminute = parseInt(request.body.startminute);
+    const endhour = parseInt(request.body.endhour);
+    const endminute = parseInt(request.body.endminute);
+    const date = moment(request.body.date).startOf('day');
+    const window = parseInt(request.body.window);
+    const buffer = parseInt(request.body.buffer);
+    try {
+      const day = await Day.create({
+        starthour: starthour,
+        startminute: startminute,
+        endhour: endhour,
+        endminute: endminute,
+        date: date,
+        window: window,
+        buffer: buffer,
+      });
+      response.send({success: true});
+    } catch(err) {
+      pino.error(`Can't post day`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
+router.delete('/settings/day', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 30) {
+    const id = request.query.id;
+    try {
+      const day = await Day.findOne({
+        where: {
+          id: id
+        }
+      });
+      await day.destroy();
+      response.send({success: true});
+    } catch(err) {
+      pino.error(`Can't delete day`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.get('/settings/days', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
   if(!!level && level >= 0) {
     try {
       const days = await Day.findAll({
-        attributes: ['date'],
         order: [['date', 'desc']]
       });
       response.send({
         success: true,
-        days: days.map(v => v.date)
+        days: days
       });
     } catch(err) {
       pino.error('error getting available days');
       pino.error(err);
-      response.send({success: false});
+      response.send({
+        success: false
+      });
     }
   } else {
     pino.info('unauthed');
