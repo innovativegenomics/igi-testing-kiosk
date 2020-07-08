@@ -37,12 +37,12 @@ export default class Slots extends Component {
       datasets: [{
         data: [this.state.scheduled, this.state.unscheduled],
         backgroundColor: [
-          '#FF6384',
-          '#36A2EB'
+          'rgba(220,53,69,.6)',
+          'rgba(0,123,255,.6)'
         ],
         hoverBackgroundColor: [
-          '#FF6384',
-          '#36A2EB'
+          'rgba(220,53,69,.8)',
+          'rgba(0,123,255,.8)'
         ]
       }],
       labels: [
