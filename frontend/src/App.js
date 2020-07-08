@@ -5,6 +5,7 @@ import ReactGA from 'react-ga';
 import { Navigation, Footer } from './components/navigation.component';
 
 import Landing from './components/public/landing.component';
+import ExternalLogin from './components/public/extlogin.component';
 import About from './components/public/about.component';
 import QRCode from './components/public/qrcode.component';
 import AccessingResults from './components/public/accessing-results.component';
@@ -14,6 +15,8 @@ import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
 
 import Admin from './components/admin/admin.component';
+
+import Error404 from './components/404.component';
 
 import { getUser } from './actions/authActions';
 
@@ -42,6 +45,7 @@ export default class App extends Component {
       },
     };
     this.landing = withTracker(Landing);
+    this.extlogin = withTracker(ExternalLogin);
     this.about = withTracker(About);
     this.qrcode = withTracker(QRCode);
     this.accessingResults = withTracker(AccessingResults);
@@ -61,16 +65,23 @@ export default class App extends Component {
           <div className='App'>
             <Navigation authed={!this.state.auth.unauthed} />
 
-            <Route path='/' exact component={this.landing} />
-            <Route path='/about' component={this.about} />
-            <Route path='/qrcode' component={this.qrcode} />
-            <Route path='/accessing-results' component={this.accessingResults}/>
+            <Switch>
+              <Route path='/' exact component={this.landing} />
+              <Route path='/extlogin' component={this.extlogin}/>
+              <Route path='/about' component={this.about} />
+              <Route path='/qrcode' component={this.qrcode} />
+              <Route path='/accessing-results' component={this.accessingResults}/>
 
-            <Route path='/newuser' component={this.newUser} />
-            <Route path='/dashboard' component={this.dashboard} />
-            <Route path='/scheduler' component={this.scheduler} />
-            
-            <Route path='/admin' component={this.admin} />
+              <Route path='/newuser' component={this.newUser} />
+              <Route path='/dashboard' component={this.dashboard} />
+              <Route path='/scheduler' component={this.scheduler} />
+              
+              <Route path='/admin' component={this.admin} />
+
+              <Route>
+                <Error404/>
+              </Route>
+            </Switch>
 
             <Footer/>
           </div>

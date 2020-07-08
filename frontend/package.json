@@ -11,6 +11,7 @@
     "bootstrap": "^4.5.0",
     "chart.js": "^2.9.3",
     "email-validator": "^2.0.4",
+    "formik": "^2.1.4",
     "google-libphonenumber": "^3.2.10",
     "http-proxy-middleware": "^1.0.4",
     "i": "^0.3.6",

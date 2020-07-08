@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import './landing.css';
 
@@ -60,9 +61,16 @@ export default class Landing extends Component {
           </div>
           <div className='row justify-content-center mb-2'>
             <div className='col text-center'>
-              <button className='btn btn-lg btn-primary text-light' onClick={this.handleLoginButton}>
+              <button className='btn btn-lg btn-primary' onClick={this.handleLoginButton}>
                 Log in with CalNet ID
               </button>
+            </div>
+          </div>
+          <div className='row justify-content-center mb-2'>
+            <div className='col text-center'>
+              <Link className='btn btn-lg btn-outline-primary' to='/extlogin'>
+                I don't have a CalNet ID
+              </Link>
             </div>
           </div>
         </div>
