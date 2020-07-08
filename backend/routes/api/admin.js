@@ -283,6 +283,52 @@ router.get('/stats/slots/completed', cas.block, async (request, response) => {
   }
 });
 
+router.get('/stats/general/scheduled', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 20) {
+    try {
+      const count = await User.count({
+        where: sequelize.literal(`(select location from "Slots" as s where s.calnetid="User".calnetid order by time desc limit 1) is not null`)
+      });
+      response.send({
+        success: true,
+        scheduled: count
+      });
+    } catch(err) {
+      pino.error(`error getting scheduled participants`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
+router.get('/stats/general/unscheduled', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 20) {
+    try {
+      const count = await User.count({
+        where: sequelize.literal(`(select location from "Slots" as s where s.calnetid="User".calnetid order by time desc limit 1) is null`)
+      });
+      response.send({
+        success: true,
+        unscheduled: count
+      });
+    } catch(err) {
+      pino.error(`error getting unscheduled participants`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.get('/settings/day', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;

@@ -3,6 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Container, Row, Col } from 'react-bootstrap';
 
 import Slots from './slots.component';
+import General from './general.component';
 
 export default class Statistics extends Component {
   render() {
@@ -12,11 +13,12 @@ export default class Statistics extends Component {
     
     return (
       <Container>
-        <Row className='mt-2'>
-          <Col lg>
+        <Row className='mt-3'>
+          <Col lg className='pl-2 pr-2'>
             <Slots/>
           </Col>
-          <Col lg>
+          <Col lg className='pl-2 pr-2'>
+            <General/>
           </Col>
         </Row>
       </Container>

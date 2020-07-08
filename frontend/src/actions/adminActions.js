@@ -66,6 +66,28 @@ export const getCompletedSlotsStat = async m => {
   }
 }
 
+export const getScheduledParticipantsStat = async () => {
+  try {
+    const response = await axios.get('/api/admin/stats/general/scheduled');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get scheduled participants`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const getUnscheduledParticipantsStat = async () => {
+  try {
+    const response = await axios.get('/api/admin/stats/general/unscheduled');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get unscheduled participants`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 /**
  * returns array of day dates
  */

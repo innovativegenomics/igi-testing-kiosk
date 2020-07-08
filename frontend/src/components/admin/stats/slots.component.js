@@ -58,10 +58,6 @@ export default class Slots extends Component {
     this.runSlotsStats({day: day});
   }
   render() {
-    if(this.props.level < 20) {
-      return <Redirect to='search' />;
-    }
-    
     const labels = [];
     const scheduledValues = [];
     const completedValues = [];
@@ -71,15 +67,19 @@ export default class Slots extends Component {
       completedValues.push(0);
     }
 
+    let scheduledTotal = 0;
+    let completedTotal = 0;
     this.state.scheduled.forEach((v, i) => {
       const time = moment(v.time);
       const index = labels.indexOf(time.format('H:mm'));
       scheduledValues[index] = v.count;
+      scheduledTotal += v.count;
     });
     this.state.completed.forEach((v, i) => {
       const time = moment(v.time);
       const index = labels.indexOf(time.format('H:mm'));
       completedValues[index] = v.count;
+      completedTotal += v.count;
     });
     const data = {
       labels: labels,
@@ -159,6 +159,9 @@ export default class Slots extends Component {
             data={data}
             options={chartOptions}
           />
+          <p className='lead m-0'>Scheduled Appointments: {scheduledTotal+completedTotal}</p>
+          <p className='lead m-0'>Completed Appointments: {completedTotal}</p>
+          <p className='lead m-0'>Appointments Left: {scheduledTotal}</p>
         </Card.Body>
       </Card>
     );
