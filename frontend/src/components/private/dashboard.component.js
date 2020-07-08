@@ -21,12 +21,13 @@ export default class Dashboard extends Component {
         success: false,
         loaded: false
       },
+      showCancelledMessage: false,
     };
   }
   requestCancel = e => {
     cancelSlot().then(res => {
       if (res.success) {
-        this.setState({ slot: { ...this.state.slot, loaded: false } });
+        this.setState({ slot: { ...this.state.slot, loaded: false }, showCancelledMessage: true });
         getSlot().then(res => this.setState({ slot: { ...res, loaded: true } }));
       } else {
         alert(`Couldn't cancel your appointment! Please try again.`);
@@ -98,6 +99,16 @@ export default class Dashboard extends Component {
                   When you arrive for your appointment, please wear your mask, and 
                   bring the QR code that you received in the confirmation email. You can
                   also view the qr code <Link to={'/qrcode?uid='+this.state.slot.slot.uid}>here</Link>.
+                </p>
+              </Alert>
+            </Col>
+          </Row>
+          <Row className='justify-content-center'>
+            <Col md={8} className={this.state.showCancelledMessage?'':'d-none'}>
+              <Alert variant='info'>
+                <h3 className='font-weight-light text-center'>Appointment Cancelled</h3>
+                <p className='lead text-center'>
+                  You can schedule a different time by clicking the button above.
                 </p>
               </Alert>
             </Col>
