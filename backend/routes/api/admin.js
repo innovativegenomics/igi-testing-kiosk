@@ -105,7 +105,7 @@ router.get('/slot', cas.block, async (request, response) => {
  *   page: which page to return, starting at 0
  * }
  */
-router.get('/search', cas.block, async (request, response) => {
+router.get('/search/slots', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
   if(!!level && level >= 0) {
@@ -161,6 +161,54 @@ router.get('/search', cas.block, async (request, response) => {
       });
     });
     response.send({success: true, results: res, count: count});
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
+/**
+ * request:
+ * {
+ *   term: string,
+ *   perpage: number of results to return
+ *   page: which page to return, starting at 0
+ * }
+ */
+router.get('/search/participants', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 20) {
+    const term = request.query.term || '';
+    const perpage = parseInt(request.query.perpage);
+    const page = parseInt(request.query.page);
+    const { count, rows } = await User.findAndCountAll({
+      limit: perpage,
+      offset: perpage*page,
+      where: {
+        [Op.or]: {
+          firstname: {
+            [Op.iLike]: `${term}%`,
+          },
+          middlename: {
+            [Op.iLike]: `${term}%`,
+          },
+          lastname: {
+            [Op.iLike]: `${term}%`,
+          },
+          email: {
+            [Op.iLike]: `${term}%`,
+          },
+          phone: {
+            [Op.iLike]: `${term}%`,
+          },
+          patientid: {
+            [Op.iLike]: `${term}%`,
+          },
+        },
+      }
+    });
+    response.send({success: true, results: rows, count: count});
   } else {
     pino.info('unauthed');
     response.status(401).send('Unauthorized');

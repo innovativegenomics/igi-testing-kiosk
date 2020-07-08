@@ -35,7 +35,18 @@ export const completeSlot = async uid => {
 
 export const searchSlots = async (term, perpage, page) => {
   try {
-    const response = await axios.get('/api/admin/search', { params: { term: term, perpage: perpage, page: page } });
+    const response = await axios.get('/api/admin/search/slots', { params: { term: term, perpage: perpage, page: page } });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't search slots`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const searchParticipants = async (term, perpage, page) => {
+  try {
+    const response = await axios.get('/api/admin/search/participants', { params: { term: term, perpage: perpage, page: page } });
     return response.data;
   } catch(err) {
     console.error(`Can't search slots`);

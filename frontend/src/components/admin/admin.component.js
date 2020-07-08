@@ -8,6 +8,7 @@ import AdminUsers from './adminusers.component';
 import Statistics from './stats/statistics.component';
 import Scanner from './scanner.component';
 import Study from './study.component';
+import Participants from './participants.component';
 
 export default class Admin extends Component {
   constructor(props) {
@@ -55,6 +56,9 @@ export default class Admin extends Component {
           <Nav.Item className={this.state.level>=20?'':'d-none'}>
             <Nav.Link as={Link} eventKey='stats' to='stats' onClick={e => this.setState({active: 'stats'})}>Statistics</Nav.Link>
           </Nav.Item>
+          <Nav.Item className={this.state.level>=20?'':'d-none'}>
+            <Nav.Link as={Link} eventKey='participants' to='participants' onClick={e => this.setState({active: 'participants'})}>Participants</Nav.Link>
+          </Nav.Item>
           <Nav.Item className={this.state.level>=30?'':'d-none'}>
             <Nav.Link as={Link} eventKey='admins' to='admins' onClick={e => this.setState({active: 'admins'})}>Manage Admins</Nav.Link>
           </Nav.Item>
@@ -82,6 +86,13 @@ export default class Admin extends Component {
           path={`${this.props.match.path}/stats`}
           render={(props) => {
             return <Statistics {...props} level={this.state.level} settings={this.state.settings} />;
+          }}
+        />
+        <Route
+          exact
+          path={`${this.props.match.path}/participants`}
+          render={(props) => {
+            return <Participants {...props} level={this.state.level} settings={this.state.settings} />;
           }}
         />
         <Route
