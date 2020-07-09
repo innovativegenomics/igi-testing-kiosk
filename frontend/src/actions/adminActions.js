@@ -33,6 +33,17 @@ export const completeSlot = async uid => {
   }
 }
 
+export const uncompleteSlot = async uid => {
+  try {
+    const response = await axios.post('/api/admin/uncomplete', { uid: uid });
+    return response.data;
+  } catch(err) {
+    console.error(`Can't uncomplete slot`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 export const searchSlots = async (term, perpage, page) => {
   try {
     const response = await axios.get('/api/admin/search/slots', { params: { term: term, perpage: perpage, page: page } });

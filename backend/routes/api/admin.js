@@ -511,6 +511,34 @@ router.post('/complete', cas.block, async (request, response) => {
   }
 });
 
+router.post('/uncomplete', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 10) {
+    const t = await sequelize.transaction();
+    try {
+      const slot = await Slot.findOne({
+        where: {
+          uid: request.body.uid,
+        },
+        transaction: t,
+      });
+      slot.completed = null;
+      await slot.save();
+      await t.commit();
+      response.send({success: true});
+    } catch(err) {
+      pino.error(`Error uncompleting appointment for ${uid}`);
+      pino.error(err);
+      await t.rollback();
+      response.send({success: false});
+    }
+  } else {
+    pino.error(`Not authed`);
+    response.status(401).send();
+  }
+});
+
 router.get('/level', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;

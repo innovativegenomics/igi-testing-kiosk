@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Container, Table, Button, Row, Col, Form, Spinner, InputGroup } from 'react-bootstrap';
 import moment from 'moment';
 
-import { searchSlots, completeSlot } from '../../actions/adminActions';
+import { searchSlots, completeSlot, uncompleteSlot } from '../../actions/adminActions';
 
 export default class SlotSearch extends Component {
   constructor(props) {
@@ -31,6 +31,10 @@ export default class SlotSearch extends Component {
     await completeSlot(uid);
     await this.runSearch(this.state.search, this.state.perpage, this.state.page);
   }
+  markAsUncomplete = async uid => {
+    await uncompleteSlot(uid);
+    await this.runSearch(this.state.search, this.state.perpage, this.state.page);
+  }
   updatePage = async p => {
     this.setState({page: p});
     await this.runSearch(this.state.search, this.state.perpage, p);
@@ -54,7 +58,14 @@ export default class SlotSearch extends Component {
         <td>{v.location}</td>
         <td>{!!v.completed?moment(v.completed).format('dddd, MMMM D h:mm A'):'Not Completed'}</td>
         {this.props.level>=10?
-          <td><Button size='sm' className={!!v.location?'':'d-none'} variant={!!v.completed?'secondary':'primary'} onClick={e => this.markAsComplete(v.uid)} disabled={!!v.completed}>{!!v.completed?`Completed`:`Mark as Complete`}</Button></td>
+          <td>
+            {!!v.completed?
+              <Button variant='secondary' size='sm' className={!!v.location?'':'d-none'} onClick={e => this.markAsUncomplete(v.uid)}>Mark uncompleted</Button>
+              :
+              <Button size='sm' className={!!v.location?'':'d-none'} onClick={e => this.markAsComplete(v.uid)}>Mark completed</Button>
+            }
+          </td>
+          // <td><Button size='sm' className={!!v.location?'':'d-none'} variant={!!v.completed?'secondary':'primary'} onClick={e => this.markAsComplete(v.uid)} disabled={!!v.completed}>{!!v.completed?`Completed`:`Mark as Complete`}</Button></td>
           :
           <td></td>
         }
