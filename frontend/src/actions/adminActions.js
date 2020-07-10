@@ -210,3 +210,14 @@ export const getSettings = async () => {
     return { success: false };
   }
 }
+
+export const updateUser = async (calnetid, params) => {
+  try {
+    const response = await axios.patch('/api/admin/participant', {calnetid: calnetid, params: params});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't patch participant`);
+    console.error(err);
+    return { success: false };
+  }
+}

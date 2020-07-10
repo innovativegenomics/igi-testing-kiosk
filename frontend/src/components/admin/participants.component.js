@@ -1,9 +1,94 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Container, Table, Button, Row, Col, Form, Spinner, InputGroup } from 'react-bootstrap';
+import ContentEditable from 'react-contenteditable';
 import moment from 'moment';
 
-import { searchParticipants } from '../../actions/adminActions';
+import { searchParticipants, updateUser } from '../../actions/adminActions';
+
+class EditableBox extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: this.props.value||'',
+      oldValue: this.props.value||'',
+      success: null,
+    };
+    this.tout = null;
+  }
+  onSave = async () => {
+    if(this.state.value === this.state.oldValue) {
+      return;
+    }
+    window.clearTimeout(this.tout);
+    this.setState({success: null});
+    const success = await this.props.onSave(this.state.value);
+    let values = {};
+    if(success) {
+      values = {oldValue: this.state.value};
+    } else {
+      values = {value: this.state.oldValue};
+    }
+    this.setState({success: success, ...values});
+    this.tout = window.setTimeout(() => {
+      this.setState({success: null});
+    }, 2000);
+  }
+  onFocus = () => {
+    window.clearTimeout(this.tout);
+    this.highlightAll();
+    this.setState({success: null});
+  }
+  onChange = e => {
+    const trimSpaces = string => (
+      string
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&gt;/g, '>')
+        .replace(/&lt;/g, '<')
+    );
+    this.setState({value: trimSpaces(e.target.value)});
+  }
+  disableNewlines = (event) => {
+    const keyCode = event.keyCode || event.which
+  
+    if (keyCode === 13) {
+      event.returnValue = false
+      if (event.preventDefault) event.preventDefault()
+      event.target.blur();
+    }
+  }
+  pasteAsPlainText = e => {
+    e.preventDefault();
+  
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertHTML', false, text);
+  }
+  highlightAll = () => {
+    setTimeout(() => {
+      document.execCommand('selectAll', false, null)
+    }, 0)
+  }
+  componentDidUpdate = (prevProps, prevState) => {
+    if(this.props.value !== prevProps.value) {
+      this.setState({value: this.props.value || '', oldValue: this.props.value || ''});
+    }
+  }
+  render() {
+    return (
+      <ContentEditable
+        tagName='span'
+        html={this.state.value}
+        className={'p-1 ' + (this.state.success?'border rounded border-success':(this.state.success===false?'border rounded border-danger':''))}
+        onChange={this.onChange}
+        onFocus={this.onFocus}
+        onBlur={this.onSave}
+        onPaste={this.pasteAsPlainText}
+        onKeyPress={this.disableNewlines}
+      />
+    );
+  }
+}
 
 export default class Participants extends Component {
   constructor(props) {
@@ -37,6 +122,17 @@ export default class Participants extends Component {
     this.setState({perpage: c, page: page});
     await this.runSearch(this.state.search, c, page);
   }
+  updateUser = async (i, v) => {
+    const { success } = await updateUser(this.state.results[i].calnetid, v);
+    if(success) {
+      const tmpRes = this.state.results;
+      tmpRes[i] = {...tmpRes[i], ...v};
+      this.setState({results: tmpRes});
+      return true;
+    } else {
+      return false;
+    }
+  }
   componentDidMount = async () => {
     await this.runSearch(this.state.search, this.state.perpage, this.state.page);
   }
@@ -50,13 +146,29 @@ export default class Participants extends Component {
       resultRows.push(<tr key={i}>
         <td style={{whiteSpace: 'nowrap'}}>{i+1+(this.state.page*this.state.perpage)}</td>
         <td style={{whiteSpace: 'nowrap'}}>{v.calnetid}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.firstname} {v.middlename} {v.lastname}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.dob}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.email}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.phone}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.sex}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.pbuilding}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.patientid}</td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.firstname} onSave={nv => this.updateUser(i, {firstname: nv})}/>
+          <EditableBox value={v.middlename} onSave={nv => this.updateUser(i, {middlename: nv})}/>
+          <EditableBox value={v.lastname} onSave={nv => this.updateUser(i, {lastname: nv})}/>
+        </td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.dob} onSave={nv => this.updateUser(i, {dob: nv})}/>
+        </td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.email} onSave={nv => this.updateUser(i, {email: nv})}/>
+        </td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.phone} onSave={nv => this.updateUser(i, {phone: nv})}/>
+        </td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.sex} onSave={nv => this.updateUser(i, {sex: nv})}/>
+        </td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.pbuilding} onSave={nv => this.updateUser(i, {pbuilding: nv})}/>
+        </td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <EditableBox value={v.patientid} onSave={nv => this.updateUser(i, {patientid: nv})}/>
+        </td>
         <td style={{whiteSpace: 'nowrap'}}>{moment(v.datejoined).format('YYYY-MM-DD h:mm A')}</td>
       </tr>);
     });
