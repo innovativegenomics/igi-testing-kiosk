@@ -673,6 +673,38 @@ router.get('/settings', cas.block, async (request, response) => {
   }
 });
 
+router.patch('/participant', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 30) {
+    const t = await sequelize.transaction();
+    try {
+      const rec = await User.findOne({
+        where: {
+          calnetid: request.body.calnetid
+        },
+        transaction: t
+      });
+      await rec.update(request.body.params);
+      await t.commit();
+      response.send({success: true});
+    } catch(err) {
+      await t.rollback();
+      pino.error(`Couldn't update user ${request.body.calnetid}`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.error({
+      route: '/api/admin/participant',
+      method: 'PATCH',
+      calnetid: calnetid,
+      error: 'Not authed'
+    });
+    response.status(401).send();
+  }
+});
+
 
 router.get('/study/participantinfo', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
