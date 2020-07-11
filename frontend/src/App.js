@@ -54,6 +54,17 @@ export default class App extends Component {
 
     this.admin = withTracker(Admin);
   }
+  updateUser = values => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        user: {
+          ...this.state.auth.user,
+          ...values
+        }
+      }
+    })
+  }
   componentDidMount() {
     getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
   }
@@ -86,7 +97,7 @@ export default class App extends Component {
               <this.scheduler {...props} auth={this.state.auth} />
             )} />
             <Route path='/reconsent' render={props => (
-              <this.reconsent {...props} auth={this.state.auth} />
+              <this.reconsent {...props} auth={this.state.auth} updateUser={this.updateUser} />
             )} />
             
             <Route path='/admin' render={props => (

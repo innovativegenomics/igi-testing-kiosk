@@ -17,9 +17,20 @@ export const getUser = async () => {
 export const createUser = async data => {
   try {
     const response = await axios.post('/api/users/profile', data);
-    return { success: response.success };
+    return { success: response.data.success };
   } catch(err) {
     console.error('error creating user');
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const reconsentUser = async questions => {
+  try {
+    const response = await axios.post('/api/users/reconsent', { questions: questions });
+    return { success: response.data.success };
+  } catch(err) {
+    console.error('error reconsenting user');
     console.error(err);
     return { success: false };
   }

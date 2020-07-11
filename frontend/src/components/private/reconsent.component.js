@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import {  Redirect } from 'react-router-dom';
 import { Container, Spinner, Card, Row, Col, ButtonGroup, Button, Form, Alert } from 'react-bootstrap';
 
+import { reconsentUser } from '../../actions/authActions';
+
 class Question extends Component {
   render() {
     return (
@@ -37,7 +39,11 @@ export default class Reconsent extends Component {
   }
   submit = async () => {
     this.setState({submitting: true});
-
+    const { success } = await reconsentUser(this.state.questions);
+    this.props.updateUser({
+      reconsented: true
+    });
+    this.setState({submitting: false, submitted: success, error: !success});
   }
   componentDidUpdate = (prevProps, prevState) => {
     if(this.props.auth.user.questions !== prevProps.auth.user.questions) {
