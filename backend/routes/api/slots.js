@@ -256,7 +256,7 @@ router.post('/slot', cas.block, async (request, response) => {
                                       moment(slot.time).add(day.window, 'minute').format('h:mm A'),
                                       slot.location,
                                       settings.locationlinks[settings.locations.indexOf(slot.location)]);
-        await scheduleAppointmentReminderEmail(user.email, moment(slot.time));
+        await scheduleAppointmentReminderEmail(user.email, moment(slot.time), slot.uid);
         if(!user.accessresultssent) {
           await scheduleResultInstructionsEmail(user.email);
           user.accessresultssent = true;
@@ -270,7 +270,7 @@ router.post('/slot', cas.block, async (request, response) => {
                                         moment(slot.time).add(day.window, 'minute').format('h:mm A'),
                                         slot.location,
                                         settings.locationlinks[settings.locations.indexOf(slot.location)]);
-          await scheduleAppointmentReminderText(user.phone, moment(slot.time));
+          await scheduleAppointmentReminderText(user.phone, moment(slot.time), slot.uid);
         }
       } catch(err) {
         pino.error(`Can't schedule confirm notifications for user ${calnetid}`);

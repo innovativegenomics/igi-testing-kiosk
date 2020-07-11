@@ -217,6 +217,10 @@ class ConfirmModal extends Component {
               </ButtonGroup>
             </Col>
           </Row>
+          <p>
+            You will be asked to hold a tube, remove your mask, and spit into that tube. If you feel that you may need 
+            assistance with these steps, please email <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a> to coordinate assistance ahead of time.
+          </p>
         </Modal.Body>
         <Modal.Footer>
           <Button variant='primary' disabled={!isComplete} onClick={e => this.props.onSubmit(this.state)}>Confirm</Button>

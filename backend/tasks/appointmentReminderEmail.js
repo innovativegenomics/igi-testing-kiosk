@@ -5,7 +5,7 @@ module.exports = async (payload, helpers) => {
 
   const { email, time } = payload;
   await sendEmail(email,
-    `IGI FAST - 30 Minute Appointment Reminder`,
+    `IGI FAST - Appointment Reminder for ${moment(time).format('h:mm A')}`,
     `<h3>You have an upcoming appointment at ${moment(time).format('h:mm A')}!</h3>
       <p>Please remember not to:</p>
       <ul>
