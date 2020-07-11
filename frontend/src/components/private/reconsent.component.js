@@ -37,14 +37,11 @@ export default class Reconsent extends Component {
   }
   submit = async () => {
     this.setState({submitting: true});
-    
+
   }
   componentDidUpdate = (prevProps, prevState) => {
     if(this.props.auth.user.questions !== prevProps.auth.user.questions) {
       const qs = this.props.auth.user.questions;
-      if(qs[4] === undefined) {
-        qs[4] = null;
-      }
       this.setState({questions: qs});
     }
   }

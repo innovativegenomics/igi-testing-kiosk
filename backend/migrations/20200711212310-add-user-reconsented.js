@@ -18,6 +18,12 @@ module.exports = {
         defaultValue: false // 3 minutes by default
       }
     );
+    await queryInterface.bulkUpdate(
+      'Users',
+      {
+        questions: Sequelize.fn('array_append', Sequelize.col('questions'), null)
+      }
+    );
   },
 
   down: async (queryInterface, Sequelize) => {

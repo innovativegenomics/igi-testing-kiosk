@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import { Row, Col, Alert, Spinner } from 'react-bootstrap';
+import { Row, Col, Alert, Spinner, Button } from 'react-bootstrap';
+import { BsFillInfoCircleFill } from 'react-icons/bs';
 import moment from 'moment';
 
 import { getSlot, cancelSlot } from '../../actions/slotActions';
@@ -75,6 +76,18 @@ export default class Dashboard extends Component {
               <button className={`btn btn-outline-danger btn-lg ${!!this.state.slot.slot.location && !this.state.slot.slot.completed ? '' : 'd-none'}`} onClick={this.requestCancel}>Cancel Appointment</button>
             </div>
           </div>
+          <Row className='justify-content-center'>
+            <Col className='text-center' md='6'>
+              <Alert variant='info' md={2} className='text-left'>
+                <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
+                <p className='text-center'>
+                  We have updated the terms of our study. If you would like, you can review the new study informed 
+                  consent, and update the answers to the questions you answered when you first signed up.
+                </p>
+              </Alert>
+              <Button variant='outline-info' size='lg' onClick={e => this.props.history.push('/reconsent')}>View updated study consent</Button>
+            </Col>
+          </Row>
           <div className={'row justify-content-center '+(this.state.slot.slot.completed?'':'d-none')}>
             <div className='col col-md-6'>
               <p className='lead alert alert-info text-center'>
