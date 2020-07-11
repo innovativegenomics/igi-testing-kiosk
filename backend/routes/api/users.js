@@ -72,7 +72,8 @@ router.get('/profile', cas.block, async (request, response) => {
       'lastname',
       'email',
       'phone',
-      'calnetid'], where: { calnetid: calnetid }
+      'calnetid',
+      'questions'], where: { calnetid: calnetid }
   });
   if (profile) {
     response.send({ success: true, user: profile });

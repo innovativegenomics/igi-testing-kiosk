@@ -8,20 +8,8 @@ export default class QRCode extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      img: '',
-      authed: false,
-      loaded: false,
-      loading: false,
-      auth: {
-        user: {},
-        loaded: false,
-        unauthed: false,
-        success: false
-      },
+      img: ''
     };
-  }
-  componentDidMount = async () => {
-    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
   }
   render() {
     if (this.state.img === '') {

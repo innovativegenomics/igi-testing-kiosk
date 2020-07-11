@@ -7,9 +7,9 @@ import moment from 'moment';
 
 import ToSModal from './tos.component';
 
-import { getUser, createUser } from '../../actions/authActions';
+import { createUser } from '../../actions/authActions';
 import { Redirect } from 'react-router-dom';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Spinner } from 'react-bootstrap';
 
 const STATE_CODES = [
   'AL', 'AK', 'AS', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FM', 'FL', 'GA',
@@ -259,7 +259,6 @@ export default class NewUser extends Component {
     super(props);
     this.state = {
       user: {},
-      unauthed: false,
       success: false,
       showTerms: true,
       questions: [true, true, true, true, null],
@@ -323,14 +322,14 @@ export default class NewUser extends Component {
     });
   }
 
-  componentDidMount() {
-    getUser().then(res => {
-      this.setState({ unauthed: res.unauthed, success: res.success });
-    });
-  }
-
   render() {
-    if (this.state.unauthed) {
+    if (!this.props.auth.loaded) {
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
+    } else if (this.props.auth.unauthed) {
       return <Redirect to='/' />
     } else if (this.state.success) {
       return <Redirect to='/dashboard' />

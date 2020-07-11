@@ -69,11 +69,6 @@ class EditableBox extends Component {
       document.execCommand('selectAll', false, null)
     }, 0)
   }
-  componentDidUpdate = (prevProps, prevState) => {
-    if(this.props.value !== prevProps.value) {
-      this.setState({value: this.props.value || '', oldValue: this.props.value || ''});
-    }
-  }
   render() {
     return (
       <ContentEditable
@@ -143,7 +138,7 @@ export default class Participants extends Component {
 
     const resultRows = [];
     this.state.results.forEach((v, i) => {
-      resultRows.push(<tr key={i}>
+      resultRows.push(<tr key={v.calnetid}>
         <td style={{whiteSpace: 'nowrap'}}>{i+1+(this.state.page*this.state.perpage)}</td>
         <td style={{whiteSpace: 'nowrap'}}>{v.calnetid}</td>
         <td style={{whiteSpace: 'nowrap'}}>
