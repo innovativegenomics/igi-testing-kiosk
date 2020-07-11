@@ -227,6 +227,9 @@ router.post('/reconsent', cas.block, async (request, response) => {
         calnetid: calnetid
       }
     });
+    if(user.reconsented) {
+      throw new Error('User already reconsented');
+    }
     user.questions = request.body.questions;
     user.reconsented = true;
     await user.save();

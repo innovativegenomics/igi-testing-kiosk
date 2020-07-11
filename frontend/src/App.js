@@ -22,12 +22,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import './App.css';
 
-import withTracker from './withTracker';
+import { withTracker } from './tracker';
 
 const trackingId = 'UA-170146726-1'; // Replace with your Google Analytics tracking ID
 ReactGA.initialize(trackingId, {
   gaOptions: {
-    siteSpeedSampleRate: 100,
+    siteSpeedSampleRate: 100, // record everything
   }
 });
 
@@ -72,7 +72,7 @@ export default class App extends Component {
     return (
         <Router>
           <div className='App'>
-            <Navigation authed={!this.state.auth.unauthed} />
+            <Navigation authed={!this.state.auth.unauthed && this.state.auth.loaded} />
 
             <Route path='/' exact render={props => (
               <this.landing {...props} auth={this.state.auth} />

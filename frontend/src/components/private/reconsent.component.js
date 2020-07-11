@@ -52,7 +52,7 @@ export default class Reconsent extends Component {
     }
   }
   render() {
-    if(this.state.submitted) {
+    if(this.state.submitted || this.props.auth.user.reconsented) {
       return <Redirect to='/dashboard' />;
     }
 

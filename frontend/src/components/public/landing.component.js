@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+
+import { TrackedButton } from '../../tracker';
 import './landing.css';
 
 export default class Landing extends Component {
@@ -60,9 +62,9 @@ export default class Landing extends Component {
           </div>
           <div className='row justify-content-center mb-2'>
             <div className='col text-center'>
-              <button className='btn btn-lg btn-primary text-light' onClick={this.handleLoginButton}>
+              <TrackedButton variant='primary' size='lg' onClick={this.handleLoginButton} category='login' action='calnet user login'>
                 Log in with CalNet ID
-              </button>
+              </TrackedButton>
             </div>
           </div>
         </div>
