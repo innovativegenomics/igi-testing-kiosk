@@ -2,13 +2,6 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 
-import billOfRights from '../../media/billOfRightsEnglish.pdf';
-import billOfRightsSpanish from '../../media/billOfRightsSpanish.pdf';
-import infoSheet from '../../media/infoSheetEnglish.pdf';
-import infoSheetSpanish from '../../media/infoSheetSpanish.pdf';
-import informedConsent from '../../media/informedConsentEnglish.pdf';
-import informedConsentSpanish from '../../media/informedConsentSpanish.pdf';
-
 export default class About extends Component {
   render() {
     return (
@@ -16,17 +9,17 @@ export default class About extends Component {
         <Container>
           <p className='display-4 text-center'>IGI FAST: Free Asymptomatic Saliva Testing</p>
           <ul>
-            <li><a href={billOfRights}>IGI FAST Bill of Rights</a> - <a href={billOfRights}>English</a>, <a href={billOfRightsSpanish}>Español</a></li>
-            <li><a href={infoSheet}>IGI FAST Info Sheet</a> - <a href={infoSheet}>English</a>, <a href={infoSheetSpanish}>Español</a></li>
-            <li><a href={informedConsent}>IGI FAST Informed Consent</a> - <a href={informedConsent}>English</a>, <a href={informedConsentSpanish}>Español</a></li>
+            <li><a href={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`}>IGI FAST Bill of Rights</a> - <a href={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`}>English</a>, <a href={`${process.env.PUBLIC_URL}/pdfs/billOfRightsSpanish.pdf`}>Español</a></li>
+            <li><a href={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`}>IGI FAST Info Sheet</a> - <a href={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`}>English</a>, <a href={`${process.env.PUBLIC_URL}/pdfs/infoSheetSpanish.pdf`}>Español</a></li>
+            <li><a href={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`}>IGI FAST Informed Consent</a> - <a href={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`}>English</a>, <a href={`${process.env.PUBLIC_URL}/pdfs/informedConsentSpanish.pdf`}>Español</a></li>
           </ul>
           <p>
             Community spread of COVID-19 is likely exacerbated by transmission from people who
             are infected, but don’t display any symptoms. Regular testing of these asymptomatic
-            individuals can help to mitigate this spread. As a UC Berkeley employee approved to
-            work on campus during the pandemic, you are invited to participate in a study that
+            individuals can help to mitigate this spread. As someone approved to work on the UC
+            Berkeley campus during the pandemic, you are invited to participate in a study that
             provides regular asymptomatic testing using an experimental saliva-based test for
-            COVID-19 on the UC Berkeley campus.
+            COVID-19 on campus.
           </p>
           <p>
             This test is for people without symptoms who are approved to work on campus or
@@ -43,6 +36,10 @@ export default class About extends Component {
           <p>
             Enrollment occurs on this website (<a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>). You will need to log in with
             your CalNet ID and answer a few questions.
+            If you are a UC Berkeley employee, log in with your CalNet ID. If
+            you are a contractor, or other individual approved for regular work on the UC Berkeley
+            campus, please email <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a> to check your eligibility and get log in
+            information.
           </p>
           <p className='lead'><b>How do I schedule my tests?</b></p>
           <p>
@@ -65,6 +62,12 @@ export default class About extends Component {
             protects against the spread of COVID-19 within the on-campus population during the
             pandemic. Your participation in other studies does not preclude you from participating in
             this one.
+          </p>
+          <p>
+            The IGI FAST Study has partnered with the UC Berkeley School of Public Health <a href='https://safecampus.covid.berkeley.edu/'>Safe Campus Study</a>. 
+            If you are enrolled in both studies and give us specific permission, we will
+            send your results to the Safe Campus Study to help make a more comprehensive dataset
+            for the researchers.
           </p>
           <p className='lead'><b>What do I need for my appointment?</b></p>
           <ul>
@@ -131,6 +134,13 @@ export default class About extends Component {
               throughout the day and by person-to-person. You do not need to feel rushed at
               any point.
             </li>
+            <li>
+              The IGI SARS-CoV-2 testing lab has observed that coffee, even when consumed
+              long before specimen collection, interferes with the detection of viral RNA in the
+              laboratory test. We advise to avoid consuming coffee within several hours of your
+              test and washing your mouth with water after consumption of coffee (more than
+              30 minutes prior to the appointment).
+            </li>
           </ul>
           <p className='lead'><b>What kind of test is this?</b></p>
           <p>
@@ -150,9 +160,11 @@ export default class About extends Component {
           <p>
             Please see <Link to='/accessing-results'>igi-fast.berkeley.edu/accessing-results</Link> for instructions on how to access
             your results through the secure messaging service we use, Virtru.
-
+          </p>
+          <p className='lead'><b>What do my results mean?</b></p>
+          <p>
             The test you are getting through this study has not yet received FDA approval for use.
-            Because of this, any positive or inconclusive results must be confirmed by an FDA-
+            Because of this, any <b>positive</b> or <b>inconclusive</b> results must be confirmed by an FDA-
             authorized test. If SARS-CoV-2, the virus causing COVID-19, is detected in your sample
             or the test result is inconclusive, you will be contacted via both phone call and encrypted
             email by the study clinician, who will give you this information, recommend that you self-
@@ -160,13 +172,24 @@ export default class About extends Component {
             Health Services.
           </p>
           <p>
-            If SARS-CoV-2 is not detected in your sample, you will be notified via encrypted email
+            If SARS-CoV-2 is <b>not detected</b> in your sample, you will be notified via encrypted email
             only. Remember that this test is experimental and we cannot guarantee that an
             individual with a negative test result is truly negative for SARS-CoV-2. You should take
             this result with caution, continue to monitor yourself for symptoms, maintain social
             distancing, wear a mask or face covering any time you are outside or on campus
             (including inside campus buildings), and complete the campus screening questionnaire
             before coming to work.
+          </p>
+          <p>
+            Sometimes a test is returned from the lab with a “<b>specimen insufficient</b>” or “<b>invalid</b>” note.
+            This means that some characteristic of the sample interfered with the lab’s ability to
+            extract and measure viral RNA, the kind of molecule measured to detect SARS-CoV-2
+            with this test. This note is different from an inconclusive result. While an insufficient or
+            invalid note indicates that there was an issue with the sample, an inconclusive result
+            indicates that viral RNA was successfully extracted and some signal associated with
+            SARS-CoV-2 was detected but did not reach the threshold necessary to label the sample
+            as positive. This is why an inconclusive result necessitates confirmatory clinical testing
+            while an insufficient or invalid result does not.
           </p>
           <p>
             No results from this study will enter into your medical record.

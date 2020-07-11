@@ -44,6 +44,7 @@
     "qrcode": "^1.4.4",
     "sequelize": "^5.21.12",
     "short-uuid": "^3.1.1",
+    "tiny-uid": "^1.1.1",
     "twilio": "^3.44.0",
     "umzug": "^2.3.0",
     "xml2js": "^0.4.23"

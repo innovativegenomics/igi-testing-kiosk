@@ -730,7 +730,7 @@ router.get('/study/participantinfo', cas.block, async (request, response) => {
     let parsed = `calnetid,patientid,firstname,middlename,lastname,email,phone,dob,sex,pbuilding,datejoined,street,city,state,county,zip,completedappts,consent1,consent2,consent3,consent4`;
     pino.debug(users[0]);
     users.forEach(v => {
-      parsed += `\n"${v.calnetid}","${v.patientid}","${v.firstname}","${v.middlename}","${v.lastname}","${v.email}","${v.phone}","${v.dob}","${v.sex}","${v.pbuilding}","${v.datejoined}","${v.street}","${v.city}","${v.state}","${v.county}","${v.zip}","${v.dataValues.completedappts}","${v.questions[0]}","${v.questions[1]}","${v.questions[2]}","${v.questions[3]}"`;
+      parsed += `\n"${v.calnetid}","${v.patientid}","${v.firstname}","${v.middlename}","${v.lastname}","${v.email}","${v.phone}","${v.dob}","${v.sex}","${v.pbuilding}","${v.datejoined}","${v.street}","${v.city}","${v.state}","${v.county}","${v.zip}","${v.dataValues.completedappts}","${v.questions[0]}","${v.questions[1]}","${v.questions[2]}","${v.questions[3]}","${v.questions[4]||'NA'}"`;
     });
     response.setHeader('Content-Disposition', contentDisposition(`participantinfo_${moment().format('M_DD_YYYY')}.csv`));
     response.setHeader('Content-Type', 'text/csv');

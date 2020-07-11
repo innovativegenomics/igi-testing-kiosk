@@ -262,7 +262,7 @@ export default class NewUser extends Component {
       unauthed: false,
       success: false,
       showTerms: true,
-      questions: [null, null, null, null],
+      questions: [true, true, true, true, null],
       showNoReturnError: false,
       showConsentError: false,
       canReturn: false,
