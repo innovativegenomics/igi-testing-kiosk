@@ -11,17 +11,26 @@ const users = require('./routes/api/users');
 const slots = require('./routes/api/slots');
 const admin = require('./routes/api/admin');
 const emails = require('./routes/api/emails');
+const slack = require('./routes/api/slack');
 
 const { verifyTasks, scheduleRescheduleUsers } = require('./scheduler');
 
 const app = express();
+
+const rawBodySaver = (req, res, buf, encoding) => {
+  if (buf && buf.length) {
+    req.rawBody = buf.toString(encoding || 'utf8');
+  }
+}
+
 // Bodyparser middleware
 app.use(
   bodyParser.urlencoded({
+    verify: rawBodySaver,
     extended: false
   })
 );
-app.use(bodyParser.json());
+app.use(bodyParser.json({verify: rawBodySaver}));
 app.use(expressPino);
 
 app.disable('x-powered-by');
@@ -55,6 +64,7 @@ module.exports = (async () => {
     app.use('/api/slots', slots);
     app.use('/api/admin', admin);
     app.use('/api/emails', emails);
+    app.use('/api/slack', slack)
     return app;
   } catch (err) {
     pino.fatal('Database initialization error!');
