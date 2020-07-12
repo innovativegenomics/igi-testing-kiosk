@@ -3,7 +3,6 @@ import { Redirect } from 'react-router-dom';
 import { Modal, Button, ButtonGroup, Row, Col, Form, Spinner } from 'react-bootstrap';
 import moment from 'moment';
 
-import { getUser } from '../../actions/authActions';
 import { getAvailable, requestSlot, reserveSlot, deleteReservedSlot } from '../../actions/slotActions';
 
 import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
@@ -235,12 +234,6 @@ export default class Scheduler extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      auth: {
-        user: {},
-        loaded: false,
-        unauthed: false,
-        success: false
-      },
       schedule: {
         available: {},
         success: false,
@@ -257,7 +250,6 @@ export default class Scheduler extends Component {
     };
   }
   componentDidMount() {
-    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
     getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true }, location: Object.keys(res.available)[0] }));
   }
   handleRequest = async selected => {
@@ -295,15 +287,15 @@ export default class Scheduler extends Component {
     if (this.state.success) {
       return <Redirect to='/dashboard' />;
     }
-    if (!this.state.auth.loaded) {
+    if (!this.props.auth.loaded) {
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
         </div>
       );
-    } else if (this.state.auth.unauthed) {
+    } else if (this.props.auth.unauthed) {
       return <Redirect to='/' />;
-    } else if (!this.state.auth.success) {
+    } else if (!this.props.auth.success) {
       return <Redirect to='/newuser' />;
     } else if (!this.state.schedule.loaded) {
       return (

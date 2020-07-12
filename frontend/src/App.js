@@ -12,6 +12,7 @@ import AccessingResults from './components/public/accessing-results.component';
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
+import Reconsent from './components/private/reconsent.component';
 
 import Admin from './components/admin/admin.component';
 
@@ -21,12 +22,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle';
 import './App.css';
 
-import withTracker from './withTracker';
+import { withTracker } from './tracker';
 
 const trackingId = 'UA-170146726-1'; // Replace with your Google Analytics tracking ID
 ReactGA.initialize(trackingId, {
   gaOptions: {
-    siteSpeedSampleRate: 100,
+    siteSpeedSampleRate: 100, // record everything
   }
 });
 
@@ -37,7 +38,7 @@ export default class App extends Component {
       auth: {
         user: {},
         loaded: false,
-        unauthed: true,
+        unauthed: false,
         success: false
       },
     };
@@ -49,8 +50,20 @@ export default class App extends Component {
     this.newUser = withTracker(NewUser);
     this.dashboard = withTracker(Dashboard);
     this.scheduler = withTracker(Scheduler);
+    this.reconsent = withTracker(Reconsent);
 
     this.admin = withTracker(Admin);
+  }
+  updateUser = values => {
+    this.setState({
+      auth: {
+        ...this.state.auth,
+        user: {
+          ...this.state.auth.user,
+          ...values
+        }
+      }
+    })
   }
   componentDidMount() {
     getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
@@ -59,18 +72,37 @@ export default class App extends Component {
     return (
         <Router>
           <div className='App'>
-            <Navigation authed={!this.state.auth.unauthed} />
+            <Navigation authed={!this.state.auth.unauthed && this.state.auth.loaded} />
 
-            <Route path='/' exact component={this.landing} />
-            <Route path='/about' component={this.about} />
-            <Route path='/qrcode' component={this.qrcode} />
-            <Route path='/accessing-results' component={this.accessingResults}/>
+            <Route path='/' exact render={props => (
+              <this.landing {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/about' render={props => (
+              <this.about {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/qrcode' render={props => (
+              <this.qrcode {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/accessing-results' render={props => (
+              <this.accessingResults {...props} auth={this.state.auth} />
+            )} />
 
-            <Route path='/newuser' component={this.newUser} />
-            <Route path='/dashboard' component={this.dashboard} />
-            <Route path='/scheduler' component={this.scheduler} />
+            <Route path='/newuser' render={props => (
+              <this.newUser {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/dashboard' render={props => (
+              <this.dashboard {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/scheduler' render={props => (
+              <this.scheduler {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/reconsent' render={props => (
+              <this.reconsent {...props} auth={this.state.auth} updateUser={this.updateUser} />
+            )} />
             
-            <Route path='/admin' component={this.admin} />
+            <Route path='/admin' render={props => (
+              <this.admin {...props} auth={this.state.auth} />
+            )} />
 
             <Footer/>
           </div>

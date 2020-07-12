@@ -9,6 +9,7 @@ const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
 const { scheduleSignupEmail } = require('../../scheduler');
+const { UserList } = require('twilio/lib/rest/chat/v1/service/user');
 
 /**
  * Logs in existing and new users
@@ -72,7 +73,9 @@ router.get('/profile', cas.block, async (request, response) => {
       'lastname',
       'email',
       'phone',
-      'calnetid'], where: { calnetid: calnetid }
+      'calnetid',
+      'questions',
+      'reconsented'], where: { calnetid: calnetid }
   });
   if (profile) {
     response.send({ success: true, user: profile });
@@ -213,6 +216,28 @@ router.post('/profile', cas.block, async (request, response) => {
       pino.error(err);
       await t2.rollback();
     }
+  }
+});
+
+router.post('/reconsent', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  try {
+    const user = await User.findOne({
+      where: {
+        calnetid: calnetid
+      }
+    });
+    if(user.reconsented) {
+      throw new Error('User already reconsented');
+    }
+    user.questions = request.body.questions;
+    user.reconsented = true;
+    await user.save();
+    response.send({success: true});
+  } catch(err) {
+    pino.error(`Can't reconsent user ${calnetid}`);
+    pino.error(err);
+    response.send({success: false});
   }
 });
 

@@ -1,21 +1,15 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import { Row, Col, Alert, Spinner } from 'react-bootstrap';
+import { Row, Col, Alert, Spinner, Button } from 'react-bootstrap';
+import { BsFillInfoCircleFill } from 'react-icons/bs';
 import moment from 'moment';
 
-import { getUser } from '../../actions/authActions';
 import { getSlot, cancelSlot } from '../../actions/slotActions';
 
 export default class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      auth: {
-        user: {},
-        loaded: false,
-        unauthed: false,
-        success: false
-      },
       slot: {
         slot: {},
         success: false,
@@ -35,19 +29,18 @@ export default class Dashboard extends Component {
     });
   }
   componentDidMount() {
-    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
     getSlot().then(res => this.setState({ slot: { ...res, loaded: true } }));
   }
   render() {
-    if (!this.state.auth.loaded) {
+    if (!this.props.auth.loaded) {
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
         </div>
       );
-    } else if (this.state.auth.unauthed) {
+    } else if (this.props.auth.unauthed) {
       return <Redirect to='/' />;
-    } else if (!this.state.auth.success) {
+    } else if (!this.props.auth.success) {
       return <Redirect to='/newuser' />;
     } else if (!this.state.slot.loaded) {
       return (
@@ -83,6 +76,22 @@ export default class Dashboard extends Component {
               <button className={`btn btn-outline-danger btn-lg ${!!this.state.slot.slot.location && !this.state.slot.slot.completed ? '' : 'd-none'}`} onClick={this.requestCancel}>Cancel Appointment</button>
             </div>
           </div>
+          {this.props.auth.user.reconsented?
+            undefined
+            :
+            <Row className='justify-content-center'>
+              <Col className='text-center' md='6'>
+                <Alert variant='info' md={2} className='text-left'>
+                  <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
+                  <p className='text-center'>
+                    We have updated the terms of our study. If you would like, you can review the new study informed 
+                    consent, and update the answers to the questions you answered when you first signed up.
+                  </p>
+                </Alert>
+                <Button variant='outline-info' size='lg' onClick={e => this.props.history.push('/reconsent')}>View updated study consent</Button>
+              </Col>
+            </Row>
+          }
           <div className={'row justify-content-center '+(this.state.slot.slot.completed?'':'d-none')}>
             <div className='col col-md-6'>
               <p className='lead alert alert-info text-center'>

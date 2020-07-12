@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 
+import { TrackedLink } from '../../tracker';
+
 import unlockMessage from '../../media/accessing-results/unlockMessage.png';
 import confirmEmail from '../../media/accessing-results/confirmEmail.png';
 import useAnotherEmail from '../../media/accessing-results/useAnotherEmail.png';
@@ -18,7 +20,7 @@ export default class AccessingResults extends Component {
           <p className='display-4 text-center'>Accessing Results</p>
           <p>
             All results will be sent to the email you used to register for this study using Virtru encryption.
-            Please make sure to look for emails from <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a> with the subject line “Your IGI
+            Please make sure to look for emails from <TrackedLink ext to='mailto:igi-fast@berkeley.edu' label='accessing-results email 1'>igi-fast@berkeley.edu</TrackedLink> with the subject line “Your IGI
             FAST Study Result” each week you get tested.
           </p>
           <p>
@@ -112,7 +114,7 @@ export default class AccessingResults extends Component {
             results. You can also reply to us through the encrypted service in this window.
           </p>
           <p>
-            For more details on using Virtru to get these results, please see <a href='https://support.virtru.com/hc/en-us/articles/115012284147'>https://support.virtru.com/hc/en-us/articles/115012284147</a>.
+            For more details on using Virtru to get these results, please see <TrackedLink ext to='https://support.virtru.com/hc/en-us/articles/115012284147' label='virtru support'>https://support.virtru.com/hc/en-us/articles/115012284147</TrackedLink>.
           </p>
           <p>
             The test you are getting through this study has not yet received FDA approval for use. Because of this,
@@ -135,7 +137,7 @@ export default class AccessingResults extends Component {
           </p>
           <p>
             If you have issues accessing your results through the protocol listed here, please contact the study
-            coordinator at <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a>.
+            coordinator at <TrackedLink ext to='mailto:igi-fast@berkeley.edu' label='accessing-results email 2'>igi-fast@berkeley.edu</TrackedLink>.
           </p>
         </Container>
       </div>
