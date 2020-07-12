@@ -2,7 +2,7 @@ module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
   const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
   const short = require('short-uuid');
-  const sendEmail = require('../email');
+  const { sendRawEmail } = require('../email');
 
   const { Pool } = require('pg');
   const env = process.env.NODE_ENV || 'development';
@@ -36,8 +36,9 @@ module.exports = async (payload, helpers) => {
     });
     const beginning = moment().startOf('week');
     const promises = [];
-    let promiseChain = Promise.resolve();
-    expired.forEach(user => {
+    let emails = [];
+    let promiseChain = Promise.resolve(0);
+    expired.forEach((user, i) => {
       promises.push((async () => {
         if(user.Slots[0].location) {
           await user.createSlot({
@@ -52,23 +53,62 @@ module.exports = async (payload, helpers) => {
             uid: short().new()
           }, {transaction: t});
         }
-        promiseChain = promiseChain.then(async r => {
-          try {
-            const nextDate = (user.Slots[0].location?beginning.clone().add(1, 'week').format('dddd, MMMM D'):beginning.format('dddd, MMMM D'));
-            const success = await sendEmail(user.email,
-              `IGI FAST - Appointment Available Week of ${nextDate}`,
-              `<h3>New testing appointment available for you during the week of ${nextDate}</h3>
-              <p>You can schedule a specific time and location on our website <a href='${config.host}'>${config.host}</a>.</p>`);
-            if(!success) {
-              throw new Error('unsuccessful email');
-            }
-          } catch(err) {
-            pino.warn(`error sending reschedule email to user ${user.calnetid} with email ${user.email}`);
-            pino.warn(err);
-          }
-        });
       })());
+      emails.push(user.email);
+      if(emails.length%100===0) {
+        const tmpEmails = [...emails];
+        promiseChain = promiseChain.then(async () => {
+          try {
+            // send email
+            const message = {
+              to: 'igi-fast@berkeley.edu',
+              from: 'IGI FAST <igi-fast@berkeley.edu>',
+              bcc: tmpEmails,
+              subject: 'IGI FAST - New Appointments Open',
+              html: `
+              <h3>New testing appointment dates have opened for you!</h3>
+              <p>You can view and schedule your new appointment at our website <a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>.</p>
+              `
+            }
+            await sendRawEmail(message);
+          } catch(err) {
+            pino.error('failed to send email to users');
+            pino.error(err);
+            pino.info({emails: emails});
+          }
+        }).then(() => {
+          return new Promise((resolve) => {
+            window.setTimeout(() => {
+              resolve();
+            }, 5000);
+          });
+        });
+        emails = [];
+      }
     });
+    if(emails.length > 0) {
+      const tmpEmails = [...emails];
+      promiseChain = promiseChain.then(async () => {
+        try {
+          // send email
+          const message = {
+            to: 'igi-fast@berkeley.edu',
+            from: 'IGI FAST <igi-fast@berkeley.edu>',
+            bcc: tmpEmails,
+            subject: 'IGI FAST - New Appointments Open',
+            html: `
+            <h3>New testing appointment dates have opened for you!</h3>
+            <p>You can view and schedule your new appointment at our website <a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>.</p>
+            `
+          }
+          await sendRawEmail(message);
+        } catch(err) {
+          pino.error('failed to send email to users');
+          pino.error(err);
+          pino.info({emails: emails});
+        }
+      });
+    }
     await Promise.all(promises);
     await promiseChain;
     await t.commit();

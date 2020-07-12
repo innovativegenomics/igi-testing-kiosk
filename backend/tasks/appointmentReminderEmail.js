@@ -1,7 +1,7 @@
 module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
   const moment = require('moment');
-  const sendEmail = require('../email');
+  const { sendEmail } = require('../email');
 
   const { email, time } = payload;
   await sendEmail(email,

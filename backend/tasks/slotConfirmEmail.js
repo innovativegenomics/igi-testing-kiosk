@@ -1,6 +1,6 @@
 module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
-  const sendEmail = require('../email');
+  const { sendEmail } = require('../email');
   const qrcode = require('qrcode');
 
   const config = require('../config/keys');
