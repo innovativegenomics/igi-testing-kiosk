@@ -9,14 +9,18 @@ const { Sequelize, sequelize, Admin, Slot, User, Day, Settings } = require('../.
 const Op = Sequelize.Op;
 
 const verifySignature = req => {
-  const signature = req.headers['x-slack-signature'];
-  const timestamp = req.headers['x-slack-request-timestamp'];
-  const hmac = crypto.createHmac('sha256', process.env.SLACK_SIGNING_SECRET);
-  const [version, hash] = signature.split('=');
+  try {
+    const signature = req.headers['x-slack-signature'];
+    const timestamp = req.headers['x-slack-request-timestamp'];
+    const hmac = crypto.createHmac('sha256', process.env.SLACK_SIGNING_SECRET);
+    const [version, hash] = signature.split('=');
 
-  hmac.update(`${version}:${timestamp}:${req.rawBody}`);
+    hmac.update(`${version}:${timestamp}:${req.rawBody}`);
 
-  return hmac.digest('hex') === hash;
+    return hmac.digest('hex') === hash;
+  } catch(err) {
+    return false;
+  }
 };
 
 router.post('/participants', async (request, response) => {
