@@ -102,6 +102,44 @@ router.post('/appointments', async (request, response) => {
       }
       if(data.toLowerCase().includes('week of')) {
         const mmt = moment(date).startOf('week');
+        const days = await Day.find({
+          where: {
+            date: {
+              [Op.gte]: mmt.toDate(),
+              [Op.lt]: mmt.clone().add(1, 'week').toDate()
+            }
+          }
+        });
+        let total = 0;
+        days.forEach(v => {
+          total += v.buffer * parseInt(moment.duration({hours: v.endhour-v.starthour, minutes: v.endminute-v.startminute}).asMinutes()/v.window);
+        });
+        const count = await Slot.count({
+          where: {
+            time: {
+              [Op.between]: [mmt.toDate(), mmt.clone().add(1, 'week').toDate()]
+            }
+          }
+        });
+        response.send({
+          response_type: 'in_channel',
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `There are ${count} appointments scheduled for the week of ${mmt.format('MMMM Do')} out of ${total} available for that week.`
+              }
+            },
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `The days available that week are ${days.map(v => moment(v.date).format('MMMM Do')).join(', ')}`
+              }
+            }
+          ]
+        });
         response.send(200);
       } else {
         const mmt = moment(date).startOf('day');
@@ -118,7 +156,7 @@ router.post('/appointments', async (request, response) => {
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: `Uh oh, it looks like the day you provided isn't open for appointments!`
+                  text: `Uh oh, it looks like ${mmt.format('MMMM Do')} isn't open for appointments!`
                 }
               }
             ]
