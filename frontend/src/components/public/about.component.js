@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import { Container } from 'react-bootstrap';
 
+import { TrackedLink } from '../../tracker';
+
 export default class About extends Component {
   render() {
     return (
@@ -9,9 +11,9 @@ export default class About extends Component {
         <Container>
           <p className='display-4 text-center'>IGI FAST: Free Asymptomatic Saliva Testing</p>
           <ul>
-            <li><a href={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`}>IGI FAST Bill of Rights</a> - <a href={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`}>English</a>, <a href={`${process.env.PUBLIC_URL}/pdfs/billOfRightsSpanish.pdf`}>Español</a></li>
-            <li><a href={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`}>IGI FAST Info Sheet</a> - <a href={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`}>English</a>, <a href={`${process.env.PUBLIC_URL}/pdfs/infoSheetSpanish.pdf`}>Español</a></li>
-            <li><a href={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`}>IGI FAST Informed Consent</a> - <a href={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`}>English</a>, <a href={`${process.env.PUBLIC_URL}/pdfs/informedConsentSpanish.pdf`}>Español</a></li>
+            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`} label='bill of rights english 1'>IGI FAST Bill of Rights</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`} label='bill of rights english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsSpanish.pdf`} label='bill of rights spanish 1'>Español</TrackedLink></li>
+            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`} label='info sheet english 1'>IGI FAST Info Sheet</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`} label='info sheet english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetSpanish.pdf`} label='info sheet spanish 1'>Español</TrackedLink></li>
+            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`} label='informed consent english 1'>IGI FAST Informed Consent</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`} label='informed consent english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentSpanish.pdf`} label='informed consent spanish 1'>Español</TrackedLink></li>
           </ul>
           <p>
             Community spread of COVID-19 is likely exacerbated by transmission from people who
@@ -24,26 +26,26 @@ export default class About extends Component {
           <p>
             This test is for people without symptoms who are approved to work on campus or
             campus satellite locations. If you do not pass the campus screener the day of an
-            appointment, please do not come to campus, cancel your appointment, and visit <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a> for guidance. 
+            appointment, please do not come to campus, cancel your appointment, and visit <TrackedLink ext to='https://uhs.berkeley.edu/coronavirus-covid-19-information' label='uhs guidance'>https://uhs.berkeley.edu/coronavirus-covid-19-information</TrackedLink> for guidance. 
             Additionally, if you are concerned 
             that you may have been exposed to someone with COVID-19, contact UHS.
           </p>
           <p>
-            For more information and to enroll, see <a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a> or contact the study
-            coordinator at <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a>.
+            For more information and to enroll, see <TrackedLink ext to='https://igi-fast.berkeley.edu' label='fast home 1'>igi-fast.berkeley.edu</TrackedLink> or contact the study
+            coordinator at <TrackedLink ext to='mailto:igi-fast@berkeley.edu' label='igi email 1'>igi-fast@berkeley.edu</TrackedLink>.
           </p>
           <p className='lead'><b>How do I enroll?</b></p>
           <p>
-            Enrollment occurs on this website (<a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>). You will need to log in with
+            Enrollment occurs on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' label='fast home 1'>igi-fast.berkeley.edu</TrackedLink>). You will need to log in with
             your CalNet ID and answer a few questions.
             If you are a UC Berkeley employee, log in with your CalNet ID. If
             you are a contractor, or other individual approved for regular work on the UC Berkeley
-            campus, please email <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a> to check your eligibility and get log in
+            campus, please email <TrackedLink ext to='mailto:igi-fast@berkeley.edu' label='igi email 2'>igi-fast@berkeley.edu</TrackedLink> to check your eligibility and get log in
             information.
           </p>
           <p className='lead'><b>How do I schedule my tests?</b></p>
           <p>
-            All test scheduling will be done on this website (<a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>). You will be
+            All test scheduling will be done on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' label='fast home 2'>igi-fast.berkeley.edu</TrackedLink>). You will be
             assigned to a regular testing schedule and will receive emails every-other week inviting
             you to schedule your next test day, time, and location. You will need to answer a few
             questions when making each appointment.
@@ -64,7 +66,7 @@ export default class About extends Component {
             this one.
           </p>
           <p>
-            The IGI FAST Study has partnered with the UC Berkeley School of Public Health <a href='https://safecampus.covid.berkeley.edu/'>Safe Campus Study</a>. 
+            The IGI FAST Study has partnered with the UC Berkeley School of Public Health <TrackedLink ext to='https://safecampus.covid.berkeley.edu/'>Safe Campus Study</TrackedLink>. 
             If you are enrolled in both studies and give us specific permission, we will
             send your results to the Safe Campus Study to help make a more comprehensive dataset
             for the researchers.
@@ -77,9 +79,9 @@ export default class About extends Component {
             </li>
             <li>
               Campus clearance message - As with all campus activities, you must complete
-              the <a href='https://calberkeley.ca1.qualtrics.com/jfe/form/SV_3xTgcs162K19qRv'>campus symptom screener</a> before coming to campus. You will be asked to present
+              the <TrackedLink ext to='https://calberkeley.ca1.qualtrics.com/jfe/form/SV_3xTgcs162K19qRv'>campus symptom screener</TrackedLink> before coming to campus. You will be asked to present
               the clearance message at the testing kiosk. If you do not pass this screener (i.e. you
-              have symptoms), you should not come to a kiosk for testing and visit <a href='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</a> for guidance.
+              have symptoms), you should not come to a kiosk for testing and visit <TrackedLink ext to='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</TrackedLink> for guidance.
             </li>
             <li>
               Eating and drinking - Do not eat or drink anything (even water), do not chew gum, and
@@ -96,7 +98,7 @@ export default class About extends Component {
           </p>
           <p>
             If you are concerned about being able to perform the procedure due to disability or other
-            physical limitations, please contact the study coordinator at <a href='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</a> as
+            physical limitations, please contact the study coordinator at <TrackedLink ext to='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</TrackedLink> as
             soon as possible.
           </p>
           <p className='lead'><b>How do I give a high-quality saliva sample?</b></p>
@@ -154,11 +156,11 @@ export default class About extends Component {
             The procedure the lab will use for your saliva sample is based on a clinical diagnostic
             test for COVID-19 that measures whether SARS-CoV-2 is present in respiratory swabs
             instead of spit. If you are interested in the details of this protocol, please see our peer-
-            reviewed correspondence, published in <a href='https://www.nature.com/articles/s41587-020-0583-3'>Nature Biotechnology</a>.
+            reviewed correspondence, published in <TrackedLink ext to='https://www.nature.com/articles/s41587-020-0583-3'>Nature Biotechnology</TrackedLink>.
           </p>
           <p className='lead'><b>How will I get my results?</b></p>
           <p>
-            Please see <Link to='/accessing-results'>igi-fast.berkeley.edu/accessing-results</Link> for instructions on how to access
+            Please see <TrackedLink to='/accessing-results'>igi-fast.berkeley.edu/accessing-results</TrackedLink> for instructions on how to access
             your results through the secure messaging service we use, Virtru.
           </p>
           <p className='lead'><b>What do my results mean?</b></p>

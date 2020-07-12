@@ -53,7 +53,7 @@ export const TrackedButton = props => {
       label: props.label,
       value: props.value,
     });
-    return props.onClick(e);
+    return (props.onClick||(u => undefined))(e);
   }}/>
 }
 
@@ -84,7 +84,7 @@ export const TrackedLink = props => {
       action: props.to,
       label: props.label
     });
-    return props.onClick(e);
+    return (props.onClick||(u => undefined))(e);
   }}/>;
 }
 
