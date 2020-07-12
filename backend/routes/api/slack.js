@@ -4,6 +4,8 @@ const express = require('express');
 const router = express.Router();
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const crypto = require('crypto');
+const moment = require('moment');
+const chrono = require('chrono-node');
 
 const { Sequelize, sequelize, Admin, Slot, User, Day, Settings } = require('../../models');
 const Op = Sequelize.Op;
@@ -57,6 +59,81 @@ router.post('/participants', async (request, response) => {
     }
   } else {
     console.log('not verified')
+    response.send(401);
+  }
+});
+
+router.post('/appointments', async (request, response) => {
+  pino.info('slack appointments request');
+  if(verifySignature(request)) {
+    pino.info('slack appointments signature verified');
+    try {
+      const data = request.body.text;
+      const date = chrono.casual.parseDate(data);
+      if(!date) {
+        response.send({
+          response_type: 'ephemeral',
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `Uh oh, it looks like you entered an invalid date! Try typing \`/appointments help\` for help.`
+              }
+            }
+          ]
+        });
+        return;
+      }
+      if(data.toLowerCase().includes('week of')) {
+        const mmt = moment(date).startOf('week');
+        response.send(200);
+      } else {
+        const mmt = moment(date).startOf('day');
+        const day = await Day.findOne({
+          where: {
+            date: mmt.toDate()
+          }
+        });
+        const count = await Slot.count({
+          where: {
+            time: {
+              [Op.between]: [mmt.toDate(), mmt.clone().add(1, 'day').toDate()]
+            }
+          }
+        });
+        const total = day.buffer * parseInt(moment.duration({hours: day.endhour-day.starthour, minutes: day.endminute-day.startminute}).asMinutes()/day.window);
+        response.send({
+          response_type: 'in_channel',
+          blocks: [
+            {
+              type: 'section',
+              text: {
+                type: 'mrkdwn',
+                text: `There are ${count} appointments scheduled for ${mmt.format('MMMM Do')} out of ${total} available for that day`
+              }
+            }
+          ]
+        });
+      }
+    } catch(err) {
+      pino.error(`error getting appointments for slack bot`);
+      pino.error(err);
+      response.send({
+        response_type: 'ephemeral',
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `Uh oh! There was a problem with the command. Please try again...`
+            }
+          }
+        ]
+      });
+    }
+  } else {
+    pino.error('not verified');
     response.send(401);
   }
 });

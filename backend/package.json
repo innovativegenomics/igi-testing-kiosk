@@ -25,6 +25,7 @@
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
     "cas-authentication": "0.0.8",
+    "chrono-node": "^1.4.8",
     "connect-pg-simple": "^6.1.0",
     "content-disposition": "^0.5.3",
     "dotenv": "^8.2.0",
