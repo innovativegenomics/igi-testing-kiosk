@@ -111,13 +111,22 @@ router.post('/appointments', async (request, response) => {
           }
         });
         let total = 0;
-        days.forEach(v => {
+        let daysReadable = '';
+        days.forEach((v, i) => {
           total += v.buffer * parseInt(moment.duration({hours: v.endhour-v.starthour, minutes: v.endminute-v.startminute}).asMinutes()/v.window);
+          if(i+2 === days.length) {
+            daysReadable += `${moment(v.date).format('MMMM Do')} and `;
+          } else if(i+1 === days.length) {
+            daysReadable += `${moment(v.date).format('MMMM Do')}`;
+          } else {
+            daysReadable += `${moment(v.date).format('MMMM Do')}, `;
+          }
         });
         const count = await Slot.count({
           where: {
             time: {
-              [Op.between]: [mmt.toDate(), mmt.clone().add(1, 'week').toDate()]
+              [Op.gt]: mmt.toDate(),
+              [Op.lt]: mmt.clone().add(1, 'week').toDate()
             }
           }
         });
@@ -135,7 +144,7 @@ router.post('/appointments', async (request, response) => {
               type: 'section',
               text: {
                 type: 'mrkdwn',
-                text: `The days available that week are ${days.map(v => moment(v.date).format('MMMM Do')).join(', ')}`
+                text: `The days available that week are ${daysReadable}`
               }
             }
           ]
