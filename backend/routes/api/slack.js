@@ -67,6 +67,21 @@ router.post('/appointments', async (request, response) => {
   pino.info('slack appointments request');
   if(verifySignature(request)) {
     pino.info('slack appointments signature verified');
+    if(request.body.text === 'help') {
+      response.send({
+        response_type: 'ephemeral',
+        blocks: [
+          {
+            type: 'section',
+            text: {
+              type: 'mrkdwn',
+              text: `Try typing \`/appointments ${moment().format('MMMM Do')}\``
+            }
+          }
+        ]
+      });
+      return;
+    }
     try {
       const data = request.body.text;
       const date = chrono.casual.parseDate(data);
@@ -95,6 +110,21 @@ router.post('/appointments', async (request, response) => {
             date: mmt.toDate()
           }
         });
+        if(!day) {
+          response.send({
+            response_type: 'ephemeral',
+            blocks: [
+              {
+                type: 'section',
+                text: {
+                  type: 'mrkdwn',
+                  text: `Uh oh, it looks like the day you provided isn't open for appointments!`
+                }
+              }
+            ]
+          });
+          return;
+        }
         const count = await Slot.count({
           where: {
             time: {
