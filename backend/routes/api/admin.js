@@ -377,6 +377,37 @@ router.get('/stats/general/unscheduled', cas.block, async (request, response) =>
   }
 });
 
+router.get('/stats/general/reconsented', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  if(!!level && level >= 20) {
+    try {
+      const reCount = await User.count({
+        where: {
+          reconsented: true
+        },
+      });
+      const unreCount = await User.count({
+        where: {
+          reconsented: false
+        },
+      });
+      response.send({
+        success: true,
+        reconsented: reCount,
+        unreconsented: unreCount
+      });
+    } catch(err) {
+      pino.error(`error getting reconsented participants`);
+      pino.error(err);
+      response.send({success: false});
+    }
+  } else {
+    pino.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.get('/settings/day', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;

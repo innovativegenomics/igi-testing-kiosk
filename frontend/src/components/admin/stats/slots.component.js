@@ -86,20 +86,16 @@ export default class Slots extends Component {
       datasets: [
         {
           label: 'Number of scheduled appointments',
-          backgroundColor: 'rgba(220,53,69,0.2)',
-          borderColor: 'rgba(220,53,69,1)',
+          backgroundColor: 'Tomato',
           borderWidth: 1,
-          hoverBackgroundColor: 'rgba(220,53,69,0.4)',
-          hoverBorderColor: 'rgba(220,53,69,1)',
+          hoverBackgroundColor: 'Tomato',
           data: scheduledValues
         },
         {
           label: 'Number of completed appointments',
-          backgroundColor: 'rgba(0,123,255,0.2)',
-          borderColor: 'rgba(0,123,255,1)',
+          backgroundColor: 'DodgerBlue',
           borderWidth: 1,
-          hoverBackgroundColor: 'rgba(0,123,255,0.4)',
-          hoverBorderColor: 'rgba(0,123,255,1)',
+          hoverBackgroundColor: 'DodgerBlue',
           data: completedValues
         }
       ]

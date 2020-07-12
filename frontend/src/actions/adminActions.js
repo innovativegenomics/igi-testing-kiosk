@@ -110,6 +110,17 @@ export const getUnscheduledParticipantsStat = async () => {
   }
 }
 
+export const getReconsentedParticipantsStat = async () => {
+  try {
+    const response = await axios.get('/api/admin/stats/general/reconsented');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get reconsented participants`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 /**
  * returns array of day dates
  */

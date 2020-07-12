@@ -3,7 +3,7 @@ import { Card, Row, Col, Form, OverlayTrigger, Tooltip, Button, Spinner } from '
 import { BsArrowClockwise } from 'react-icons/bs';
 import { Doughnut } from 'react-chartjs-2';
 
-import { getScheduledParticipantsStat, getUnscheduledParticipantsStat } from '../../../actions/adminActions';
+import { getScheduledParticipantsStat, getUnscheduledParticipantsStat, getReconsentedParticipantsStat } from '../../../actions/adminActions';
 
 export default class Slots extends Component {
   constructor(props) {
@@ -12,42 +12,76 @@ export default class Slots extends Component {
       loading: false,
       scheduled: 0,
       unscheduled: 0,
+      reconsented: 0,
+      unreconsented: 0
     };
   }
   componentDidMount = async () => {
     this.setState({loading: true});
-    const [scheduled, unscheduled] = await Promise.all([getScheduledParticipantsStat(), getUnscheduledParticipantsStat()]);
+    const [scheduled, unscheduled, reconsented] = await Promise.all([getScheduledParticipantsStat(), getUnscheduledParticipantsStat(), getReconsentedParticipantsStat()]);
     this.setState({
       scheduled: scheduled.scheduled,
       unscheduled: unscheduled.unscheduled,
+      reconsented: reconsented.reconsented,
+      unreconsented: reconsented.unreconsented,
       loading: false
     });
   }
   refreshButton = async () => {
     this.setState({loading: true});
-    const [scheduled, unscheduled] = await Promise.all([getScheduledParticipantsStat(), getUnscheduledParticipantsStat()]);
+    const [scheduled, unscheduled, reconsented] = await Promise.all([getScheduledParticipantsStat(), getUnscheduledParticipantsStat(), getReconsentedParticipantsStat()]);
     this.setState({
       scheduled: scheduled.scheduled,
       unscheduled: unscheduled.unscheduled,
+      reconsented: reconsented.reconsented,
+      unreconsented: reconsented.unreconsented,
       loading: false
     });
   }
   render() {
+    const colors = {
+      red: ''
+    };
     const data = {
-      datasets: [{
-        data: [this.state.scheduled, this.state.unscheduled],
-        backgroundColor: [
-          'rgba(220,53,69,.6)',
-          'rgba(0,123,255,.6)'
-        ],
-        hoverBackgroundColor: [
-          'rgba(220,53,69,.8)',
-          'rgba(0,123,255,.8)'
-        ]
-      }],
+      datasets: [
+        {
+          data: [this.state.scheduled, this.state.unscheduled, 0, 0],
+          backgroundColor: [
+            'Tomato',
+            'DodgerBlue',
+            'MediumSeaGreen',
+            'Orange'
+          ],
+          hoverBackgroundColor: [
+            'Tomato',
+            'DodgerBlue',
+            'MediumSeaGreen',
+            'Orange'
+          ],
+          label: 'scheduled participants'
+        },
+        {
+          data: [0, 0, this.state.reconsented, this.state.unreconsented],
+          backgroundColor: [
+            'Tomato',
+            'DodgerBlue',
+            'MediumSeaGreen',
+            'Orange'
+          ],
+          hoverBackgroundColor: [
+            'Tomato',
+            'DodgerBlue',
+            'MediumSeaGreen',
+            'Orange'
+          ],
+          label: 'reconsented participants'
+        }
+      ],
       labels: [
         'Scheduled',
-        'Unscheduled'
+        'Unscheduled',
+        'Reconsented',
+        'Not Reconsented'
       ]
     };
 
