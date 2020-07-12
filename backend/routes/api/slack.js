@@ -102,7 +102,7 @@ router.post('/appointments', async (request, response) => {
       }
       if(data.toLowerCase().includes('week of')) {
         const mmt = moment(date).startOf('week');
-        const days = await Day.find({
+        const days = await Day.findAll({
           where: {
             date: {
               [Op.gte]: mmt.toDate(),
