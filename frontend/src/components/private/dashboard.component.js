@@ -79,7 +79,7 @@ export default class Dashboard extends Component {
           {this.props.auth.user.reconsented?
             undefined
             :
-            <Row className='justify-content-center'>
+            <Row className='justify-content-center mb-3'>
               <Col className='text-center' md='6'>
                 <Alert variant='info' md={2} className='text-left'>
                   <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
