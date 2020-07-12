@@ -78,7 +78,7 @@ module.exports = async (payload, helpers) => {
           }
         }).then(() => {
           return new Promise((resolve) => {
-            window.setTimeout(() => {
+            setTimeout(() => {
               resolve();
             }, 5000);
           });
