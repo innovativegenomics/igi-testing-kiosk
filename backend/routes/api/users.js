@@ -131,6 +131,7 @@ router.post('/profile', cas.block, async (request, response) => {
         email: request.body.email,
         phone: request.body.phone,
         questions: request.body.questions,
+        reconsented: true
       }, { transaction: t1 });
       const settings = await Settings.findOne({});
       // Figure out which week this person should be assigned to
