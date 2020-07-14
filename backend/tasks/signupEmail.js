@@ -1,5 +1,6 @@
 module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
+  const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
   const { sendEmail } = require('../email');
 
   const config = require('../config/keys');
@@ -72,5 +73,5 @@ message.
                       path: './media/IGI-FAST.png',
                       cid: 'logo',
                     }
-                  ]);
+                  ], pino);
 }

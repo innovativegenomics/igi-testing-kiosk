@@ -3,7 +3,7 @@ const router = express.Router();
 const moment = require('moment');
 const contentDisposition = require('content-disposition');
 const short = require('short-uuid');
-const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
+// const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const { Sequelize, sequelize, Admin, Slot, User, Day, Settings } = require('../../models');
 const Op = Sequelize.Op;
 
@@ -21,20 +21,20 @@ const { scheduleNewAdminEmail } = require('../../scheduler');
 router.get('/login', cas.bounce, async (request, response) => {
   const calnetid = request.session.cas_user;
   const uid = request.query.uid;
-  const t = await sequelize.transaction();
+  const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
-    const user = await Admin.findOne({where: {calnetid: calnetid}, transaction: t});
+    const user = await Admin.findOne({where: {calnetid: calnetid}, transaction: t, logging: (msg) => request.log.info(msg)});
     if(user) {
       request.session.usertype = 'admin';
       response.redirect('/admin/search');
     } else {
       if(!uid) {
-        request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for admin ${calnetid}`); pino.error(err)}});
+        request.session.destroy((err) => {if(err) {request.log.error(`Couldn't destroy session for admin ${calnetid}`); request.log.error(err)}});
         response.status(401).send('Unauthorized');
       } else {
-        const newuser = await Admin.findOne({where: {uid: uid}, transaction: t});
+        const newuser = await Admin.findOne({where: {uid: uid}, transaction: t, logging: (msg) => request.log.info(msg)});
         if(!newuser) {
-          request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for admin ${calnetid}`); pino.error(err)}});
+          request.session.destroy((err) => {if(err) {request.log.error(`Couldn't destroy session for admin ${calnetid}`); request.log.error(err)}});
           response.status(401).send('Unauthorized');
         } else {
           if(!newuser.calnetid) {
@@ -43,7 +43,7 @@ router.get('/login', cas.bounce, async (request, response) => {
             request.session.usertype='admin';
             response.redirect('/admin/dashboard');
           } else {
-            request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for admin ${calnetid}`); pino.error(err)}});
+            request.session.destroy((err) => {if(err) {request.log.error(`Couldn't destroy session for admin ${calnetid}`); request.log.error(err)}});
             response.status(401).send('Unauthorized');
           }
         }
@@ -51,8 +51,8 @@ router.get('/login', cas.bounce, async (request, response) => {
     }
     await t.commit();
   } catch(err) {
-    pino.error(`Could not login admin user ${calnetid} ${uid}`);
-    pino.error(err);
+    request.log.error(`Could not login admin user ${calnetid} ${uid}`);
+    request.log.error(err);
     await t.rollback();
     response.status(500).send();
   }
@@ -65,14 +65,15 @@ router.get('/logout', cas.logout);
 
 router.get('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 0) {
     try {
       const slot = await Slot.findOne({
         where: {
           uid: request.query.uid || ''
         },
-        include: User
+        include: User,
+        logging: (msg) => request.log.info(msg)
       });
       if(!slot) {
         response.send({success: false});
@@ -92,7 +93,7 @@ router.get('/slot', cas.block, async (request, response) => {
       response.status(500).send('Internal server error');
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
@@ -107,7 +108,7 @@ router.get('/slot', cas.block, async (request, response) => {
  */
 router.get('/search/slots', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 0) {
     const term = request.query.term || '';
     const perpage = parseInt(request.query.perpage);
@@ -147,7 +148,8 @@ router.get('/search/slots', cas.block, async (request, response) => {
         model: Slot,
         order: [['time', 'desc']],
         limit: 1,
-      }]
+      }],
+      logging: (msg) => request.log.info(msg)
     });
     const res = [];
     rows.forEach(v => {
@@ -162,7 +164,7 @@ router.get('/search/slots', cas.block, async (request, response) => {
     });
     response.send({success: true, results: res, count: count});
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
@@ -177,7 +179,7 @@ router.get('/search/slots', cas.block, async (request, response) => {
  */
 router.get('/search/participants', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     const term = request.query.term || '';
     const perpage = parseInt(request.query.perpage);
@@ -206,11 +208,12 @@ router.get('/search/participants', cas.block, async (request, response) => {
             [Op.iLike]: `${term}%`,
           },
         },
-      }
+      },
+      logging: (msg) => request.log.info(msg)
     });
     response.send({success: true, results: rows, count: count});
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
@@ -231,7 +234,7 @@ router.get('/search/participants', cas.block, async (request, response) => {
  */
 router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     const day = await Day.findOne({
       where: {
@@ -239,7 +242,8 @@ router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
           [Op.gte]: moment(request.query.day).startOf('day'),
           [Op.lt]: moment(request.query.day).startOf('day').add(1, 'day'),
         }
-      }
+      },
+      logging: (msg) => request.log.info(msg)
     });
     const starttime = moment(day.date).set('hour', day.starthour).set('minute', day.startminute);
     const endtime = moment(day.date).set('hour', day.endhour).set('minute', day.endminute);
@@ -257,17 +261,18 @@ router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
             [Op.not]: null
           },
           completed: null
-        }
+        },
+        logging: (msg) => request.log.info(msg)
       });
-      pino.debug(res);
+      request.log.debug(res);
       response.send({success: true, scheduled: res});
     } catch(err) {
-      pino.error(`Can't get scheduled slots`);
-      pino.error(err);
+      request.log.error(`Can't get scheduled slots`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
@@ -288,7 +293,7 @@ router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
  */
 router.get('/stats/slots/completed', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     const day = await Day.findOne({
       where: {
@@ -296,7 +301,8 @@ router.get('/stats/slots/completed', cas.block, async (request, response) => {
           [Op.gte]: moment(request.query.day).startOf('day'),
           [Op.lt]: moment(request.query.day).startOf('day').add(1, 'day'),
         }
-      }
+      },
+      logging: (msg) => request.log.info(msg)
     });
     const starttime = moment(day.date).set('hour', day.starthour).set('minute', day.startminute);
     const endtime = moment(day.date).set('hour', day.endhour).set('minute', day.endminute);
@@ -316,17 +322,18 @@ router.get('/stats/slots/completed', cas.block, async (request, response) => {
           completed: {
             [Op.not]: null
           }
-        }
+        },
+        logging: (msg) => request.log.info(msg)
       });
-      pino.debug(res);
+      request.log.debug(res);
       response.send({success: true, completed: res});
     } catch(err) {
-      pino.error(`Can't get completed slots`);
-      pino.error(err);
+      request.log.error(`Can't get completed slots`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
@@ -344,53 +351,56 @@ router.get('/stats/general/scheduled', cas.block, async (request, response) => {
         scheduled: count
       });
     } catch(err) {
-      pino.error(`error getting scheduled participants`);
-      pino.error(err);
+      request.log.error(`error getting scheduled participants`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.get('/stats/general/unscheduled', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     try {
       const count = await User.count({
-        where: sequelize.literal(`(select location from "Slots" as s where s.calnetid="User".calnetid order by time desc limit 1) is null`)
+        where: sequelize.literal(`(select location from "Slots" as s where s.calnetid="User".calnetid order by time desc limit 1) is null`),
+        logging: (msg) => request.log.info(msg)
       });
       response.send({
         success: true,
         unscheduled: count
       });
     } catch(err) {
-      pino.error(`error getting unscheduled participants`);
-      pino.error(err);
+      request.log.error(`error getting unscheduled participants`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.get('/stats/general/reconsented', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     try {
       const reCount = await User.count({
         where: {
           reconsented: true
         },
+        logging: (msg) => request.log.info(msg)
       });
       const unreCount = await User.count({
         where: {
           reconsented: false
         },
+        logging: (msg) => request.log.info(msg)
       });
       response.send({
         success: true,
@@ -398,43 +408,44 @@ router.get('/stats/general/reconsented', cas.block, async (request, response) =>
         unreconsented: unreCount
       });
     } catch(err) {
-      pino.error(`error getting reconsented participants`);
-      pino.error(err);
+      request.log.error(`error getting reconsented participants`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.get('/settings/day', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
-    pino.debug(request.query.day);
+    request.log.debug(request.query.day);
     const d = moment(request.query.day).startOf('day').toDate();
     try {
       const day = await Day.findOne({
         where: {
           date: d
-        }
+        },
+        logging: (msg) => request.log.info(msg)
       });
       response.send({success: true, day: day});
     } catch(err) {
-      pino.error(`Can't get day`);
-      pino.error(err);
+      request.log.error(`Can't get day`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.post('/settings/day', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     const starthour = parseInt(request.body.starthour);
     const startminute = parseInt(request.body.startminute);
@@ -452,136 +463,140 @@ router.post('/settings/day', cas.block, async (request, response) => {
         date: date,
         window: window,
         buffer: buffer,
-      });
+      }, {logging: (msg) => request.log.info(msg)});
       response.send({success: true});
     } catch(err) {
-      pino.error(`Can't post day`);
-      pino.error(err);
+      request.log.error(`Can't post day`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.delete('/settings/day', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     const id = request.query.id;
     try {
       const day = await Day.findOne({
         where: {
           id: id
-        }
+        },
+        logging: (msg) => request.log.info(msg)
       });
       await day.destroy();
       response.send({success: true});
     } catch(err) {
-      pino.error(`Can't delete day`);
-      pino.error(err);
+      request.log.error(`Can't delete day`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.get('/settings/days', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 0) {
     try {
       const days = await Day.findAll({
-        order: [['date', 'desc']]
+        order: [['date', 'desc']],
+        logging: (msg) => request.log.info(msg)
       });
       response.send({
         success: true,
         days: days
       });
     } catch(err) {
-      pino.error('error getting available days');
-      pino.error(err);
+      request.log.error('error getting available days');
+      request.log.error(err);
       response.send({
         success: false
       });
     }
   } else {
-    pino.info('unauthed');
+    request.log.info('unauthed');
     response.status(401).send('Unauthorized');
   }
 });
 
 router.post('/complete', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 10) {
-    const t = await sequelize.transaction();
+    const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
     try {
       const slot = await Slot.findOne({
         where: {
           uid: request.body.uid,
         },
         transaction: t,
+        logging: (msg) => request.log.info(msg)
       });
       slot.completed = moment().toDate();
       await slot.save();
       await t.commit();
       response.send({success: true});
     } catch(err) {
-      pino.error(`Error completing appointment for ${uid}`);
-      pino.error(err);
+      request.log.error(`Error completing appointment for ${request.body.uid}`);
+      request.log.error(err);
       await t.rollback();
       response.send({success: false});
     }
   } else {
-    pino.error(`Not authed`);
+    request.log.error(`Not authed`);
     response.status(401).send();
   }
 });
 
 router.post('/uncomplete', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 10) {
-    const t = await sequelize.transaction();
+    const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
     try {
       const slot = await Slot.findOne({
         where: {
           uid: request.body.uid,
         },
         transaction: t,
+        logging: (msg) => request.log.info(msg)
       });
       slot.completed = null;
       await slot.save();
       await t.commit();
       response.send({success: true});
     } catch(err) {
-      pino.error(`Error uncompleting appointment for ${uid}`);
-      pino.error(err);
+      request.log.error(`Error uncompleting appointment for ${request.body.uid}`);
+      request.log.error(err);
       await t.rollback();
       response.send({success: false});
     }
   } else {
-    pino.error(`Not authed`);
+    request.log.error(`Not authed`);
     response.status(401).send();
   }
 });
 
 router.get('/level', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   response.send({ success: true, level: level });
 });
 
 router.get('/admins', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     try {
-      const admins = (await Admin.findAll({where:{calnetid: {[Op.not]: null}}})).map(a => ({
+      const admins = (await Admin.findAll({where:{calnetid: {[Op.not]: null}}, logging: (msg) => request.log.info(msg)})).map(a => ({
         name: a.name,
         level: a.level,
         email: a.email,
@@ -596,20 +611,20 @@ router.get('/admins', cas.block, async (request, response) => {
       response.send({success: false});
     }
   } else {
-    pino.error(`Not authed`);
+    request.log.error(`Not authed`);
     response.status(401).send();
   }
 });
 
 router.delete('/admins', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     if(!request.query.uid) {
       response.send({success: false});
     } else {
       try {
-        const admin = await Admin.findOne({where: {uid: request.query.uid}});
+        const admin = await Admin.findOne({where: {uid: request.query.uid}, logging: (msg) => request.log.info(msg)});
         await admin.destroy();
         response.send({
           success: true
@@ -619,14 +634,14 @@ router.delete('/admins', cas.block, async (request, response) => {
       }
     }
   } else {
-    pino.error(`Not authed`);
+    request.log.error(`Not authed`);
     response.status(401).send();
   }
 });
 
 router.post('/admins', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     if(!request.body.name || !request.body.email || !(request.body.level >= 0)) {
       response.send({success: false});
@@ -638,7 +653,7 @@ router.post('/admins', cas.block, async (request, response) => {
           email: request.body.email,
           level: request.body.level,
           uid: uid,
-        });
+        }, {logging: (msg) => request.log.info(msg)});
         await scheduleNewAdminEmail(request.body.email, uid);
         response.send({
           success: true
@@ -648,17 +663,17 @@ router.post('/admins', cas.block, async (request, response) => {
       }
     }
   } else {
-    pino.error(`Not authed`);
+    request.log.error(`Not authed`);
     response.status(401).send();
   }
 });
 
 router.get('/admins/pending', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     try {
-      const admins = (await Admin.findAll({where:{calnetid: null}})).map(a => ({
+      const admins = (await Admin.findAll({where:{calnetid: null}, logging: (msg) => request.log.info(msg)})).map(a => ({
         name: a.name,
         level: a.level,
         email: a.email,
@@ -672,21 +687,16 @@ router.get('/admins/pending', cas.block, async (request, response) => {
       response.send({success: false});
     }
   } else {
-    pino.error(`Not authed`);
+    request.log.error(`Not authed`);
     response.status(401).send();
   }
 });
 
 router.get('/settings', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
-  pino.info({
-    route: '/api/admin/settings',
-    calnetid: calnetid,
-    level: level,
-  });
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 0) {
-    const settings = await Settings.findOne({});
+    const settings = await Settings.findOne({logging: (msg) => request.log.info(msg)});
     response.send({
       settings: {
         locations: settings.locations,
@@ -695,43 +705,35 @@ router.get('/settings', cas.block, async (request, response) => {
       success: true,
     });
   } else {
-    pino.error({
-      route: '/api/admin/settings',
-      calnetid: calnetid,
-      error: 'Not authed'
-    });
+    request.log.error('Not authed');
     response.status(401).send();
   }
 });
 
 router.patch('/participant', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
-    const t = await sequelize.transaction();
+    const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
     try {
       const rec = await User.findOne({
         where: {
           calnetid: request.body.calnetid
         },
-        transaction: t
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
       });
       await rec.update(request.body.params);
       await t.commit();
       response.send({success: true});
     } catch(err) {
       await t.rollback();
-      pino.error(`Couldn't update user ${request.body.calnetid}`);
-      pino.error(err);
+      request.log.error(`Couldn't update user ${request.body.calnetid}`);
+      request.log.error(err);
       response.send({success: false});
     }
   } else {
-    pino.error({
-      route: '/api/admin/participant',
-      method: 'PATCH',
-      calnetid: calnetid,
-      error: 'Not authed'
-    });
+    request.log.error('Not authed');
     response.status(401).send();
   }
 });
@@ -739,7 +741,7 @@ router.patch('/participant', cas.block, async (request, response) => {
 
 router.get('/study/participantinfo', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}})).level;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 40) {
     const users = await User.findAll({
       attributes: {
@@ -756,22 +758,19 @@ router.get('/study/participantinfo', cas.block, async (request, response) => {
             'completedappts'
           ]
         ]
-      }
+      },
+      logging: (msg) => request.log.info(msg)
     });
-    let parsed = `calnetid,patientid,firstname,middlename,lastname,email,phone,dob,sex,pbuilding,datejoined,street,city,state,county,zip,completedappts,consent1,consent2,consent3,consent4`;
-    pino.debug(users[0]);
+    let parsed = `calnetid,patientid,firstname,middlename,lastname,email,phone,dob,sex,pbuilding,datejoined,street,city,state,county,zip,completedappts,reconsented,consent1,consent2,consent3,consent4,consent5`;
+    request.log.debug(users[0]);
     users.forEach(v => {
-      parsed += `\n"${v.calnetid}","${v.patientid}","${v.firstname}","${v.middlename}","${v.lastname}","${v.email}","${v.phone}","${v.dob}","${v.sex}","${v.pbuilding}","${v.datejoined}","${v.street}","${v.city}","${v.state}","${v.county}","${v.zip}","${v.dataValues.completedappts}","${v.questions[0]}","${v.questions[1]}","${v.questions[2]}","${v.questions[3]}","${v.questions[4]}"`;
+      parsed += `\n"${v.calnetid}","${v.patientid}","${v.firstname}","${v.middlename}","${v.lastname}","${v.email}","${v.phone}","${v.dob}","${v.sex}","${v.pbuilding}","${v.datejoined}","${v.street}","${v.city}","${v.state}","${v.county}","${v.zip}","${v.dataValues.completedappts}","${v.dataValues.reconsented}","${v.questions[0]}","${v.questions[1]}","${v.questions[2]}","${v.questions[3]}","${v.questions[4]}"`;
     });
     response.setHeader('Content-Disposition', contentDisposition(`participantinfo_${moment().format('M_DD_YYYY')}.csv`));
     response.setHeader('Content-Type', 'text/csv');
     response.send(parsed);
   } else {
-    pino.error({
-      route: '/api/admin/study/participantinfo',
-      calnetid: calnetid,
-      error: 'Not authed'
-    });
+    request.log.error('Not authed');
     response.status(401).send();
   }
 });

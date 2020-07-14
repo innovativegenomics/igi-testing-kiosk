@@ -1,8 +1,8 @@
 const axios = require('axios');
-const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
+// const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
-const getNewAccessToken = async refreshtoken => {
+const getNewAccessToken = async (refreshtoken, logger) => {
   const request = await axios.post(require('./config/keys').lims.token, null, {
     params: {
       grant_type: 'refresh_token',
@@ -11,11 +11,11 @@ const getNewAccessToken = async refreshtoken => {
       refresh_token: refreshtoken
     }
   });
-  pino.info('NEW ACCESS TOKEN');
+  logger.info('NEW ACCESS TOKEN');
   return request.data.access_token;
 }
 
-const postNewPatient = async (accesstoken, payload) => {
+const postNewPatient = async (accesstoken, payload, logger) => {
   try {
     const request = await axios.post(require('./config/keys').lims.add,
       payload,
@@ -27,13 +27,13 @@ const postNewPatient = async (accesstoken, payload) => {
       throw { response: { data: resp } };
     }
   } catch (err) {
-    pino.warn(err);
+    logger.warn(err);
     throw { error: err.response.data[0].errorCode };
   }
 }
 
-module.exports.newPatient = async (profile, accesstoken, refreshtoken) => {
-  pino.info(`Date of Birth: ${moment.utc(profile.dob).format('YYYY-MM-DD HH:mm:ss')}`);
+module.exports.newPatient = async (profile, accesstoken, refreshtoken, logger) => {
+  logger.info(`Date of Birth: ${moment.utc(profile.dob).format('YYYY-MM-DD HH:mm:ss')}`);
   const payload = {
     payload: JSON.stringify({
       First_Name__c: profile.firstname,
@@ -56,15 +56,15 @@ module.exports.newPatient = async (profile, accesstoken, refreshtoken) => {
     })
   };
   try {
-    const response = await postNewPatient(accesstoken, payload);
+    const response = await postNewPatient(accesstoken, payload, logger);
     return response;
   } catch (err) {
-    pino.warn('CATCHING ERROR FROM PATIENT ATTEMPT');
-    pino.warn(err);
+    logger.warn('CATCHING ERROR FROM PATIENT ATTEMPT');
+    logger.warn(err);
     if (err.error === 'INVALID_SESSION_ID') {
-      pino.warn('TRYING TO GET NEW ACCESS TOKEN');
-      const newtoken = await getNewAccessToken(refreshtoken);
-      const response = await postNewPatient(newtoken, payload);
+      logger.warn('TRYING TO GET NEW ACCESS TOKEN');
+      const newtoken = await getNewAccessToken(refreshtoken, logger);
+      const response = await postNewPatient(newtoken, payload, logger);
       return { ...response, accesstoken: newtoken };
     } else {
       throw new Error('Can not post new patient');
