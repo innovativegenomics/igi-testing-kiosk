@@ -3,7 +3,7 @@ var url           = require('url'),
     https         = require('https'),
     parseXML      = require('xml2js').parseString,
     XMLprocessors = require('xml2js/lib/processors');
-const pino = require('pino')({level: process.env.LOG_LEVEL || 'info'});
+// const pino = require('pino')({level: process.env.LOG_LEVEL || 'info'});
 
 /**
  * The CAS authentication types.
@@ -49,7 +49,7 @@ function CASAuthentication(options) {
 
     if (this.cas_version === '1.0') {
         this._validateUri = '/validate';
-        this._validate = function(body, callback) {
+        this._validate = function(body, callback, logger) {
             var lines = body.split('\n');
             if (lines[ 0 ] === 'yes' && lines.length >= 2) {
                 return callback(null, lines[ 1 ]);
@@ -64,7 +64,7 @@ function CASAuthentication(options) {
     }
     else if (this.cas_version === '2.0' || this.cas_version === '3.0') {
         this._validateUri = (this.cas_version === '2.0' ? '/serviceValidate' : '/p3/serviceValidate');
-        this._validate = function(body, callback) {
+        this._validate = function(body, callback, logger) {
             parseXML(body, {
                 trim: true,
                 normalize: true,
@@ -88,7 +88,7 @@ function CASAuthentication(options) {
                     }
                 }
                 catch (err) {
-                    pino.error(err);
+                    logger.error(err);
                     return callback(new Error('CAS authentication failed.'));
                 }
             });
@@ -96,7 +96,7 @@ function CASAuthentication(options) {
     }
     else if(this.cas_version === 'saml1.1') {
         this._validateUri = '/samlValidate';
-        this._validate = function(body, callback) {
+        this._validate = function(body, callback, logger) {
             parseXML(body, {
                 trim: true,
                 normalize: true,
@@ -135,7 +135,7 @@ function CASAuthentication(options) {
                     }
                 }
                 catch (err) {
-                    pino.error(err);
+                    logger.error(err);
                     return callback(new Error('CAS authentication failed.'));
                 }
             });
@@ -269,7 +269,7 @@ CASAuthentication.prototype.logout = function(req, res, next) {
     if (this.destroy_session) {
         req.session.destroy(function(err) {
             if (err) {
-                pino.error(err);
+                req.log.error(err);
             }
         });
     }
@@ -343,7 +343,7 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
         response.on('end', function() {
             this._validate(body, function(err, user, attributes) {
                 if (err) {
-                    pino.error(err);
+                    req.log.error(err);
                     res.sendStatus(401);
                 }
                 else {
@@ -353,16 +353,16 @@ CASAuthentication.prototype._handleTicket = function(req, res, next) {
                     }
                     res.redirect(req.session.cas_return_to);
                 }
-            }.bind(this));
+            }.bind(this), req.log);
         }.bind(this));
         response.on('error', function(err) {
-            pino.error('Response error from CAS: ', err);
+            req.log.error('Response error from CAS: ', err);
             res.sendStatus(401);
         }.bind(this));
     }.bind(this));
 
     request.on('error', function(err) {
-        pino.error('Request error with CAS: ', err);
+        req.log.error('Request error with CAS: ', err);
         res.sendStatus(401);
     }.bind(this));
 

@@ -2,7 +2,7 @@ process.env.SLACK_SIGNING_SECRET = require('../../config/keys').slack.signingSec
 
 const express = require('express');
 const router = express.Router();
-const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
+// const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const crypto = require('crypto');
 const moment = require('moment');
 const chrono = require('chrono-node');
@@ -26,11 +26,11 @@ const verifySignature = req => {
 };
 
 router.post('/participants', async (request, response) => {
-  pino.info('slack participant request');
+  request.log.info('slack participant request');
   if(verifySignature(request)) {
-    pino.info('slack participant signature verified');
+    request.log.info('slack participant signature verified');
     try {
-      const count = await User.count({});
+      const count = await User.count({logging: (msg) => request.log.info(msg)});
       response.send({
         response_type: 'in_channel',
         blocks: [
@@ -64,9 +64,9 @@ router.post('/participants', async (request, response) => {
 });
 
 router.post('/appointments', async (request, response) => {
-  pino.info('slack appointments request');
+  request.log.info('slack appointments request');
   if(verifySignature(request)) {
-    pino.info('slack appointments signature verified');
+    request.log.info('slack appointments signature verified');
     if(request.body.text === 'help') {
       response.send({
         response_type: 'ephemeral',
@@ -108,7 +108,8 @@ router.post('/appointments', async (request, response) => {
               [Op.gte]: mmt.toDate(),
               [Op.lt]: mmt.clone().add(1, 'week').toDate()
             }
-          }
+          },
+          logging: (msg) => request.log.info(msg)
         });
         let total = 0;
         let daysReadable = '';
@@ -128,7 +129,8 @@ router.post('/appointments', async (request, response) => {
               [Op.gt]: mmt.toDate(),
               [Op.lt]: mmt.clone().add(1, 'week').toDate()
             }
-          }
+          },
+          logging: (msg) => request.log.info(msg)
         });
         response.send({
           response_type: 'in_channel',
@@ -155,7 +157,8 @@ router.post('/appointments', async (request, response) => {
         const day = await Day.findOne({
           where: {
             date: mmt.toDate()
-          }
+          },
+          logging: (msg) => request.log.info(msg)
         });
         if(!day) {
           response.send({
@@ -177,7 +180,8 @@ router.post('/appointments', async (request, response) => {
             time: {
               [Op.between]: [mmt.toDate(), mmt.clone().add(1, 'day').toDate()]
             }
-          }
+          },
+          logging: (msg) => request.log.info(msg)
         });
         const total = day.buffer * parseInt(moment.duration({hours: day.endhour-day.starthour, minutes: day.endminute-day.startminute}).asMinutes()/day.window);
         response.send({
@@ -194,8 +198,8 @@ router.post('/appointments', async (request, response) => {
         });
       }
     } catch(err) {
-      pino.error(`error getting appointments for slack bot`);
-      pino.error(err);
+      request.log.error(`error getting appointments for slack bot`);
+      request.log.error(err);
       response.send({
         response_type: 'ephemeral',
         blocks: [
@@ -210,7 +214,7 @@ router.post('/appointments', async (request, response) => {
       });
     }
   } else {
-    pino.error('not verified');
+    request.log.error('not verified');
     response.send(401);
   }
 });

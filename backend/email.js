@@ -1,8 +1,8 @@
 const { Settings, sequelize } = require('./models');
-const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
+// const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const nodemailer = require('nodemailer');
 
-module.exports.sendEmail = async (email, subject, html, attachments) => {
+module.exports.sendEmail = async (email, subject, html, attachments, logger) => {
   try {
     const settings = await Settings.findOne({});
     const transport = nodemailer.createTransport({
@@ -18,7 +18,7 @@ module.exports.sendEmail = async (email, subject, html, attachments) => {
       },
     });
     transport.on('token', async token => {
-      pino.info('New email access token generated');
+      logger.info('New email access token generated');
       settings.EmailAccessToken = token.accessToken;
       await settings.save();
     });
@@ -31,13 +31,13 @@ module.exports.sendEmail = async (email, subject, html, attachments) => {
       attachments: attachments,
     });
   } catch(err) {
-    pino.error(`unable to send email to ${email}`);
-    pino.error(err);
+    logger.error(`unable to send email to ${email}`);
+    logger.error(err);
     return false;
   }
 }
 
-module.exports.sendRawEmail = async message => {
+module.exports.sendRawEmail = async (message, logger) => {
   const settings = await Settings.findOne({});
   const transport = nodemailer.createTransport({
     service: 'gmail',
@@ -52,7 +52,7 @@ module.exports.sendRawEmail = async message => {
     },
   });
   transport.on('token', async token => {
-    pino.info('New email access token generated');
+    logger.info('New email access token generated');
     settings.EmailAccessToken = token.accessToken;
     await settings.save();
   });

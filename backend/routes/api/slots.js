@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
+// const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
 const { sequelize, Sequelize, Slot, User, Day, ReservedSlot, Settings } = require('../../models');
@@ -28,15 +28,16 @@ const cas = require('../../cas');
  */
 router.get('/available', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const t = await sequelize.transaction();
+  const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
-    const settings = await Settings.findOne({ transaction: t });
+    const settings = await Settings.findOne({ transaction: t, logging: (msg) => request.log.info(msg) });
     const week = moment((await Slot.findAll({
       limit: 1,
       where: { calnetid: calnetid },
       attributes: ['time'],
       order: [['time', 'desc']],
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     }))[0].time).startOf('week');
     const days = await Day.findAll({
       where: {
@@ -45,7 +46,8 @@ router.get('/available', cas.block, async (request, response) => {
           [Op.lt]: week.clone().add(1, 'week').toDate()
         }
       },
-      transaction: t
+      transaction: t,
+      logging: (msg) => request.log.info(msg)
     });
     const taken = await Slot.findAll({
       where: {
@@ -58,6 +60,7 @@ router.get('/available', cas.block, async (request, response) => {
       },
       attributes: ['time', 'location'],
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     });
     const reserved = await ReservedSlot.findAll({
       where: {
@@ -69,6 +72,7 @@ router.get('/available', cas.block, async (request, response) => {
         }
       },
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     });
     const now = moment();
     const open = {};
@@ -79,7 +83,7 @@ router.get('/available', cas.block, async (request, response) => {
           continue;
         } else {
           for (let i = moment(day.date).set('hour', day.starthour).set('minute', day.startminute); i.isBefore(i.clone().set('hour', day.endhour).set('minute', day.endminute)); i = i.add(day.window, 'minute')) {
-            // pino.debug(`slot: ${i}`);
+            // request.log.debug(`slot: ${i}`);
             if (i.isBefore(now)) {
               continue;
             } else {
@@ -102,8 +106,8 @@ router.get('/available', cas.block, async (request, response) => {
     await t.commit();
     response.send({ success: true, available: open });
   } catch (err) {
-    pino.error(`Can't get available slots for user ${calnetid}`);
-    pino.error(err);
+    request.log.error(`Can't get available slots for user ${calnetid}`);
+    request.log.error(err);
     await t.rollback();
     response.send({ success: false });
   }
@@ -129,6 +133,7 @@ router.get('/slot', cas.block, async (request, response) => {
       attributes: ['location', 'time', 'uid', 'completed'],
       where: { calnetid: calnetid },
       order: [['time', 'desc']],
+      logging: (msg) => request.log.info(msg)
     }))[0];
     response.json({ success: true, slot: {
       location: slot.location,
@@ -156,17 +161,19 @@ router.post('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const t = await sequelize.transaction({
     isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+    logging: (msg) => request.log.info(msg)
   });
   try {
     const reqtime = moment(request.body.time);
     const reqlocation = request.body.location;
     const questions = request.body.questions;
-    const settings = await Settings.findOne({transaction: t});
+    const settings = await Settings.findOne({transaction: t, logging: (msg) => request.log.info(msg)});
     const slot = (await Slot.findAll({
       limit: 1,
       where: { calnetid: calnetid },
       order: [['time', 'desc']],
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     }))[0];
     const day = await Day.findOne({
       where: {
@@ -175,7 +182,8 @@ router.post('/slot', cas.block, async (request, response) => {
           [Op.lt]: reqtime.clone().startOf('day').add(1, 'day').toDate()
         }
       },
-      transaction: t
+      transaction: t,
+      logging: (msg) => request.log.info(msg)
     });
 
     if(!day) {
@@ -207,6 +215,7 @@ router.post('/slot', cas.block, async (request, response) => {
         location: reqlocation,
       },
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     })) + (await ReservedSlot.count({
       where: {
         calnetid: {
@@ -219,6 +228,7 @@ router.post('/slot', cas.block, async (request, response) => {
         }
       },
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     }));
     if(takenCount >= day.buffer) {
       throw new Error('Slot is already full');
@@ -228,12 +238,13 @@ router.post('/slot', cas.block, async (request, response) => {
           where: {
             calnetid: calnetid
           },
-          transaction: t
+          transaction: t,
+          logging: (msg) => request.log.info(msg)
         })).destroy();
       } catch(err) {
         // No slot for the given user
-        pino.debug(`Can't delete reserved slot for user ${calnetid}`);
-        pino.debug(err);
+        request.log.debug(`Can't delete reserved slot for user ${calnetid}`);
+        request.log.debug(err);
       }
 
       slot.time = reqtime.toDate();
@@ -248,7 +259,7 @@ router.post('/slot', cas.block, async (request, response) => {
       await t.commit();
       response.send({success: true});
       try {
-        const user = await User.findOne({where: {calnetid: calnetid}});
+        const user = await User.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)});
         await scheduleSlotConfirmEmail(user.email, 
                                       slot.uid, 
                                       moment(slot.time).format('dddd, MMMM Do'),
@@ -273,13 +284,13 @@ router.post('/slot', cas.block, async (request, response) => {
           await scheduleAppointmentReminderText(user.phone, moment(slot.time), slot.uid);
         }
       } catch(err) {
-        pino.error(`Can't schedule confirm notifications for user ${calnetid}`);
-        pino.error(err);
+        request.log.error(`Can't schedule confirm notifications for user ${calnetid}`);
+        request.log.error(err);
       }
     }
   } catch(err) {
-    pino.error(`Can't set slot for user ${calnetid}`);
-    pino.error(err);
+    request.log.error(`Can't set slot for user ${calnetid}`);
+    request.log.error(err);
     await t.rollback();
     response.send({success: false});
   }
@@ -292,13 +303,14 @@ router.post('/slot', cas.block, async (request, response) => {
  */
 router.delete('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const t = await sequelize.transaction();
+  const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
     const slot = (await Slot.findAll({
       limit: 1,
       where: { calnetid: calnetid },
       order: [['time', 'desc']],
       transaction: t,
+      logging: (msg) => request.log.info(msg)
     }))[0];
     if (!slot.completed) {
       slot.location = null;
@@ -309,13 +321,14 @@ router.delete('/slot', cas.block, async (request, response) => {
         where: {
           calnetid: calnetid
         },
-        transaction: t
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
       });
       try {
         await deleteAppointmentReminders(user.email, user.phone);
       } catch(err) {
-        pino.error(`Couldn't delete appointment reminders for user ${calnetid}`);
-        pino.error(err);
+        request.log.error(`Couldn't delete appointment reminders for user ${calnetid}`);
+        request.log.error(err);
       }
       response.send({ success: true });
     } else {
@@ -323,8 +336,8 @@ router.delete('/slot', cas.block, async (request, response) => {
     }
     await t.commit();
   } catch (err) {
-    pino.error(`Can't cancel appointment for user ${calnetid}`);
-    pino.error(err);
+    request.log.error(`Can't cancel appointment for user ${calnetid}`);
+    request.log.error(err);
     await t.rollback();
     response.send({ success: false });
   }
@@ -332,27 +345,30 @@ router.delete('/slot', cas.block, async (request, response) => {
 
 router.post('/reserve', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  pino.debug(request.body);
+  request.log.debug(request.body);
   const time = moment(request.body.time);
   const location = request.body.location;
   if(!!time && !!location) {
     const t = await sequelize.transaction({
       isolationLevel: Sequelize.Transaction.ISOLATION_LEVELS.SERIALIZABLE,
+      logging: (msg) => request.log.info(msg)
     });
     try {
-      const settings = await Settings.findOne({transaction: t});
+      const settings = await Settings.findOne({transaction: t, logging: (msg) => request.log.info(msg)});
       const day = await Day.findOne({
         where: {
           date: time.clone().startOf('day').toDate()
         },
-        transaction: t
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
       });
       const taken = (await Slot.count({
         where: {
           location: location,
           time: time.toDate(),
         },
-        transaction: t
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
       })) + (await ReservedSlot.count({
         where: {
           calnetid: {
@@ -364,29 +380,30 @@ router.post('/reserve', cas.block, async (request, response) => {
             [Op.gt]: moment().toDate()
           }
         },
-        transaction: t
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
       }));
-      pino.debug(`${taken}`);
+      request.log.debug(`${taken}`);
       if(taken < day.buffer) {
         await ReservedSlot.upsert({
           calnetid: calnetid,
           time: time.toDate(),
           location: location,
           expires: moment().add(settings.ReservedSlotTimeout, 'seconds').toDate(),
-        }, {transaction: t});
+        }, {transaction: t, logging: (msg) => request.log.info(msg)});
         response.send({success: true});
       } else {
         response.send({success: false});
       }
       await t.commit();
     } catch(err) {
-      pino.error(`couldn't create reservation for user ${calnetid}`);
-      pino.error(err);
+      request.log.error(`couldn't create reservation for user ${calnetid}`);
+      request.log.error(err);
       await t.rollback();
       response.send({success: false});
     }
   } else {
-    pino.info({route: `/api/slots/reserve`, calnetid: calnetid, msg: `Invalid request`});
+    request.log.info(`Invalid request`);
     response.status(400).send();
   }
 });
@@ -394,11 +411,11 @@ router.post('/reserve', cas.block, async (request, response) => {
 router.delete('/reserve', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   try {
-    await (await ReservedSlot.findOne({where: {calnetid: calnetid}})).destroy();
+    await (await ReservedSlot.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).destroy();
     response.send({success: true});
   } catch(err) {
-    pino.error(`couldn't delete reservation for user ${calnetid}`);
-    pino.error(err);
+    request.log.error(`couldn't delete reservation for user ${calnetid}`);
+    request.log.error(err);
     response.send({success: false});
   }
 });

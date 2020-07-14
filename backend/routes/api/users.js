@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
+// const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 const short = require('short-uuid');
 
@@ -18,19 +18,19 @@ const { UserList } = require('twilio/lib/rest/chat/v1/service/user');
  */
 router.get('/login', cas.bounce, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const t = await sequelize.transaction();
+  const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
-    const user = await User.findOne({ where: { calnetid: calnetid }, transaction: t });
+    const user = await User.findOne({ where: { calnetid: calnetid }, transaction: t, logging: (msg) => request.log.info(msg) });
     if (user) {
-      pino.info({calnetid: calnetid, from: 'get /login'}, 'user exists, updating last login');
+      request.log.info('user exists, updating last login');
       user.lastlogin = moment().toDate();
       await user.save();
       request.session.usertype='patient';
       response.redirect('/dashboard');
     } else {
       if (!require('../../config/keys').newusers) {
-        pino.error(`user with calnetid ${calnetid} not authorized`);
-        request.session.destroy((err) => {if(err) {pino.error(`Couldn't destroy session for user ${calnetid}`); pino.error(err)}});
+        request.log.error(`user with calnetid ${calnetid} not authorized`);
+        request.session.destroy((err) => {if(err) {request.log.error(`Couldn't destroy session for user ${calnetid}`); request.log.error(err)}});
         response.status(401).send('Unauthorized user');
       } else {
 
@@ -66,7 +66,7 @@ router.get('/logout', cas.logout);
  */
 router.get('/profile', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  pino.debug(`trying to get profile for user ${calnetid}`);
+  request.log.debug(`trying to get profile for user ${calnetid}`);
   const profile = await User.findOne({
     attributes: ['firstname',
       'middlename',
@@ -75,7 +75,8 @@ router.get('/profile', cas.block, async (request, response) => {
       'phone',
       'calnetid',
       'questions',
-      'reconsented'], where: { calnetid: calnetid }
+      'reconsented'], where: { calnetid: calnetid },
+      logging: (msg) => request.log.info(msg)
   });
   if (profile) {
     response.send({ success: true, user: profile });
@@ -107,9 +108,9 @@ router.get('/profile', cas.block, async (request, response) => {
  */
 router.post('/profile', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
-  const t1 = await sequelize.transaction();
-  const count = await User.count({ where: { calnetid: calnetid }, transaction: t1 });
-  pino.info(`User count for ${calnetid}: ${count}`);
+  const t1 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
+  const count = await User.count({ where: { calnetid: calnetid }, transaction: t1, logging: (msg) => request.log.info(msg) });
+  request.log.info(`User count for ${calnetid}: ${count}`);
   if (count > 0) {
     response.send({ success: false, error: 'USER_EXISTS' });
     await t1.commit();
@@ -132,8 +133,8 @@ router.post('/profile', cas.block, async (request, response) => {
         phone: request.body.phone,
         questions: request.body.questions,
         reconsented: true
-      }, { transaction: t1 });
-      const settings = await Settings.findOne({});
+      }, { transaction: t1, logging: (msg) => request.log.info(msg) });
+      const settings = await Settings.findOne({logging: (msg) => request.log.info(msg)});
       // Figure out which week this person should be assigned to
       let week = moment().startOf('week');
       while(true) {
@@ -145,7 +146,8 @@ router.post('/profile', cas.block, async (request, response) => {
             }
           },
           order: [['date', 'asc']],
-          transaction: t1
+          transaction: t1,
+          logging: (msg) => request.log.info(msg)
         });
         let available = 0;
         days.forEach(v => {
@@ -158,9 +160,10 @@ router.post('/profile', cas.block, async (request, response) => {
               [Op.lt]: week.clone().add(1, 'week').toDate()
             }
           },
-          transaction: t1
+          transaction: t1,
+          logging: (msg) => request.log.info(msg)
         });
-        pino.debug(`available: ${available} taken: ${taken} between ${week.format()} and ${week.clone().add(1, 'week').format()}`);
+        request.log.debug(`available: ${available} taken: ${taken} between ${week.format()} and ${week.clone().add(1, 'week').format()}`);
         if(available === 0) {
           break;
         }
@@ -180,13 +183,13 @@ router.post('/profile', cas.block, async (request, response) => {
         calnetid: calnetid,
         time: week.toDate(),
         uid: short().new()
-      }, { transaction: t1 });
+      }, { transaction: t1, logging: (msg) => request.log.info(msg) });
 
       await t1.commit();
       response.send({ success: true });
     } catch (err) {
-      pino.error(`error creating user profile for ${calnetid}`);
-      pino.error(err);
+      request.log.error(`error creating user profile for ${calnetid}`);
+      request.log.error(err);
       await t1.rollback();
       response.send({ success: false, error: 'SERVER_ERROR' });
     }
@@ -194,12 +197,12 @@ router.post('/profile', cas.block, async (request, response) => {
     try {
       await scheduleSignupEmail(request.body.email, `${request.body.firstname} ${request.body.lastname}`);
     } catch (err) {
-      pino.error(`Coundn't schedule signup email for user ${calnetid}`);
-      pino.error(err);
+      request.log.error(`Coundn't schedule signup email for user ${calnetid}`);
+      request.log.error(err);
     }
 
-    const t2 = await sequelize.transaction();
-    const settings = await Settings.findOne({transaction: t2});
+    const t2 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
+    const settings = await Settings.findOne({transaction: t2, logging: (msg) => request.log.info(msg)});
     try {
       const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken);
       if (res.accesstoken) {
@@ -207,14 +210,14 @@ router.post('/profile', cas.block, async (request, response) => {
         await settings.save();
       }
       if(res.patient_id) {
-        const user = await User.findOne({where: {calnetid: calnetid}, transaction: t2});
+        const user = await User.findOne({where: {calnetid: calnetid}, transaction: t2, logging: (msg) => request.log.info(msg)});
         user.patientid = res.patient_id;
         await user.save();
       }
       await t2.commit();
     } catch (err) {
-      pino.error('Can not add new LIMs patient');
-      pino.error(err);
+      request.log.error('Can not add new LIMs patient');
+      request.log.error(err);
       await t2.rollback();
     }
   }
@@ -226,7 +229,8 @@ router.post('/reconsent', cas.block, async (request, response) => {
     const user = await User.findOne({
       where: {
         calnetid: calnetid
-      }
+      },
+      logging: (msg) => request.log.info(msg)
     });
     if(user.reconsented) {
       throw new Error('User already reconsented');
@@ -236,8 +240,8 @@ router.post('/reconsent', cas.block, async (request, response) => {
     await user.save();
     response.send({success: true});
   } catch(err) {
-    pino.error(`Can't reconsent user ${calnetid}`);
-    pino.error(err);
+    request.log.error(`Can't reconsent user ${calnetid}`);
+    request.log.error(err);
     response.send({success: false});
   }
 });
