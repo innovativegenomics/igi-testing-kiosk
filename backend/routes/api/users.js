@@ -204,7 +204,7 @@ router.post('/profile', cas.block, async (request, response) => {
     const t2 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
     const settings = await Settings.findOne({transaction: t2, logging: (msg) => request.log.info(msg)});
     try {
-      const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken);
+      const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken, request.log);
       if (res.accesstoken) {
         settings.accesstoken = res.accesstoken;
         await settings.save();

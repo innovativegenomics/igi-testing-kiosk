@@ -1,5 +1,6 @@
 module.exports = async (payload, helpers) => {
   process.env.TZ = 'America/Los_Angeles';
+  const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
   const { sendEmail } = require('../email');
   const qrcode = require('qrcode');
 
@@ -34,5 +35,5 @@ module.exports = async (payload, helpers) => {
                       filename: 'IGI_study_info_sheet_Spanish.pdf',
                       path: './media/infoSheetSpanish.pdf'
                     },
-                  ]);
+                  ], pino);
 }

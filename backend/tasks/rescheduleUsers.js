@@ -70,7 +70,7 @@ module.exports = async (payload, helpers) => {
               <p>You can view and schedule your new appointment at our website <a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>.</p>
               `
             }
-            await sendRawEmail(message);
+            await sendRawEmail(message, pino);
           } catch(err) {
             pino.error('failed to send email to users');
             pino.error(err);
@@ -101,7 +101,7 @@ module.exports = async (payload, helpers) => {
             <p>You can view and schedule your new appointment at our website <a href='https://igi-fast.berkeley.edu'>igi-fast.berkeley.edu</a>.</p>
             `
           }
-          await sendRawEmail(message);
+          await sendRawEmail(message, pino);
         } catch(err) {
           pino.error('failed to send email to users');
           pino.error(err);
