@@ -545,7 +545,7 @@ router.post('/complete', cas.block, async (request, response) => {
       await t.commit();
       response.send({success: true});
     } catch(err) {
-      request.log.error(`Error completing appointment for ${uid}`);
+      request.log.error(`Error completing appointment for ${request.body.uid}`);
       request.log.error(err);
       await t.rollback();
       response.send({success: false});
@@ -574,7 +574,7 @@ router.post('/uncomplete', cas.block, async (request, response) => {
       await t.commit();
       response.send({success: true});
     } catch(err) {
-      request.log.error(`Error uncompleting appointment for ${uid}`);
+      request.log.error(`Error uncompleting appointment for ${request.body.uid}`);
       request.log.error(err);
       await t.rollback();
       response.send({success: false});
