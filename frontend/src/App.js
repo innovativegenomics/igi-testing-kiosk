@@ -65,6 +65,10 @@ export default class App extends Component {
       }
     })
   }
+  reloadProfile = async () => {
+    this.setState({loaded: false});
+    await getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
+  }
   componentDidMount() {
     getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
   }
@@ -88,7 +92,7 @@ export default class App extends Component {
             )} />
 
             <Route path='/newuser' render={props => (
-              <this.newUser {...props} auth={this.state.auth} />
+              <this.newUser {...props} auth={this.state.auth} reloadProfile={this.reloadProfile} />
             )} />
             <Route path='/dashboard' render={props => (
               <this.dashboard {...props} auth={this.state.auth} />

@@ -313,10 +313,11 @@ export default class NewUser extends Component {
       }
     });
     payload.questions = this.state.questions;
-    createUser(payload).then(res => {
+    createUser(payload).then(async res => {
       if (!res) {
         // Handle error!
       } else {
+        await this.props.reloadProfile();
         this.setState({ success: true });
       }
     });
@@ -331,7 +332,7 @@ export default class NewUser extends Component {
       );
     } else if (this.props.auth.unauthed) {
       return <Redirect to='/' />
-    } else if (this.state.success) {
+    } else if (this.state.success || this.props.auth.success) {
       return <Redirect to='/dashboard' />
     }
     var isValid = true;
