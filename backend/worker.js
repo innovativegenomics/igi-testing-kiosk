@@ -408,6 +408,15 @@ module.exports.scheduleNewAdminEmail = async (params = { email, uid }) => {
  * @param {moment.Moment} slot - the time slot they signed up for
  */
 module.exports.scheduleAppointmentReminderEmail = async (params = { calnetid, time, uid }) => {
+  const user = await User.findOne({
+    where: {
+      calnetid: calnetid
+    },
+    logging: (msg) => pino.info(msg)
+  });
+  await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${user.email}`]);
+  });
   await workerUtils.addJob('appointmentReminderEmail', params, {
     runAt: params.time.clone().subtract(2, 'hour'),
     jobKey: `${params.calnetid}-reminder-email`,
@@ -416,6 +425,15 @@ module.exports.scheduleAppointmentReminderEmail = async (params = { calnetid, ti
 }
 
 module.exports.scheduleAppointmentReminderText = async (params = { calnetid, time, uid }) => {
+  const user = await User.findOne({
+    where: {
+      calnetid: calnetid
+    },
+    logging: (msg) => pino.info(msg)
+  });
+  await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${user.phone}`]);
+  });
   await workerUtils.addJob('appointmentReminderText', params, {
     runAt: params.time.clone().subtract(30, 'minute'),
     jobKey: `${params.calnetid}-reminder-text`,
