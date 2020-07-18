@@ -738,6 +738,46 @@ router.patch('/participant', cas.block, async (request, response) => {
   }
 });
 
+router.delete('/participant', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
+    try {
+      const rec = await User.findOne({
+        where: {
+          calnetid: request.query.calnetid
+        },
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
+      });
+      await rec.destroy();
+      const slots = await Slot.findAll({
+        where: {
+          calnetid: request.query.calnetid
+        },
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
+      });
+      const promises = [];
+      slots.forEach(slot => {
+        promises.push((async () => await slot.destroy())());
+      });
+      await Promise.all(promises);
+      await t.commit();
+      response.send({success: true});
+    } catch(err) {
+      await t.rollback();
+      request.log.error(`Couldn't delete user ${request.query.calnetid}`);
+      request.log.error(err);
+      response.send({success: false});
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
 
 router.get('/study/participantinfo', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
