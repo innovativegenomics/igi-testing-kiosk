@@ -232,3 +232,14 @@ export const updateUser = async (calnetid, params) => {
     return { success: false };
   }
 }
+
+export const deleteUser = async (calnetid) => {
+  try {
+    const response = await axios.delete('/api/admin/participant', {params: {calnetid: calnetid}});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't delete participant`);
+    console.error(err);
+    return { success: false };
+  }
+}

@@ -4,7 +4,7 @@ import { Container, Table, Button, Row, Col, Form, Spinner, InputGroup } from 'r
 import ContentEditable from 'react-contenteditable';
 import moment from 'moment';
 
-import { searchParticipants, updateUser } from '../../actions/adminActions';
+import { searchParticipants, updateUser, deleteUser } from '../../actions/adminActions';
 
 class EditableBox extends Component {
   constructor(props) {
@@ -128,6 +128,14 @@ export default class Participants extends Component {
       return false;
     }
   }
+  deleteUser = async (calnetid) => {
+    const { success } = await deleteUser(calnetid);
+    if(success) {
+      await this.runSearch(this.state.search, this.state.perpage, this.state.page);
+    } else {
+      alert(`Couldn't delete participant, please try again!`);
+    }
+  }
   componentDidMount = async () => {
     await this.runSearch(this.state.search, this.state.perpage, this.state.page);
   }
@@ -165,6 +173,9 @@ export default class Participants extends Component {
           <EditableBox value={v.patientid} onSave={nv => this.updateUser(i, {patientid: nv})}/>
         </td>
         <td style={{whiteSpace: 'nowrap'}}>{moment(v.datejoined).format('YYYY-MM-DD h:mm A')}</td>
+        <td style={{whiteSpace: 'nowrap'}}>
+          <Button variant='danger' size='sm' onClick={e => this.deleteUser(v.calnetid)}>Delete participant</Button>
+        </td>
       </tr>);
     });
 
@@ -206,6 +217,7 @@ export default class Participants extends Component {
               <th>Primary Building</th>
               <th>Patient ID</th>
               <th>Date Joined</th>
+              <th>Delete participant</th>
             </tr>
           </thead>
           <tbody>
