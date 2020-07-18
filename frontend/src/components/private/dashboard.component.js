@@ -104,7 +104,7 @@ export default class Dashboard extends Component {
               <Alert variant='success'>
                 <h3 className='font-weight-light text-center'>You have an upcoming appointment!</h3>
                 <p className='lead text-center'>
-                  You should have received an appointment confirmation email/text.
+                  You should have received an appointment confirmation email/text. If you didn't receive an email, check your spam.
                   When you arrive for your appointment, please wear your mask, and 
                   bring the QR code that you received in the confirmation email. You can
                   also view the qr code <Link to={'/qrcode?uid='+this.state.slot.slot.uid}>here</Link>.
