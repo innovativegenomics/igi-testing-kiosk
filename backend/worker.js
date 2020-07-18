@@ -1,5 +1,5 @@
 const env = process.env.NODE_ENV || 'development';
-const dbConfig = require(__dirname + './config/config.json')[env];
+const dbConfig = require(__dirname + '/config/config.json')[env];
 const config = require('./config/keys');
 const { Logger, makeWorkerUtils, run } = require('graphile-worker');
 const sgMail = require('@sendgrid/mail');
@@ -91,10 +91,10 @@ const tasks = {
           name: `${user.firstname} ${user.lastname}`
         }
       });
-      helpers.logging.info('Sent email');
+      helpers.logger.info('Sent email');
     } catch(err) {
-      helpers.logging.error(`Could not send email`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
     }
   },
   slotConfirmEmail: async (payload, helpers) => {
@@ -120,7 +120,7 @@ const tasks = {
         templateId: 'd-8fdf653f576545539db3cfb2aef7fa71',
         dynamicTemplateData: {
           location: location,
-          locationlink: settings.locationlinks[settings.indexOf(location)],
+          locationlink: settings.locationlinks[settings.locations.indexOf(location)],
           starttime: moment(time).format('h:mm A, MMMM Do'),
           endtime: moment(time).add(day.window, 'minute').format('h:mm A, MMMM Do'),
           day: moment(time).format('MMMM Do'),
@@ -128,10 +128,10 @@ const tasks = {
           qrimg: `https://igi-fast.berkeley.edu/api/emails/qrimg?uid=${uid}`,
         }
       });
-      helpers.logging.info('Sent email');
+      helpers.logger.info('Sent email');
     } catch(err) {
-      helpers.logging.error(`Could not send email`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err.stack);
     }
   },
   slotConfirmText: async (payload, helpers) => {
@@ -153,16 +153,16 @@ const tasks = {
       const status = await twilio.messages.create({
         body: `Testing Appointment Confirmation for ${moment(time).format('MMMM Do')} 
 Please arrive between ${moment(time).format('h:mm A, MMMM Do')} and ${moment(time).add(day.window, 'minute').format('h:mm A, MMMM Do')} at location ${location}. 
-To view a map to this location, visit the following link ${settings.locationlinks[settings.indexOf(location)]}. 
+To view a map to this location, visit the following link ${settings.locationlinks[settings.locations.indexOf(location)]}. 
 When you arrive, please present the QR code at the following link: https://igi-fast.berkeley.edu/qrcode?uid=${uid}. 
 To change or cancel this appointment, log into your testing account.`,
         to: user.phone,
         from: config.twilio.sender
       });
-      helpers.logging.info('Sent text');
+      helpers.logger.info('Sent text');
     } catch(err) {
-      helpers.logging.error(`Could not send text`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send text`);
+      helpers.logger.error(err.stack);
     }
   },
   resultInstructionsEmail: async (payload, helpers) => {
@@ -180,11 +180,14 @@ To change or cancel this appointment, log into your testing account.`,
         from: config.sendgrid.from,
         replyTo: config.sendgrid.replyTo,
         templateId: 'd-56a60717a4dd48fbba8f22e4316152e7',
+        dynamicTemplateData: {
+          name: `${user.firstname} ${user.lastname}`
+        }
       });
-      helpers.logging.info('Sent email');
+      helpers.logger.info('Sent email');
     } catch(err) {
-      helpers.logging.error(`Could not send email`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err.stack);
     }
   },
   appointmentReminderEmail: async (payload, helpers) => {
@@ -206,10 +209,10 @@ To change or cancel this appointment, log into your testing account.`,
           time: moment(time).format('h:mm A, MMMM Do')
         }
       });
-      helpers.logging.info('Sent email');
+      helpers.logger.info('Sent email');
     } catch(err) {
-      helpers.logging.error(`Could not send email`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err.stack);
     }
   },
   appointmentReminderText: async (payload, helpers) => {
@@ -229,10 +232,10 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
         to: user.phone,
         from: config.twilio.sender
       });
-      helpers.logging.info('Sent text');
+      helpers.logger.info('Sent text');
     } catch(err) {
-      helpers.logging.error(`Could not send text`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send text`);
+      helpers.logger.error(err.stack);
     }
   },
   rescheduleUsers: async (payload, helpers) => {
@@ -284,7 +287,7 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
             });
           } catch(err) {
             helpers.logger.error('failed to send email to user');
-            helpers.logger.error(err);
+            helpers.logger.error(err.stack);
           }
         })
       });
@@ -293,7 +296,7 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
       await t.commit();
     } catch(err) {
       helpers.logger.error(`Can not update schedules`);
-      helpers.logger.error(err);
+      helpers.logger.error(err.stack);
       await t.rollback();
     }
 
@@ -311,16 +314,17 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
           signup: `${config.host}/api/admin/login?returnTo=${encodeURIComponent(config.host+'/api/admin/login?uid='+uid)}`
         }
       });
-      helpers.logging.info('Sent email');
+      helpers.logger.info('Sent email');
     } catch(err) {
-      helpers.logging.error(`Could not send email`);
-      helpers.logging.error(err);
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err.stack);
     }
   },
 };
 
 module.exports.startWorker = async () => {
-  const connectionString = `postgres://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
+  const connectionString = `postgres://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${(process.env.POSTGRES_PORT?process.env.POSTGRES_PORT:5432)}/${dbConfig.database}`;
+  console.log(connectionString);
   workerUtils = await makeWorkerUtils({
     connectionString: connectionString,
   });
@@ -370,16 +374,16 @@ module.exports.scheduleNewAdminEmail = async (params = { email, uid }) => {
  */
 module.exports.scheduleAppointmentReminderEmail = async (params = { calnetid, time, uid }) => {
   await workerUtils.addJob('appointmentReminderEmail', params, {
-    runAt: time.clone().subtract(2, 'hour'),
-    jobKey: `${calnetid}-reminder-email`,
+    runAt: params.time.clone().subtract(2, 'hour'),
+    jobKey: `${params.calnetid}-reminder-email`,
     queueName: 'reminderEmails'
   });
 }
 
 module.exports.scheduleAppointmentReminderText = async (params = { calnetid, time, uid }) => {
   await workerUtils.addJob('appointmentReminderText', params, {
-    runAt: slot.clone().subtract(30, 'minute'),
-    jobKey: `${calnetid}-reminder-text`,
+    runAt: params.time.clone().subtract(30, 'minute'),
+    jobKey: `${params.calnetid}-reminder-text`,
     queueName: 'reminderTexts'
   });
 }

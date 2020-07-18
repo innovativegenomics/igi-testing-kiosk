@@ -263,12 +263,12 @@ router.post('/slot', cas.block, async (request, response) => {
         await scheduleSlotConfirmEmail({
           calnetid: calnetid,
           uid: slot.uid,
-          time: slot.time,
+          time: moment(slot.time),
           location: slot.location
         });
         await scheduleAppointmentReminderEmail({
           calnetid: calnetid,
-          time: slot.time,
+          time: moment(slot.time),
           uid: slot.uid
         });
         if(!user.accessresultssent) {
@@ -281,12 +281,12 @@ router.post('/slot', cas.block, async (request, response) => {
         await scheduleSlotConfirmText({
           calnetid: calnetid,
           uid: slot.uid,
-          time: slot.time,
+          time: moment(slot.time),
           location: slot.location
         });
         await scheduleAppointmentReminderText({
           calnetid: calnetid,
-          time: slot.time,
+          time: moment(slot.time),
           uid: slot.uid
         });
       } catch(err) {
