@@ -16,7 +16,11 @@ export const withTracker = (WrappedComponent, options = {}) => {
   const HOC = class extends Component {
     componentDidMount() {
       const page = this.props.location.pathname;
-      ReactGA.set({userId: this.props.auth.user.calnetid || null});
+      try {
+        ReactGA.set({userId: this.props.auth.user.calnetid});
+      } catch(err) {
+        ReactGA.set({userId: null});
+      }
       trackPage(page);
     }
 
@@ -26,7 +30,11 @@ export const withTracker = (WrappedComponent, options = {}) => {
       
       try {
         if(prevProps.auth.user.calnetid !== this.props.auth.user.calnetid) {
-          ReactGA.set({userId: this.props.auth.user.calnetid || null});
+          try {
+            ReactGA.set({userId: this.props.auth.user.calnetid});
+          } catch(err) {
+            ReactGA.set({userId: null});
+          }
         }
       } catch(err) {
         
