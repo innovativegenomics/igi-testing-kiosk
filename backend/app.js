@@ -1,3 +1,5 @@
+process.env.TZ = 'America/Los_Angeles';
+
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -19,8 +21,6 @@ const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' }, (proces
 const short = require('short-uuid');
 const ExpressPinoLogger = require('express-pino-logger');
 
-process.env.TZ = 'America/Los_Angeles';
-
 const { sequelize } = require('./models');
 const users = require('./routes/api/users');
 const slots = require('./routes/api/slots');
@@ -28,7 +28,7 @@ const admin = require('./routes/api/admin');
 const emails = require('./routes/api/emails');
 const slack = require('./routes/api/slack');
 
-const { verifyTasks, scheduleRescheduleUsers } = require('./scheduler');
+const { startWorker, scheduleRescheduleUsers } = require('./worker');
 
 const app = express();
 
@@ -38,7 +38,7 @@ module.exports = (async () => {
   try {
     await sequelize.authenticate();
     await sequelize.sync();
-    await verifyTasks();
+    await startWorker();
     await scheduleRescheduleUsers();
     pino.info('database initialized successfully!');
 

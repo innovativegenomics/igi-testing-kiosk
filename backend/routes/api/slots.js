@@ -9,7 +9,7 @@ const { scheduleSlotConfirmEmail,
   scheduleAppointmentReminderEmail,
   scheduleAppointmentReminderText,
   scheduleResultInstructionsEmail, 
-  deleteAppointmentReminders,} = require('../../scheduler');
+  deleteAppointmentReminders,} = require('../../worker');
 const Op = Sequelize.Op;
 const cas = require('../../cas');
 
@@ -260,29 +260,35 @@ router.post('/slot', cas.block, async (request, response) => {
       response.send({success: true});
       try {
         const user = await User.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)});
-        await scheduleSlotConfirmEmail(user.email, 
-                                      slot.uid, 
-                                      moment(slot.time).format('dddd, MMMM Do'),
-                                      moment(slot.time).format('h:mm A'),
-                                      moment(slot.time).add(day.window, 'minute').format('h:mm A'),
-                                      slot.location,
-                                      settings.locationlinks[settings.locations.indexOf(slot.location)]);
-        await scheduleAppointmentReminderEmail(user.email, moment(slot.time), slot.uid);
+        await scheduleSlotConfirmEmail({
+          calnetid: calnetid,
+          uid: slot.uid,
+          time: slot.time,
+          location: slot.location
+        });
+        await scheduleAppointmentReminderEmail({
+          calnetid: calnetid,
+          time: slot.time,
+          uid: slot.uid
+        });
         if(!user.accessresultssent) {
-          await scheduleResultInstructionsEmail(user.email);
+          await scheduleResultInstructionsEmail({
+            calnetid: calnetid
+          });
           user.accessresultssent = true;
           await user.save();
         }
-        if(user.phone) {
-          await scheduleSlotConfirmText(user.phone, 
-                                        slot.uid, 
-                                        moment(slot.time).format('dddd, MMMM Do'),
-                                        moment(slot.time).format('h:mm A'),
-                                        moment(slot.time).add(day.window, 'minute').format('h:mm A'),
-                                        slot.location,
-                                        settings.locationlinks[settings.locations.indexOf(slot.location)]);
-          await scheduleAppointmentReminderText(user.phone, moment(slot.time), slot.uid);
-        }
+        await scheduleSlotConfirmText({
+          calnetid: calnetid,
+          uid: slot.uid,
+          time: slot.time,
+          location: slot.location
+        });
+        await scheduleAppointmentReminderText({
+          calnetid: calnetid,
+          time: slot.time,
+          uid: slot.uid
+        });
       } catch(err) {
         request.log.error(`Can't schedule confirm notifications for user ${calnetid}`);
         request.log.error(err);
@@ -325,7 +331,7 @@ router.delete('/slot', cas.block, async (request, response) => {
         logging: (msg) => request.log.info(msg)
       });
       try {
-        await deleteAppointmentReminders(user.email, user.phone);
+        await deleteAppointmentReminders(calnetid);
       } catch(err) {
         request.log.error(`Couldn't delete appointment reminders for user ${calnetid}`);
         request.log.error(err);

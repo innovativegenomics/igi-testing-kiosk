@@ -1,7 +1,7 @@
 const env = process.env.NODE_ENV || 'development';
 const dbConfig = require(__dirname + './config/config.json')[env];
 const config = require('./config/keys');
-const { Logger, run } = require('graphile-worker');
+const { Logger, makeWorkerUtils, run } = require('graphile-worker');
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(config.sendgrid.key);
 const twilio = new (require('twilio'))(config.twilio.accountSid, config.twilio.authToken);
@@ -25,6 +25,9 @@ const pinoElastic = require('pino-elasticsearch')({
   'flush-bytes': 1000
 });
 const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' }, (process.env.NODE_ENV==='production'?pinoElastic:undefined));
+
+let workerUtils;
+let runner;
 
 const logFactory = (scope) => {
   const levels = {
@@ -185,7 +188,7 @@ To change or cancel this appointment, log into your testing account.`,
     }
   },
   appointmentReminderEmail: async (payload, helpers) => {
-    const { calnetid, time } = payload;
+    const { calnetid, time, uid } = payload;
     try {
       const user = await User.findOne({
         where: {
@@ -210,7 +213,7 @@ To change or cancel this appointment, log into your testing account.`,
     }
   },
   appointmentReminderText: async (payload, helpers) => {
-    const { calnetid, time } = payload;
+    const { calnetid, time, uid } = payload;
     try {
       const user = await User.findOne({
         where: {
@@ -296,11 +299,34 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
 
     await helpers.addJob('rescheduleUsers', {}, {runAt: moment().startOf('week').add(1, 'week').add(1, 'minute').toDate(), jobKey: 'reschedule', queueName: 'rescheduleQueue'});
   },
+  newAdminEmail: async (payload, helpers) => {
+    const { email, uid } = payload;
+    try {
+      const status = await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-bcea535bb5ec436eb94d1d389db26411',
+        dynamicTemplateData: {
+          signup: `${config.host}/api/admin/login?returnTo=${encodeURIComponent(config.host+'/api/admin/login?uid='+uid)}`
+        }
+      });
+      helpers.logging.info('Sent email');
+    } catch(err) {
+      helpers.logging.error(`Could not send email`);
+      helpers.logging.error(err);
+    }
+  },
 };
 
 module.exports.startWorker = async () => {
-  const runner = await run({
-    connectionString: `postgres://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`,
+  const connectionString = `postgres://${dbConfig.username}:${dbConfig.password}@${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`;
+  workerUtils = await makeWorkerUtils({
+    connectionString: connectionString,
+  });
+  await workerUtils.migrate();
+  runner = await run({
+    connectionString: connectionString,
     logger: new Logger(logFactory),
     concurrency: 1,
     // Install signal handlers for graceful shutdown on SIGINT, SIGTERM, etc
@@ -311,7 +337,56 @@ module.exports.startWorker = async () => {
     // or:
     //   taskDirectory: `${__dirname}/tasks`,
   });
-  return runner;
 }
 
+module.exports.scheduleRescheduleUsers = async () => {
+  await workerUtils.addJob('rescheduleUsers', {}, { runAt: moment().startOf('week').add(1, 'week').add(1, 'minute').toDate(), jobKey: 'reschedule', queueName: 'rescheduleQueue' });
+}
 
+module.exports.scheduleSlotConfirmText = async (params = { calnetid, uid, time, location }) => {
+  await workerUtils.addJob('slotConfirmText', params);
+}
+
+module.exports.scheduleSlotConfirmEmail = async (params = { calnetid, uid, time, location }) => {
+  await workerUtils.addJob('slotConfirmEmail', params);
+}
+
+module.exports.scheduleSignupEmail = async (params = { calnetid } ) => {
+  await workerUtils.addJob('signupEmail', params);
+}
+
+module.exports.scheduleResultInstructionsEmail = async (params = { calnetid }) => {
+  await workerUtils.addJob('resultInstructionsEmail', params);
+}
+
+module.exports.scheduleNewAdminEmail = async (params = { email, uid }) => {
+  await workerUtils.addJob('newAdminEmail', params);
+}
+
+/**
+ * 30 minute reminders
+ * @param {string} email
+ * @param {moment.Moment} slot - the time slot they signed up for
+ */
+module.exports.scheduleAppointmentReminderEmail = async (params = { calnetid, time, uid }) => {
+  await workerUtils.addJob('appointmentReminderEmail', params, {
+    runAt: time.clone().subtract(2, 'hour'),
+    jobKey: `${calnetid}-reminder-email`,
+    queueName: 'reminderEmails'
+  });
+}
+
+module.exports.scheduleAppointmentReminderText = async (params = { calnetid, time, uid }) => {
+  await workerUtils.addJob('appointmentReminderText', params, {
+    runAt: slot.clone().subtract(30, 'minute'),
+    jobKey: `${calnetid}-reminder-text`,
+    queueName: 'reminderTexts'
+  });
+}
+
+module.exports.deleteAppointmentReminders = async (calnetid) => {
+  await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${calnetid}-reminder-email`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${calnetid}-reminder-text`]);
+  });
+}

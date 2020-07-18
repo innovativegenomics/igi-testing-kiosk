@@ -8,8 +8,7 @@ const { sequelize, Sequelize, User, Slot, Day, Settings } = require('../../model
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
-const { scheduleSignupEmail } = require('../../scheduler');
-const { UserList } = require('twilio/lib/rest/chat/v1/service/user');
+const { scheduleSignupEmail } = require('../../worker');
 
 /**
  * Logs in existing and new users
@@ -195,7 +194,9 @@ router.post('/profile', cas.block, async (request, response) => {
     }
     
     try {
-      await scheduleSignupEmail(request.body.email, `${request.body.firstname} ${request.body.lastname}`);
+      await scheduleSignupEmail({
+        calnetid: calnetid
+      });
     } catch (err) {
       request.log.error(`Coundn't schedule signup email for user ${calnetid}`);
       request.log.error(err);

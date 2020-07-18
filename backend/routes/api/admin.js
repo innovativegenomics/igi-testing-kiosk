@@ -8,7 +8,7 @@ const { Sequelize, sequelize, Admin, Slot, User, Day, Settings } = require('../.
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
-const { scheduleNewAdminEmail } = require('../../scheduler');
+const { scheduleNewAdminEmail } = require('../../worker');
 
 /**
  * User admin levels:
@@ -654,7 +654,7 @@ router.post('/admins', cas.block, async (request, response) => {
           level: request.body.level,
           uid: uid,
         }, {logging: (msg) => request.log.info(msg)});
-        await scheduleNewAdminEmail(request.body.email, uid);
+        await scheduleNewAdminEmail({calnetid: request.body.email, uid: uid});
         response.send({
           success: true
         });
