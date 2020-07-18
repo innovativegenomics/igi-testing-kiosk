@@ -424,7 +424,15 @@ module.exports.scheduleAppointmentReminderText = async (params = { calnetid, tim
 }
 
 module.exports.deleteAppointmentReminders = async (calnetid) => {
+  const user = await User.findOne({
+    where: {
+      calnetid: calnetid
+    },
+    logging: (msg) => pino.info(msg)
+  });
   await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${user.email}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${user.phone}`]);
     await pgClient.query('select graphile_worker.remove_job($1)', [`${calnetid}-reminder-email`]);
     await pgClient.query('select graphile_worker.remove_job($1)', [`${calnetid}-reminder-text`]);
   });
