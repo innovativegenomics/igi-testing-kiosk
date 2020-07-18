@@ -317,13 +317,13 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
                 week: ((user.Slots[0].location)?beginning.clone().add(1, 'week'):beginning.clone()).format('MMMM Do')
               }
             });
-            helpers.logger.info(`sent email to user ${user.email}`);
+            helpers.logger.info(`${user.email}`);
             helpers.logger.info(status);
           } catch(err) {
-            helpers.logger.error(`failed to send email to user ${user.email}`);
+            helpers.logger.error(`${user.email}`);
             helpers.logger.error(err.stack);
           }
-        })
+        });
       });
       await Promise.all(promises);
       await promiseChain;
