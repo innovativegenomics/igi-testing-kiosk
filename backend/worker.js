@@ -410,7 +410,7 @@ module.exports.scheduleNewAdminEmail = async (params = { email, uid }) => {
 module.exports.scheduleAppointmentReminderEmail = async (params = { calnetid, time, uid }) => {
   const user = await User.findOne({
     where: {
-      calnetid: calnetid
+      calnetid: params.calnetid
     },
     logging: (msg) => pino.info(msg)
   });
@@ -427,7 +427,7 @@ module.exports.scheduleAppointmentReminderEmail = async (params = { calnetid, ti
 module.exports.scheduleAppointmentReminderText = async (params = { calnetid, time, uid }) => {
   const user = await User.findOne({
     where: {
-      calnetid: calnetid
+      calnetid: params.calnetid
     },
     logging: (msg) => pino.info(msg)
   });
