@@ -654,7 +654,7 @@ router.post('/admins', cas.block, async (request, response) => {
           level: request.body.level,
           uid: uid,
         }, {logging: (msg) => request.log.info(msg)});
-        await scheduleNewAdminEmail({calnetid: request.body.email, uid: uid});
+        await scheduleNewAdminEmail({email: request.body.email, uid: uid});
         response.send({
           success: true
         });

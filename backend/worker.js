@@ -92,6 +92,7 @@ const tasks = {
         }
       });
       helpers.logger.info('Sent email');
+      helpers.logger.info(status);
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err);
@@ -121,14 +122,15 @@ const tasks = {
         dynamicTemplateData: {
           location: location,
           locationlink: settings.locationlinks[settings.locations.indexOf(location)],
-          starttime: moment(time).format('h:mm A, MMMM Do'),
-          endtime: moment(time).add(day.window, 'minute').format('h:mm A, MMMM Do'),
+          starttime: moment(time).format('h:mm A'),
+          endtime: moment(time).add(day.window, 'minute').format('h:mm A'),
           day: moment(time).format('MMMM Do'),
           qrlink: `https://igi-fast.berkeley.edu/qrcode?uid=${uid}`,
           qrimg: `https://igi-fast.berkeley.edu/api/emails/qrimg?uid=${uid}`,
         }
       });
       helpers.logger.info('Sent email');
+      helpers.logger.info(status);
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err.stack);
@@ -152,7 +154,7 @@ const tasks = {
       });
       const status = await twilio.messages.create({
         body: `Testing Appointment Confirmation for ${moment(time).format('MMMM Do')} 
-Please arrive between ${moment(time).format('h:mm A, MMMM Do')} and ${moment(time).add(day.window, 'minute').format('h:mm A, MMMM Do')} at location ${location}. 
+Please arrive between ${moment(time).format('h:mm A')} and ${moment(time).add(day.window, 'minute').format('h:mm A')} at location ${location}. 
 To view a map to this location, visit the following link ${settings.locationlinks[settings.locations.indexOf(location)]}. 
 When you arrive, please present the QR code at the following link: https://igi-fast.berkeley.edu/qrcode?uid=${uid}. 
 To change or cancel this appointment, log into your testing account.`,
@@ -160,6 +162,7 @@ To change or cancel this appointment, log into your testing account.`,
         from: config.twilio.sender
       });
       helpers.logger.info('Sent text');
+      helpers.logger.info(status);
     } catch(err) {
       helpers.logger.error(`Could not send text`);
       helpers.logger.error(err.stack);
@@ -185,6 +188,7 @@ To change or cancel this appointment, log into your testing account.`,
         }
       });
       helpers.logger.info('Sent email');
+      helpers.logger.info(status);
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err.stack);
@@ -193,23 +197,38 @@ To change or cancel this appointment, log into your testing account.`,
   appointmentReminderEmail: async (payload, helpers) => {
     const { calnetid, time, uid } = payload;
     try {
-      const user = await User.findOne({
-        where: {
-          calnetid: calnetid
-        },
-        logging: (msg) => helpers.logger.info(msg)
-      });
+      if(!calnetid) {
+        const status = await sgMail.send({
+          to: payload.email,
+          from: config.sendgrid.from,
+          replyTo: config.sendgrid.replyTo,
+          templateId: 'd-be653a90c94b4c50ba124180b9b6a739',
+          dynamicTemplateData: {
+            time: moment(time).format('h:mm A, MMMM Do')
+          }
+        });
+        helpers.logger.info('Sent legacy email');
+        helpers.logger.info(status);
+      } else {
+        const user = await User.findOne({
+          where: {
+            calnetid: calnetid
+          },
+          logging: (msg) => helpers.logger.info(msg)
+        });
 
-      const status = await sgMail.send({
-        to: user.email,
-        from: config.sendgrid.from,
-        replyTo: config.sendgrid.replyTo,
-        templateId: 'd-be653a90c94b4c50ba124180b9b6a739',
-        dynamicTemplateData: {
-          time: moment(time).format('h:mm A, MMMM Do')
-        }
-      });
-      helpers.logger.info('Sent email');
+        const status = await sgMail.send({
+          to: user.email,
+          from: config.sendgrid.from,
+          replyTo: config.sendgrid.replyTo,
+          templateId: 'd-be653a90c94b4c50ba124180b9b6a739',
+          dynamicTemplateData: {
+            time: moment(time).format('h:mm A, MMMM Do')
+          }
+        });
+        helpers.logger.info('Sent email');
+        helpers.logger.info(status);
+      }
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err.stack);
@@ -218,21 +237,34 @@ To change or cancel this appointment, log into your testing account.`,
   appointmentReminderText: async (payload, helpers) => {
     const { calnetid, time, uid } = payload;
     try {
-      const user = await User.findOne({
-        where: {
-          calnetid: calnetid
-        },
-        logging: (msg) => helpers.logger.info(msg)
-      });
-
-      const status = await twilio.messages.create({
-        body: `Reminder that you have a Covid 19 testing appointment in 30 minutes at ${moment(time).format('h:mm A')}! 
+      if(!calnetid) {
+        const status = await twilio.messages.create({
+          body: `Reminder that you have a Covid 19 testing appointment in 30 minutes at ${moment(time).format('h:mm A')}! 
 Make sure not to eat, drink, smoke, or chew gum 30 minutes before your appointment. Be sure to wear your mask, and bring the QR code you received. 
 You can view your appointment by logging into https://igi-fast.berkeley.edu`,
-        to: user.phone,
-        from: config.twilio.sender
-      });
-      helpers.logger.info('Sent text');
+          to: payload.number,
+          from: config.twilio.sender
+        });
+        helpers.logger.info('Sent legacy text');
+        helpers.logger.info(status);
+      } else {
+        const user = await User.findOne({
+          where: {
+            calnetid: calnetid
+          },
+          logging: (msg) => helpers.logger.info(msg)
+        });
+
+        const status = await twilio.messages.create({
+          body: `Reminder that you have a Covid 19 testing appointment in 30 minutes at ${moment(time).format('h:mm A')}! 
+  Make sure not to eat, drink, smoke, or chew gum 30 minutes before your appointment. Be sure to wear your mask, and bring the QR code you received. 
+  You can view your appointment by logging into https://igi-fast.berkeley.edu`,
+          to: user.phone,
+          from: config.twilio.sender
+        });
+        helpers.logger.info('Sent text');
+        helpers.logger.info(status);
+      }
     } catch(err) {
       helpers.logger.error(`Could not send text`);
       helpers.logger.error(err.stack);
@@ -285,8 +317,10 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
                 week: ((user.Slots[0].location)?beginning.clone().add(1, 'week'):beginning.clone()).format('MMMM Do')
               }
             });
+            helpers.logger.info(`sent email to user ${user.email}`);
+            helpers.logger.info(status);
           } catch(err) {
-            helpers.logger.error('failed to send email to user');
+            helpers.logger.error(`failed to send email to user ${user.email}`);
             helpers.logger.error(err.stack);
           }
         })
@@ -315,6 +349,7 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
         }
       });
       helpers.logger.info('Sent email');
+      helpers.logger.info(status);
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err.stack);
