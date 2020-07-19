@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import ReactGA from 'react-ga';
+import axios from 'axios';
 
 import { Navigation, Footer } from './components/navigation.component';
 
@@ -8,6 +9,8 @@ import Landing from './components/public/landing.component';
 import About from './components/public/about.component';
 import QRCode from './components/public/qrcode.component';
 import AccessingResults from './components/public/accessing-results.component';
+import Signup from './components/public/signup.component';
+import Pending from './components/public/pending.component';
 
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
@@ -41,11 +44,15 @@ export default class App extends Component {
         unauthed: false,
         success: false
       },
+      devmode: false,
+      siteKey: ''
     };
     this.landing = withTracker(Landing);
     this.about = withTracker(About);
     this.qrcode = withTracker(QRCode);
     this.accessingResults = withTracker(AccessingResults);
+    this.signup = withTracker(Signup);
+    this.pending = withTracker(Pending);
 
     this.newUser = withTracker(NewUser);
     this.dashboard = withTracker(Dashboard);
@@ -69,8 +76,18 @@ export default class App extends Component {
     this.setState({loaded: false});
     await getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
   }
-  componentDidMount() {
-    getUser().then(res => this.setState({ auth: { ...res, loaded: true } }));
+  componentDidMount = async () => {
+    const user = await getUser();
+    const { data: { devmode } } = await axios.get('/api/utils/devmode');
+    const { data: { siteKey } } = await axios.get('/api/utils/sitekey');
+    this.setState({
+      auth: {
+        ...user,
+        loaded: true
+      },
+      devmode: devmode,
+      siteKey: siteKey
+    });
   }
   render() {
     return (
@@ -79,7 +96,7 @@ export default class App extends Component {
             <Navigation authed={!this.state.auth.unauthed && this.state.auth.loaded} />
 
             <Route path='/' exact render={props => (
-              <this.landing {...props} auth={this.state.auth} />
+              <this.landing {...props} auth={this.state.auth} devmode={this.state.devmode} />
             )} />
             <Route path='/about' render={props => (
               <this.about {...props} auth={this.state.auth} />
@@ -89,6 +106,12 @@ export default class App extends Component {
             )} />
             <Route path='/accessing-results' render={props => (
               <this.accessingResults {...props} auth={this.state.auth} />
+            )} />
+            <Route path='/signup' render={props => (
+              <this.signup {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+            )} />
+            <Route path='/pending' render={props => (
+              <this.pending {...props} auth={this.state.auth} />
             )} />
 
             <Route path='/newuser' render={props => (

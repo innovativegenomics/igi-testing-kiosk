@@ -8,23 +8,15 @@ export default class Landing extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      devmode: false,
       devuser: ''
     };
   }
   handleLoginButton = () => {
-    if (this.state.devmode) {
+    if (this.props.devmode) {
       window.open('/api/users/login?devuser=' + escape(this.state.devuser), '_self');
     } else {
       window.open('/api/users/login', '_self');
     }
-  }
-  componentDidMount() {
-    axios.get('/api/users/devmode').then(res => {
-      this.setState({ devmode: res.data.devmode });
-    }).catch(err => {
-      console.error('could not determine if dev mode is active');
-    });
   }
   render() {
     return (
@@ -55,7 +47,7 @@ export default class Landing extends Component {
               <p className='lead text-center'>To enroll and schedule an appointment:</p>
             </div>
           </div>
-          <div className={`row justify-content-center ${(this.state.devmode) ? '' : 'd-none'}`}>
+          <div className={`row justify-content-center ${(this.props.devmode) ? '' : 'd-none'}`}>
             <div className='col-md-4 text-center pb-2'>
               <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({ devuser: e.target.value })} autoComplete='off' autoCorrect='off' autoCapitalize='none' />
             </div>

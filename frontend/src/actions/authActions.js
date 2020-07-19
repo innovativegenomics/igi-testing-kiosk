@@ -35,3 +35,14 @@ export const reconsentUser = async questions => {
     return { success: false };
   }
 }
+
+export const externalSignup = async (data, token) => {
+  try {
+    const response = await axios.post('/api/users/external/signup', { ...data }, {headers: {'g-recaptcha-response': token}});
+    return response.data;
+  } catch(err) {
+    console.error('error signing up external user');
+    console.error(err);
+    return { success: false };
+  }
+}

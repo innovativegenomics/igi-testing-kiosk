@@ -3,8 +3,14 @@ const router = express.Router();
 // const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 const short = require('short-uuid');
+let Recaptcha;
+if(process.env.NODE_ENV !== 'production') {
+  Recaptcha = new (require('express-recaptcha').RecaptchaV3)('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
+} else {
+  Recaptcha = new (require('express-recaptcha').RecaptchaV3)(require('../../config/keys').recaptcha.siteKey, require('../../config/keys').recaptcha.secretKey);
+}
 
-const { sequelize, Sequelize, User, Slot, Day, Settings } = require('../../models');
+const { sequelize, Sequelize, User, Slot, Day, Settings, ExternalUser } = require('../../models');
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
@@ -246,6 +252,41 @@ router.post('/reconsent', cas.block, async (request, response) => {
     response.send({success: false});
   }
 });
+
+router.post('/external/signup', Recaptcha.middleware.verify, async (request, response) => {
+  if(!request.recaptcha.error) {
+    request.log.info({
+      recaptchaScore: request.recaptcha.data.score
+    });
+    if(request.recaptcha.data.score < 0.5) {
+      request.log.info('recaptcha score less than 0.5');
+      response.status(401);
+    } else {
+      request.log.info('recaptcha score greater than or equal to 0.5');
+      try {
+        await ExternalUser.create({
+          email: request.body.email,
+          name: request.body.name,
+          calnetid: `E${short().new().substring(0, 8)}`,
+          uid: short().new(),
+          jobDescription: request.body.jobDescription,
+          employer: request.body.employer,
+          workFrequency: request.body.workFrequency,
+        }, {logging: (msg) => request.log.info(msg)});
+        response.send({success: true});
+      } catch(err) {
+        request.log.error('error creating new external user');
+        response.send({success: false});
+      }
+    }
+  } else {
+    request.log.error(`Could not get recaptcha response`);
+    request.log.error(request.recaptcha.error);
+    response.status(500).send();
+  }
+});
+
+
 
 /**
  * Quick and dirty way for the frontend to know if the server is dev mode

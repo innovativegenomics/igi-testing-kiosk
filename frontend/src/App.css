@@ -2,6 +2,10 @@
   margin-bottom: 6rem;
 }
 
+.grecaptcha-badge { 
+  visibility: hidden;
+}
+
 .form-group.required .col-form-label:after { 
   content:"*";
   color:red;
