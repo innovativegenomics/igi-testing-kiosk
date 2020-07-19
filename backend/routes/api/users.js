@@ -14,7 +14,7 @@ const { sequelize, Sequelize, User, Slot, Day, Settings, ExternalUser } = requir
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
-const { scheduleSignupEmail } = require('../../worker');
+const { scheduleSignupEmail, scheduleExternalRequestEmail } = require('../../worker');
 
 /**
  * Logs in existing and new users
@@ -273,6 +273,16 @@ router.post('/external/signup', Recaptcha.middleware.verify, async (request, res
           employer: request.body.employer,
           workFrequency: request.body.workFrequency,
         }, {logging: (msg) => request.log.info(msg)});
+        // schedule email
+        try {
+          await scheduleExternalRequestEmail({
+            email: request.body.email,
+            name: request.body.name
+          });
+        } catch(err) {
+          request.log.error(`error sending signup email to ${request.body.name}`);
+          request.log.error(err.stack);
+        }
         response.send({success: true});
       } catch(err) {
         request.log.error('error creating new external user');

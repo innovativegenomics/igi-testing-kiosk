@@ -42,7 +42,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: ''
     },
-  }, {});
+  }, {
+    defaultScope: {
+      attributes: { exclude: ['password'] }
+    }
+  });
   ExternalUser.associate = function(models) {
     // associations can be defined here
   };

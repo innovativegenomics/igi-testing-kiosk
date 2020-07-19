@@ -4,11 +4,11 @@ const moment = require('moment');
 const contentDisposition = require('content-disposition');
 const short = require('short-uuid');
 // const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
-const { Sequelize, sequelize, Admin, Slot, User, Day, Settings } = require('../../models');
+const { Sequelize, sequelize, Admin, Slot, User, Day, Settings, ExternalUser } = require('../../models');
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
-const { scheduleNewAdminEmail } = require('../../worker');
+const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail } = require('../../worker');
 
 /**
  * User admin levels:
@@ -777,6 +777,117 @@ router.delete('/participant', cas.block, async (request, response) => {
     response.status(401).send();
   }
 });
+
+router.get('/external/users', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const search = request.query.search;
+      const extUsers = await ExternalUser.findAll({
+        where: {
+          [Op.or]: {
+            name: {
+              [Op.iLike]: `${search}%`,
+            },
+            email: {
+              [Op.iLike]: `${search}%`,
+            }
+          }
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      response.send({
+        success: true,
+        extUsers: extUsers
+      });
+    } catch(err) {
+      request.log.error('error getting external users');
+      request.log.error(err.stack);
+      response.send({ success: false });
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
+router.post('/external/approve', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const uid = request.body.uid;
+      const extUser = await ExternalUser.findOne({
+        where: {
+          uid: uid
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      extUser.approved = true;
+      await extUser.save();
+      // send approval email
+      try {
+        await scheduleExternalUserApproveEmail({
+          email: extUser.email,
+          name: extUser.name,
+          uid: extUser.uid
+        });
+      } catch(err) {
+        request.log.error(`Error sending external user approval email`);
+        request.log.error(err.stack);
+      }
+      response.send({
+        success: true
+      });
+    } catch(err) {
+      request.log.error(`error approving external user ${request.body.uid}`);
+      request.log.error(err.stack);
+      response.send({ success: false });
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
+router.delete('/external/user', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const uid = request.query.uid;
+      const extUser = await ExternalUser.findOne({
+        where: {
+          uid: uid
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      // send rejection email
+      try {
+        await scheduleExternalUserRejectEmail({
+          email: extUser.email,
+          name: extUser.name
+        });
+      } catch(err) {
+        request.log.error(`Error sending external user reject email`);
+        request.log.error(err.stack);
+      }
+      await extUser.destroy();
+      response.send({
+        success: true
+      });
+    } catch(err) {
+      request.log.error(`error approving external user ${request.body.uid}`);
+      request.log.error(err.stack);
+      response.send({ success: false });
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
 
 
 router.get('/study/participantinfo', cas.block, async (request, response) => {

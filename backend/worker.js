@@ -270,6 +270,64 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
       helpers.logger.error(err.stack);
     }
   },
+  externalRequestEmail: async (payload, helpers) => {
+    const { email, name } = payload;
+    try {
+      const status = await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-ad83a71a4bee4da9b087c65a1dc3cd1c',
+        dynamicTemplateData: {
+          name: name
+        }
+      });
+      helpers.logger.info('Sent email');
+      helpers.logger.info(status);
+    } catch(err) {
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
+    }
+  },
+  externalUserApproveEmail: async (payload, helpers) => {
+    const { email, name, uid } = payload;
+    try {
+      const status = await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-5d6eefc43e4e4b1eafb308409bf5c38c',
+        dynamicTemplateData: {
+          name: name,
+          uid: uid
+        }
+      });
+      helpers.logger.info('Sent email');
+      helpers.logger.info(status);
+    } catch(err) {
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
+    }
+  },
+  externalUserRejectEmail: async (payload, helpers) => {
+    const { email, name } = payload;
+    try {
+      const status = await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-6dfb97a179b64a9c92e85b1c59c7092a',
+        dynamicTemplateData: {
+          name: name
+        }
+      });
+      helpers.logger.info('Sent email');
+      helpers.logger.info(status);
+    } catch(err) {
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
+    }
+  },
   rescheduleUsers: async (payload, helpers) => {
     const t = await sequelize.transaction({logging: (msg) => helpers.logger.info(msg)});
     try {
@@ -396,6 +454,18 @@ module.exports.scheduleSignupEmail = async (params = { calnetid } ) => {
 
 module.exports.scheduleResultInstructionsEmail = async (params = { calnetid }) => {
   await workerUtils.addJob('resultInstructionsEmail', params);
+}
+
+module.exports.scheduleExternalRequestEmail = async (params = { email, name }) => {
+  await workerUtils.addJob('externalRequestEmail', params);
+}
+
+module.exports.scheduleExternalUserApproveEmail = async (params = { email, name, uid }) => {
+  await workerUtils.addJob('externalUserApproveEmail', params);
+}
+
+module.exports.scheduleExternalUserRejectEmail = async (params = { email, name }) => {
+  await workerUtils.addJob('externalUserRejectEmail', params);
 }
 
 module.exports.scheduleNewAdminEmail = async (params = { email, uid }) => {
