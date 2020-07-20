@@ -9,6 +9,7 @@ let Recaptcha;
 if(process.env.NODE_ENV !== 'production') {
   Recaptcha = new (require('express-recaptcha').RecaptchaV3)('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
 } else {
+  console.log(require('../../config/keys').recaptcha.secretKey);
   Recaptcha = new (require('express-recaptcha').RecaptchaV3)(require('../../config/keys').recaptcha.siteKey, require('../../config/keys').recaptcha.secretKey);
 }
 const recaptchaScoreThreshold = 0.0;
