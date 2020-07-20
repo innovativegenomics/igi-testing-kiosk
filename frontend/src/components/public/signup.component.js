@@ -57,6 +57,7 @@ export default class Signup extends Component {
                   }}
                   onSubmit={(values, { setSubmitting }) => {
                     const {confirmEmail, ...data} = values;
+                    console.log(this.props.siteKey);
                     grecaptcha.ready(async () => {
                       try {
                         const token = await grecaptcha.execute(this.props.siteKey, {action: 'signup'});
