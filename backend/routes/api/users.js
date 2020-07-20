@@ -11,6 +11,7 @@ if(process.env.NODE_ENV !== 'production') {
 } else {
   Recaptcha = new (require('express-recaptcha').RecaptchaV3)(require('../../config/keys').recaptcha.siteKey, require('../../config/keys').recaptcha.secretKey);
 }
+const recaptchaScoreThreshold = 0.0;
 
 const { sequelize, Sequelize, User, Slot, Day, Settings, ExternalUser, ResetRequest } = require('../../models');
 const Op = Sequelize.Op;
@@ -258,11 +259,11 @@ router.post('/reconsent', cas.block, async (request, response) => {
 router.post('/external/signup', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
     request.log.info(`recaptcha score: ${request.recaptcha}`);
-    if(request.recaptcha.data.score < 0.5) {
-      request.log.info('recaptcha score less than 0.5');
+    if(request.recaptcha.data.score < recaptchaScoreThreshold) {
+      request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
       response.status(401);
     } else {
-      request.log.info('recaptcha score greater than or equal to 0.5');
+      request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
       try {
         await ExternalUser.create({
           email: request.body.email,
@@ -299,11 +300,11 @@ router.post('/external/signup', Recaptcha.middleware.verify, async (request, res
 router.post('/external/create', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
     request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
-    if(request.recaptcha.data.score < 0.5) {
-      request.log.info('recaptcha score less than 0.5');
+    if(request.recaptcha.data.score < recaptchaScoreThreshold) {
+      request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
       response.status(401);
     } else {
-      request.log.info('recaptcha score greater than or equal to 0.5');
+      request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
       try {
         const extUser = await ExternalUser.findOne({
           attributes: ['password', 'uid', 'id'],
@@ -340,11 +341,11 @@ router.post('/external/create', Recaptcha.middleware.verify, async (request, res
 router.post('/external/login', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
     request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
-    if(request.recaptcha.data.score < 0.5) {
-      request.log.info('recaptcha score less than 0.5');
+    if(request.recaptcha.data.score < recaptchaScoreThreshold) {
+      request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
       response.status(401);
     } else {
-      request.log.info('recaptcha score greater than or equal to 0.5');
+      request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
       try {
         const extUser = await ExternalUser.findOne({
           attributes: ['password', 'email', 'id', 'calnetid'],
@@ -384,11 +385,11 @@ router.post('/external/login', Recaptcha.middleware.verify, async (request, resp
 router.post('/external/forgot', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
     request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
-    if(request.recaptcha.data.score < 0.5) {
-      request.log.info('recaptcha score less than 0.5');
+    if(request.recaptcha.data.score < recaptchaScoreThreshold) {
+      request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
       response.status(401);
     } else {
-      request.log.info('recaptcha score greater than or equal to 0.5');
+      request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
       try {
         const user = await ExternalUser.findOne({
           where: {
@@ -433,11 +434,11 @@ router.post('/external/forgot', Recaptcha.middleware.verify, async (request, res
 router.post('/external/reset', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
     request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
-    if(request.recaptcha.data.score < 0.5) {
-      request.log.info('recaptcha score less than 0.5');
+    if(request.recaptcha.data.score < recaptchaScoreThreshold) {
+      request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
       response.status(401);
     } else {
-      request.log.info('recaptcha score greater than or equal to 0.5');
+      request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
       try {
         const resetReq = await ResetRequest.findOne({
           where: {
