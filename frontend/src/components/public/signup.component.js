@@ -61,6 +61,7 @@ export default class Signup extends Component {
                     grecaptcha.ready(async () => {
                       try {
                         const token = await grecaptcha.execute(this.props.siteKey, {action: 'signup'});
+                        console.log(token);
                         const { success } = await externalSignup(data, token);
                         setSubmitting(false);
                         if(!success) {
