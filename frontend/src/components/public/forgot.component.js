@@ -1,12 +1,11 @@
 /*global grecaptcha*/
 import React, { Component } from 'react';
-import { Link } from 'react-router-dom';
-import { Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { Row, Col, Card, Form, Button } from 'react-bootstrap';
 import { Formik } from 'formik';
 
-import { externalLogin } from '../../actions/authActions';
+import { externalForgotPassword } from '../../actions/authActions';
 
-export default class ExtLogin extends Component {
+export default class Forgot extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -19,22 +18,19 @@ export default class ExtLogin extends Component {
         <Col></Col>
         <Col lg={5} md={6} sm={7}>
           <Card>
-            <Card.Body>
-              <p className='h1 font-weight-light text-center'>Login without a CalNet ID</p>
-              <Alert variant='danger' className={(this.state.success===false)?'':'d-none'}>
-                Incorrect email or password
-              </Alert>
+            <Card.Body className={this.state.success!==true?'':'d-none'}>
+              <p className='h1 font-weight-light text-center'>Forgot password</p>
+              <p>
+                Enter your email below, and we'll send you an email with
+                instructions for reseting your password.
+              </p>
               <Formik
-                initialValues={{ email: '', password: '' }}
+                initialValues={{ email: '' }}
                 validate={values => {
                   const errors = {};
 
                   if(!values.email) {
-                    errors.email = 'email required!';
-                  }
-
-                  if(!values.password) {
-                    errors.password = `password required!`;
+                    errors.email = 'email required';
                   }
 
                   return errors;
@@ -42,14 +38,12 @@ export default class ExtLogin extends Component {
                 onSubmit={(values, { setSubmitting }) => {
                   grecaptcha.ready(async () => {
                     try {
-                      const token = await grecaptcha.execute(this.props.siteKey, {action: 'login'});
-                      const { success } = await externalLogin(values, token);
-                      setSubmitting(false);
+                      const token = await grecaptcha.execute(this.props.siteKey, {action: 'forgot'});
+                      const { success } = await externalForgotPassword(values, token);
                       this.setState({success: success});
+                      setSubmitting(false);
                       if(!success) {
-                      } else {
-                        await this.props.reloadProfile();
-                        this.props.history.push('/dashboard');
+                        alert(`Oops! There was a problem. Please try again!`);
                       }
                     } catch(err) {
                       console.error('Error getting token');
@@ -85,26 +79,18 @@ export default class ExtLogin extends Component {
                         {errors.email && touched.email && errors.email}
                       </p>
                     </Form.Group>
-                    <Form.Group>
-                      <Form.Label>Password</Form.Label>
-                      <Form.Control
-                        type='password'
-                        name='password'
-                        placeholder='password'
-                        className={(errors.password && touched.password)?'border-danger':''}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                        value={values.password}
-                      />
-                      <p className={`m-0 text-danger ${errors.password?'':'d-none'}`}>
-                        {errors.password && touched.password && errors.password}
-                      </p>
-                      <Link to='/forgot'>Forgot password</Link>
-                    </Form.Group>
                     <Button type='submit' disabled={isSubmitting}>Submit</Button>
                   </Form>
                 )}
               </Formik>
+            </Card.Body>
+            <Card.Body className={this.state.success!==true?'d-none':''}>
+              <p className='h1 font-weight-light'>Forgot password email sent</p>
+              <p>
+                You should receive an email shortly with instructions on how
+                to reset your password. Make sure to check spam if you aren't
+                receiving the email.
+              </p>
             </Card.Body>
           </Card>
         </Col>

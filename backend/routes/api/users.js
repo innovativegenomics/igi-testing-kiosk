@@ -4,6 +4,7 @@ const router = express.Router();
 const moment = require('moment');
 const bcrypt = require('bcrypt');
 const short = require('short-uuid');
+const { v4: uuidv4 } = require('uuid');
 let Recaptcha;
 if(process.env.NODE_ENV !== 'production') {
   Recaptcha = new (require('express-recaptcha').RecaptchaV3)('6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI', '6LeIxAcTAAAAAGG-vFI1TnRWxMZNFuojJ4WifJWe');
@@ -11,11 +12,11 @@ if(process.env.NODE_ENV !== 'production') {
   Recaptcha = new (require('express-recaptcha').RecaptchaV3)(require('../../config/keys').recaptcha.siteKey, require('../../config/keys').recaptcha.secretKey);
 }
 
-const { sequelize, Sequelize, User, Slot, Day, Settings, ExternalUser } = require('../../models');
+const { sequelize, Sequelize, User, Slot, Day, Settings, ExternalUser, ResetRequest } = require('../../models');
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
-const { scheduleSignupEmail, scheduleExternalRequestEmail } = require('../../worker');
+const { scheduleSignupEmail, scheduleExternalRequestEmail, scheduleExternalUserForgotEmail } = require('../../worker');
 
 /**
  * Logs in existing and new users
@@ -369,6 +370,102 @@ router.post('/external/login', Recaptcha.middleware.verify, async (request, resp
         }
       } catch(err) {
         request.log.error('error creating new external user');
+        request.log.error(err.stack);
+        response.send({success: false});
+      }
+    }
+  } else {
+    request.log.error(`Could not get recaptcha response`);
+    request.log.error(request.recaptcha.error);
+    response.status(500).send();
+  }
+});
+
+router.post('/external/forgot', Recaptcha.middleware.verify, async (request, response) => {
+  if(!request.recaptcha.error) {
+    request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
+    if(request.recaptcha.data.score < 0.5) {
+      request.log.info('recaptcha score less than 0.5');
+      response.status(401);
+    } else {
+      request.log.info('recaptcha score greater than or equal to 0.5');
+      try {
+        const user = await ExternalUser.findOne({
+          where: {
+            email: request.body.email
+          },
+          logging: (msg) => request.log.info(msg)
+        });
+        if(!user) {
+          request.log.info(`no user with email ${request.body.email}`);
+          response.send({success: true});
+          return;
+        }
+        const resetReq = await ResetRequest.create({
+          uid: uuidv4(),
+          useruid: user.uid,
+          expires: moment().add(1, 'hour')
+        }, {logging: (msg) => request.log.info(msg)});
+        try {
+          await scheduleExternalUserForgotEmail({
+            email: user.email,
+            name: user.name,
+            uid: resetReq.uid
+          });
+        } catch(err) {
+          request.log.error('error scheduling forgot email');
+          request.log.error(err.stack);
+        }
+        response.send({success: true});
+      } catch(err) {
+        request.log.error('error with external forgot request');
+        request.log.error(err.stack);
+        response.send({success: false});
+      }
+    }
+  } else {
+    request.log.error(`Could not get recaptcha response`);
+    request.log.error(request.recaptcha.error);
+    response.status(500).send();
+  }
+});
+
+router.post('/external/reset', Recaptcha.middleware.verify, async (request, response) => {
+  if(!request.recaptcha.error) {
+    request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
+    if(request.recaptcha.data.score < 0.5) {
+      request.log.info('recaptcha score less than 0.5');
+      response.status(401);
+    } else {
+      request.log.info('recaptcha score greater than or equal to 0.5');
+      try {
+        const resetReq = await ResetRequest.findOne({
+          where: {
+            uid: request.body.uid
+          },
+          logging: (msg) => request.log.info(msg)
+        });
+        if(!resetReq) {
+          request.log.info(`no reset request found for uid ${request.body.uid}`);
+          response.send({success: false});
+          return;
+        } else if(moment(resetReq.expires).isBefore(moment())) {
+          request.log.info(`reset request expired for ${request.body.uid}`);
+          await resetReq.destroy();
+          return;
+        }
+        const user = await ExternalUser.findOne({
+          where: {
+            uid: resetReq.useruid
+          },
+          logging: (msg) => request.log.info(msg)
+        });
+        user.password = await bcrypt.hash(request.body.password, 10);
+        await user.save();
+        await resetReq.destroy();
+        response.send({success: true});
+      } catch(err) {
+        request.log.error('error reseting external password');
         request.log.error(err.stack);
         response.send({success: false});
       }

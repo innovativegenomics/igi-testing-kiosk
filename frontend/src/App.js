@@ -12,6 +12,8 @@ import AccessingResults from './components/public/accessing-results.component';
 import Signup from './components/public/signup.component';
 import Create from './components/public/create.component';
 import ExtLogin from './components/public/extlogin.component';
+import Forgot from './components/public/forgot.component';
+import Reset from './components/public/reset.component';
 
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
@@ -55,6 +57,8 @@ export default class App extends Component {
     this.signup = withTracker(Signup);
     this.create = withTracker(Create);
     this.extlogin = withTracker(ExtLogin);
+    this.forgot = withTracker(Forgot);
+    this.reset = withTracker(Reset);
 
     this.newUser = withTracker(NewUser);
     this.dashboard = withTracker(Dashboard);
@@ -117,6 +121,12 @@ export default class App extends Component {
             )} />
             <Route path='/extlogin' render={props => (
               <this.extlogin {...props} auth={this.state.auth} siteKey={this.state.siteKey} reloadProfile={this.reloadProfile} />
+            )} />
+            <Route path='/forgot' render={props => (
+              <this.forgot {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+            )} />
+            <Route path='/reset' render={props => (
+              <this.reset {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
             )} />
 
             <Route path='/newuser' render={props => (

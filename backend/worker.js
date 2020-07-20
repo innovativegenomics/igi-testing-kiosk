@@ -328,6 +328,26 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
       helpers.logger.error(err);
     }
   },
+  externalUserForgotEmail: async (payload, helpers) => {
+    const { email, uid, name } = payload;
+    try {
+      const status = await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-575c8c658e9541728bc683dce3c9ee37',
+        dynamicTemplateData: {
+          name: name,
+          uid: uid
+        }
+      });
+      helpers.logger.info('Sent email');
+      helpers.logger.info(status);
+    } catch(err) {
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
+    }
+  },
   rescheduleUsers: async (payload, helpers) => {
     const t = await sequelize.transaction({logging: (msg) => helpers.logger.info(msg)});
     try {
@@ -466,6 +486,10 @@ module.exports.scheduleExternalUserApproveEmail = async (params = { email, name,
 
 module.exports.scheduleExternalUserRejectEmail = async (params = { email, name }) => {
   await workerUtils.addJob('externalUserRejectEmail', params);
+}
+
+module.exports.scheduleExternalUserForgotEmail = async (params = { email, uid, name }) => {
+  await workerUtils.addJob('externalUserForgotEmail', params);
 }
 
 module.exports.scheduleNewAdminEmail = async (params = { email, uid }) => {
