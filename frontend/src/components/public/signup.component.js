@@ -204,15 +204,15 @@ export default class Signup extends Component {
           </Card.Body>
           <Card.Body className={(this.state.success === true?``:`d-none`)}>
             <p className='h1 font-weight-light'>
-              Thanks for signing up!
+              Request received!
             </p>
             <p>
               You have successfully requested to join the study!
-              You should have received a confirmation email (maybe check spam).
-              Our study coordinator will review your request, and will
-              notify you by email in a day or two whether you have been
-              accepted into the study or not. If accepted, you will then be
-              prompted to create an account and schedule a testing appointment.
+              Our study coordinator will review your request, 
+              and will notify you within 3 business days regarding 
+              your request to enroll. If you are eligible for the 
+              study, you will then be prompted to create an account 
+              and schedule a testing appointment.
             </p>
             <p>
               If you have any questions or concerns, please contact the study
