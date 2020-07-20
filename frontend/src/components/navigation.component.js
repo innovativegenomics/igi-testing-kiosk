@@ -18,6 +18,12 @@ class LogoutLink extends Component {
 
 export class Navigation extends Component {
   render() {
+    let calnetid;
+    try {
+      calnetid = this.props.auth.user.calnetid;
+    } catch(err) {
+      calnetid = '';
+    }
     return (
       <Navbar bg='white' expand='sm' className='mb-2 border-bottom'>
         <Navbar.Brand>
@@ -31,35 +37,16 @@ export class Navigation extends Component {
             <Nav.Link as={TrackedLink} to='/accessing-results' label='navbar' className={this.props.authed?'':'d-none'}>Accessing Results</Nav.Link>
           </Nav>
           <Form inline className={this.props.authed?'':'d-none'}>
-            <Nav.Link as={TrackedLink} ext to='/api/users/logout' className='btn btn-primary text-white'>CalNet Logout</Nav.Link>
+            <Nav.Link as={TrackedLink} ext to='/api/users/logout' className='btn btn-primary text-white'>
+              {calnetid.substring(0,1)==='E'?
+                'CalNet Logout'
+                :
+                'Logout'
+              }
+            </Nav.Link>
           </Form>
         </Navbar.Collapse>
       </Navbar>
-      // <nav className='navbar navbar-expand-lg navbar-light p-3' style={{ fontFamily: 'Raleway' }}>
-      //   <Link to='/'><div className='navbar-brand igi-header font-weight-light mx-auto'>IGI <i>FAST</i></div></Link>
-      //   <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-      //     <span className="navbar-toggler-icon"></span>
-      //   </button>
-      //   <div className='collapse navbar-collapse' id='navbarCollapse'>
-      //     <ul className="navbar-nav mr-auto">
-      //       <li className='nav-item pl-5'>
-      //         <Link className='lead' to='/about'>About</Link>
-      //       </li>
-      //       <li className={`nav-item pl-5 ${(!this.props.authed && !this.props.admin) ? '' : 'd-none'}`}>
-      //         <a className='lead' href={'/api/admin/login' + (this.props.devuser?'?devuser='+this.props.devuser:'')}>Admin</a>
-      //       </li>
-      //       <li className={`nav-item pl-5 ${(this.props.admin) ? '' : 'd-none'}`}>
-      //         <Link className='lead' to={'/admin/dashboard'}>Dashboard</Link>
-      //       </li>
-      //       <li className={`nav-item pl-5 ${(this.props.authed && !this.props.admin) ? '' : 'd-none'}`}>
-      //         <Link className='lead' to={'/dashboard'}>Appointment</Link>
-      //       </li>
-      //     </ul>
-      //     <form className='form-inline'>
-      //       <LogoutLink visible={this.props.authed || this.props.showLogout} address={this.props.admin?'/api/admin/logout':'/api/users/logout'} />
-      //     </form>
-      //   </div>
-      // </nav>
     );
   }
 }

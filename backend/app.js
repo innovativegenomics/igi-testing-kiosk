@@ -27,6 +27,7 @@ const slots = require('./routes/api/slots');
 const admin = require('./routes/api/admin');
 const emails = require('./routes/api/emails');
 const slack = require('./routes/api/slack');
+const utils = require('./routes/api/utils');
 
 const { startWorker, scheduleRescheduleUsers } = require('./worker');
 
@@ -97,7 +98,8 @@ module.exports = (async () => {
     app.use('/api/slots', slots);
     app.use('/api/admin', admin);
     app.use('/api/emails', emails);
-    app.use('/api/slack', slack)
+    app.use('/api/slack', slack);
+    app.use('/api/utils', utils);
     return app;
   } catch (err) {
     pino.fatal('Database initialization error!');

@@ -243,3 +243,36 @@ export const deleteUser = async (calnetid) => {
     return { success: false };
   }
 }
+
+export const getExternalUsers = async search => {
+  try {
+    const response = await axios.get('/api/admin/external/users', {params: {search: search}});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get external users`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const approveExternalUser = async uid => {
+  try {
+    const response = await axios.post('/api/admin/external/approve', {uid: uid});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't approve external user`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const rejectExternalUser = async uid => {
+  try {
+    const response = await axios.delete('/api/admin/external/user', {params: {uid: uid}});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't reject external user`);
+    console.error(err);
+    return { success: false };
+  }
+}
