@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 // const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
+const bcrypt = require('bcrypt');
 const short = require('short-uuid');
 let Recaptcha;
 if(process.env.NODE_ENV !== 'production') {
@@ -255,9 +256,7 @@ router.post('/reconsent', cas.block, async (request, response) => {
 
 router.post('/external/signup', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
-    request.log.info({
-      recaptchaScore: request.recaptcha.data.score
-    });
+    request.log.info(`recaptcha score: ${request.recaptcha}`);
     if(request.recaptcha.data.score < 0.5) {
       request.log.info('recaptcha score less than 0.5');
       response.status(401);
@@ -286,6 +285,91 @@ router.post('/external/signup', Recaptcha.middleware.verify, async (request, res
         response.send({success: true});
       } catch(err) {
         request.log.error('error creating new external user');
+        response.send({success: false});
+      }
+    }
+  } else {
+    request.log.error(`Could not get recaptcha response`);
+    request.log.error(request.recaptcha.error);
+    response.status(500).send();
+  }
+});
+
+router.post('/external/create', Recaptcha.middleware.verify, async (request, response) => {
+  if(!request.recaptcha.error) {
+    request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
+    if(request.recaptcha.data.score < 0.5) {
+      request.log.info('recaptcha score less than 0.5');
+      response.status(401);
+    } else {
+      request.log.info('recaptcha score greater than or equal to 0.5');
+      try {
+        const extUser = await ExternalUser.findOne({
+          attributes: ['password', 'uid', 'id'],
+          where: {
+            uid: request.body.uid
+          },
+          logging: (msg) => request.log.info(msg)
+        });
+        if(!extUser) {
+          response.send({success: false});
+          return;
+        }
+        if(extUser.password) {
+          response.send({success: false});
+          return;
+        }
+        const hash = await bcrypt.hash(request.body.password, 10);
+        extUser.password = hash;
+        await extUser.save();
+        response.send({success: true});
+      } catch(err) {
+        request.log.error('error creating new external user');
+        request.log.error(err.stack);
+        response.send({success: false});
+      }
+    }
+  } else {
+    request.log.error(`Could not get recaptcha response`);
+    request.log.error(request.recaptcha.error);
+    response.status(500).send();
+  }
+});
+
+router.post('/external/login', Recaptcha.middleware.verify, async (request, response) => {
+  if(!request.recaptcha.error) {
+    request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
+    if(request.recaptcha.data.score < 0.5) {
+      request.log.info('recaptcha score less than 0.5');
+      response.status(401);
+    } else {
+      request.log.info('recaptcha score greater than or equal to 0.5');
+      try {
+        const extUser = await ExternalUser.findOne({
+          attributes: ['password', 'email', 'id', 'calnetid'],
+          where: {
+            email: request.body.email
+          },
+          logging: (msg) => request.log.info(msg)
+        });
+        if(!extUser) {
+          response.send({success: false});
+          return;
+        }
+        if(!extUser.password) {
+          response.send({success: false});
+          return;
+        }
+        const same = await bcrypt.compare(request.body.password, extUser.password);
+        if(same) {
+          request.session.cas_user = extUser.calnetid;
+          response.send({success: true});
+        } else {
+          response.send({success: false});
+        }
+      } catch(err) {
+        request.log.error('error creating new external user');
+        request.log.error(err.stack);
         response.send({success: false});
       }
     }

@@ -187,6 +187,13 @@ export default class Signup extends Component {
                           </Form.Text>
                         </Col>
                       </Form.Group>
+                      <p>
+                        By clicking "Sign up", I affirm that I am (1) approved by UC Berkeley to work
+                        inside campus buildings as a government employee, other
+                        UC campus or UCOP employee, contractor, or other service
+                        worker and (2) expect to work on campus at least 2 days
+                        per month.
+                      </p>
                       <Button variant='primary' type='submit' disabled={isSubmitting}>Sign up</Button>
                     </Form>
                   )}

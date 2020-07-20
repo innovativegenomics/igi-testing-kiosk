@@ -46,3 +46,25 @@ export const externalSignup = async (data, token) => {
     return { success: false };
   }
 }
+
+export const externalSetPassword = async (data, uid, token) => {
+  try {
+    const response = await axios.post('/api/users/external/create', { ...data, uid: uid }, {headers: {'g-recaptcha-response': token}});
+    return response.data;
+  } catch(err) {
+    console.error('error creating external user');
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const externalLogin = async (data, token) => {
+  try {
+    const response = await axios.post('/api/users/external/login', { ...data }, {headers: {'g-recaptcha-response': token}});
+    return response.data;
+  } catch(err) {
+    console.error('error logging in external user');
+    console.error(err);
+    return { success: false };
+  }
+}

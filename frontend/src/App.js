@@ -10,7 +10,8 @@ import About from './components/public/about.component';
 import QRCode from './components/public/qrcode.component';
 import AccessingResults from './components/public/accessing-results.component';
 import Signup from './components/public/signup.component';
-import Pending from './components/public/pending.component';
+import Create from './components/public/create.component';
+import ExtLogin from './components/public/extlogin.component';
 
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
@@ -52,7 +53,8 @@ export default class App extends Component {
     this.qrcode = withTracker(QRCode);
     this.accessingResults = withTracker(AccessingResults);
     this.signup = withTracker(Signup);
-    this.pending = withTracker(Pending);
+    this.create = withTracker(Create);
+    this.extlogin = withTracker(ExtLogin);
 
     this.newUser = withTracker(NewUser);
     this.dashboard = withTracker(Dashboard);
@@ -110,8 +112,11 @@ export default class App extends Component {
             <Route path='/signup' render={props => (
               <this.signup {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
             )} />
-            <Route path='/pending' render={props => (
-              <this.pending {...props} auth={this.state.auth} />
+            <Route path='/create' render={props => (
+              <this.create {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+            )} />
+            <Route path='/extlogin' render={props => (
+              <this.extlogin {...props} auth={this.state.auth} siteKey={this.state.siteKey} reloadProfile={this.reloadProfile} />
             )} />
 
             <Route path='/newuser' render={props => (
