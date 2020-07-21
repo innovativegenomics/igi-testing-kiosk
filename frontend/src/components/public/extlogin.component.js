@@ -101,7 +101,14 @@ export default class ExtLogin extends Component {
                       </p>
                       <Link to='/forgot'>Forgot password</Link>
                     </Form.Group>
-                    <Button type='submit' disabled={isSubmitting}>Submit</Button>
+                    <Row>
+                      <Col md='auto'>
+                        <Button type='submit' disabled={isSubmitting}>Submit</Button>
+                      </Col>
+                      <Col className='m-auto'>
+                        <p className='m-0'>Don't have an account? <Link to='/signup'>Enroll!</Link></p>
+                      </Col>
+                    </Row>
                   </Form>
                 )}
               </Formik>
