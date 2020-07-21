@@ -38,7 +38,7 @@ export const reconsentUser = async questions => {
 
 export const externalSignup = async (data, token) => {
   try {
-    const response = await axios.post('/api/users/external/signup', { ...data }, {headers: {'g-recaptcha-response': token}});
+    const response = await axios.post('/api/users/external/signup', { ...data }, {params: {'g-recaptcha-response': token}});
     return response.data;
   } catch(err) {
     console.error('error signing up external user');
@@ -49,7 +49,7 @@ export const externalSignup = async (data, token) => {
 
 export const externalSetPassword = async (data, uid, token) => {
   try {
-    const response = await axios.post('/api/users/external/create', { ...data, uid: uid }, {headers: {'g-recaptcha-response': token}});
+    const response = await axios.post('/api/users/external/create', { ...data, uid: uid }, {params: {'g-recaptcha-response': token}});
     return response.data;
   } catch(err) {
     console.error('error creating external user');
@@ -60,7 +60,7 @@ export const externalSetPassword = async (data, uid, token) => {
 
 export const externalLogin = async (data, token) => {
   try {
-    const response = await axios.post('/api/users/external/login', { ...data }, {headers: {'g-recaptcha-response': token}});
+    const response = await axios.post('/api/users/external/login', { ...data }, {params: {'g-recaptcha-response': token}});
     return response.data;
   } catch(err) {
     console.error('error logging in external user');
@@ -71,7 +71,7 @@ export const externalLogin = async (data, token) => {
 
 export const externalForgotPassword = async (data, token) => {
   try {
-    const response = await axios.post('/api/users/external/forgot', { ...data }, {headers: {'g-recaptcha-response': token}});
+    const response = await axios.post('/api/users/external/forgot', { ...data }, {params: {'g-recaptcha-response': token}});
     return response.data;
   } catch(err) {
     console.error('error sending forgot password email');
@@ -82,7 +82,7 @@ export const externalForgotPassword = async (data, token) => {
 
 export const externalResetPassword = async (data, uid, token) => {
   try {
-    const response = await axios.post('/api/users/external/reset', { ...data, uid: uid }, {headers: {'g-recaptcha-response': token}});
+    const response = await axios.post('/api/users/external/reset', { ...data, uid: uid }, {params: {'g-recaptcha-response': token}});
     return response.data;
   } catch(err) {
     console.error('error sending forgot password email');
