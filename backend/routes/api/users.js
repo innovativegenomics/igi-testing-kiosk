@@ -259,7 +259,7 @@ router.post('/reconsent', cas.block, async (request, response) => {
 
 router.post('/external/signup', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {
-    request.log.info(`recaptcha score: ${request.recaptcha}`);
+    request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
     if(request.recaptcha.data.score < recaptchaScoreThreshold) {
       request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
       response.status(401);
