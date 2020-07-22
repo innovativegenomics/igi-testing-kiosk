@@ -98,7 +98,7 @@ export default class Scanner extends Component {
             <p className='lead'>Time: {moment(this.state.slot.time).format('dddd, MMMM D h:mm A')}</p>
             <p className={'lead '+(this.state.slot.completed?'':'d-none')}>Completed: {moment(this.state.slot.completed).format('dddd, MMMM D h:mm A')}</p>
             <p className='lead'>Location: {this.state.slot.location}</p>
-            <p className='lead'>Has had previous appointment: {this.state.slot.apptCount > 1?'Yes':'No'}</p>
+            <p className='lead'>Has had previous appointment: {this.state.slot.apptCount > 0?'Yes':'No'}</p>
           </Col>
           :
           <br />
