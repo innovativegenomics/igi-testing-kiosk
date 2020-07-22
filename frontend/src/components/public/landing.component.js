@@ -54,13 +54,13 @@ export default class Landing extends Component {
           </div>
           <div className='row justify-content-center mb-2'>
             <div className='col text-center'>
-              <TrackedButton variant='primary' size='lg' onClick={this.handleLoginButton} category='login' action='calnet user login'>
+              <TrackedButton variant='primary' size='lg' onClick={this.handleLoginButton} label='/api/users/login' action='calnet user login'>
                 Log in with CalNet ID
               </TrackedButton>
               <br />
-              <TrackedButton className='mt-2' variant='outline-primary' size='lg' onClick={e => this.props.history.push('/extlogin')} category='login' action='signin'>Log in without a CalNet ID</TrackedButton>
+              <TrackedButton className='mt-2' variant='outline-primary' size='lg' onClick={e => this.props.history.push('/extlogin')} label='/extlogin' action='external sign in'>Log in without a CalNet ID</TrackedButton>
               <p className='mt-4 lead'>Don't have a CalNet ID, but still want to enroll?</p>
-              <TrackedButton variant='outline-primary' size='lg' onClick={e => this.props.history.push('/signup')} category='login' action='signup'>Sign up without a CalNet ID</TrackedButton>
+              <TrackedButton variant='outline-primary' size='lg' onClick={e => this.props.history.push('/signup')} label='/signup' action='external sign up'>Sign up without a CalNet ID</TrackedButton>
             </div>
           </div>
         </div>

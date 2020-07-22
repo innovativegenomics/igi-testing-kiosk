@@ -49,7 +49,7 @@ class Calendar extends Component {
         if (day < startDay) {
           btnRow.push(<DateButton grey={true} day={lastMonth.daysInMonth() - startDay + 1 + day} key={day} />);
         } else if (day >= startDay && day < this.props.month.daysInMonth() + startDay) {
-          const active = !this.props.days.every(e => !e.startOf('day').isSame(this.props.month.clone().set('date', day - startDay + 1).startOf('day')));
+          const active = !this.props.days.every(l => l.every(e => !e.startOf('day').isSame(this.props.month.clone().set('date', day - startDay + 1).startOf('day'))));
           const dayMoment = this.props.month.clone().set('date', day - startDay + 1);
           btnRow.push(<DateButton active={active} selected={dayMoment.isSame(this.props.day)} day={day - startDay + 1} onClick={e => this.props.setDay(dayMoment)} key={day} />);
         } else {
@@ -239,9 +239,9 @@ export default class Scheduler extends Component {
         success: false,
         loaded: false,
       },
-      location: '',
       day: null,
       month: moment().startOf('month').startOf('day'),
+      location: null,
       selected: null,
       success: false,
       showConfirmModal: false,
@@ -250,11 +250,11 @@ export default class Scheduler extends Component {
     };
   }
   componentDidMount() {
-    getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true }, location: Object.keys(res.available)[0] }));
+    getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true } }));
   }
-  handleRequest = async selected => {
+  handleRequest = async (selected, location) => {
     this.setState({selected: selected});
-    const { success } = await reserveSlot(moment(selected), this.state.location);
+    const { success } = await reserveSlot(moment(selected), location);
     if(success) {
       this.setState({showConfirmModal: true});
     } else {
@@ -310,27 +310,21 @@ export default class Scheduler extends Component {
     Object.keys(this.state.schedule.available).forEach(k => {
       locationOptions.push(<option key={k}>{k}</option>);
     });
-    const slots = Object.keys(this.state.schedule.available[this.state.location] || {}).filter(v => {
-      return this.state.schedule.available[this.state.location][v] > 0;
-    }).map(v => moment(v));
+    const slots = {};
+    Object.keys(this.state.schedule.available || {}).map(v => {
+      slots[v] = Object.keys(this.state.schedule.available[v] || {}).filter(iv => {
+        return this.state.schedule.available[v][iv] > 0;
+      }).map(iv => moment(iv));
+    });
     return (
       <div>
         <div className='container'>
-          <div className='row justify-content-center m-3'>
-            <div className='col-sm-4'>
-              <p className='lead'>Location:</p>
-              <select className='form-control' onChange={e => this.setState({ location: e.target.value, day: null, month: moment(Object.keys(this.state.schedule.available[e.target.value])[0]).startOf('month').startOf('day') })} value={this.state.location}>
-                <option value=''>--location--</option>
-                {locationOptions}
-              </select>
-            </div>
-          </div>
           <div className='row justify-content-center'>
             <Calendar month={this.state.month} setMonth={m => this.setState({month: m})} days={slots} setDay={d => this.setState({ day: d })} day={this.state.day} />
           </div>
           <div className='row justify-content-center'>
-            <div className='col-sm-8'>
-              {this.state.day ? <AppointmentTable slots={this.state.schedule.available[this.state.location]} location={this.state.location} day={this.state.day} request={this.handleRequest} /> : <br />}
+            <div className='col-sm-auto'>
+              {this.state.day ? <AppointmentTable slots={this.state.schedule.available} day={this.state.day} request={this.handleRequest} /> : <br />}
             </div>
           </div>
         </div>

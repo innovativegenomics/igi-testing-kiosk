@@ -11,9 +11,9 @@ export default class About extends Component {
         <Container>
           <p className='display-4 text-center'>IGI FAST: Free Asymptomatic Saliva Testing</p>
           <ul>
-            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`} label='bill of rights english 1'>IGI FAST Bill of Rights</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`} label='bill of rights english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsSpanish.pdf`} label='bill of rights spanish 1'>Español</TrackedLink></li>
-            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`} label='info sheet english 1'>IGI FAST Info Sheet</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`} label='info sheet english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetSpanish.pdf`} label='info sheet spanish 1'>Español</TrackedLink></li>
-            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`} label='informed consent english 1'>IGI FAST Informed Consent</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`} label='informed consent english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentSpanish.pdf`} label='informed consent spanish 1'>Español</TrackedLink></li>
+            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`} action='bill of rights english 1'>IGI FAST Bill of Rights</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsEnglish.pdf`} action='bill of rights english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/billOfRightsSpanish.pdf`} action='bill of rights spanish 1'>Español</TrackedLink></li>
+            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`} action='info sheet english 1'>IGI FAST Info Sheet</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetEnglish.pdf`} action='info sheet english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/infoSheetSpanish.pdf`} action='info sheet spanish 1'>Español</TrackedLink></li>
+            <li><TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`} action='informed consent english 1'>IGI FAST Informed Consent</TrackedLink> - <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentEnglish.pdf`} action='informed consent english 2'>English</TrackedLink>, <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/informedConsentSpanish.pdf`} action='informed consent spanish 1'>Español</TrackedLink></li>
           </ul>
           <p>
             Community spread of COVID-19 is likely exacerbated by transmission from people who
@@ -26,26 +26,26 @@ export default class About extends Component {
           <p>
             This test is for people without symptoms who are approved to work on campus or
             campus satellite locations. If you do not pass the campus screener the day of an
-            appointment, please do not come to campus, cancel your appointment, and visit <TrackedLink ext to='https://uhs.berkeley.edu/coronavirus-covid-19-information' label='uhs guidance'>https://uhs.berkeley.edu/coronavirus-covid-19-information</TrackedLink> for guidance. 
+            appointment, please do not come to campus, cancel your appointment, and visit <TrackedLink ext to='https://uhs.berkeley.edu/coronavirus-covid-19-information' action='uhs guidance'>https://uhs.berkeley.edu/coronavirus-covid-19-information</TrackedLink> for guidance. 
             Additionally, if you are concerned 
             that you may have been exposed to someone with COVID-19, contact UHS.
           </p>
           <p>
-            For more information and to enroll, see <TrackedLink ext to='https://igi-fast.berkeley.edu' label='fast home 1'>igi-fast.berkeley.edu</TrackedLink> or contact the study
-            coordinator at <TrackedLink ext to='mailto:igi-fast@berkeley.edu' label='igi email 1'>igi-fast@berkeley.edu</TrackedLink>.
+            For more information and to enroll, see <TrackedLink ext to='https://igi-fast.berkeley.edu' action='fast home 1'>igi-fast.berkeley.edu</TrackedLink> or contact the study
+            coordinator at <TrackedLink ext to='mailto:igi-fast@berkeley.edu' action='igi email 1'>igi-fast@berkeley.edu</TrackedLink>.
           </p>
           <p className='lead'><b>How do I enroll?</b></p>
           <p>
-            Enrollment occurs on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' label='fast home 1'>igi-fast.berkeley.edu</TrackedLink>). You will need to log in with
+            Enrollment occurs on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' action='fast home 1'>igi-fast.berkeley.edu</TrackedLink>). You will need to log in with
             your CalNet ID and answer a few questions.
             If you are a UC Berkeley employee, log in with your CalNet ID. If
             you are a contractor, or other individual approved for regular work on the UC Berkeley
-            campus, please email <TrackedLink ext to='mailto:igi-fast@berkeley.edu' label='igi email 2'>igi-fast@berkeley.edu</TrackedLink> to check your eligibility and get log in
+            campus, please email <TrackedLink ext to='mailto:igi-fast@berkeley.edu' action='igi email 2'>igi-fast@berkeley.edu</TrackedLink> to check your eligibility and get log in
             information.
           </p>
           <p className='lead'><b>How do I schedule my tests?</b></p>
           <p>
-            All test scheduling will be done on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' label='fast home 2'>igi-fast.berkeley.edu</TrackedLink>). You will be
+            All test scheduling will be done on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' action='fast home 2'>igi-fast.berkeley.edu</TrackedLink>). You will be
             assigned to a regular testing schedule and will receive emails every-other week inviting
             you to schedule your next test day, time, and location. You will need to answer a few
             questions when making each appointment.

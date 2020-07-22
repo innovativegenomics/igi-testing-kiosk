@@ -128,6 +128,7 @@ router.get('/available', cas.block, async (request, response) => {
 router.get('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   try {
+    const settings = await Settings.findOne({});
     const slot = (await Slot.findAll({
       limit: 1,
       attributes: ['location', 'time', 'uid', 'completed'],
@@ -140,6 +141,7 @@ router.get('/slot', cas.block, async (request, response) => {
       time: slot.time,
       uid: slot.uid,
       completed: slot.completed,
+      locationlink: settings.locationlinks[settings.locations.indexOf(slot.location)]
     }});
   } catch (err) {
     response.json({ success: false });
