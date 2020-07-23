@@ -75,6 +75,15 @@ router.get('/slot', cas.block, async (request, response) => {
         include: User,
         logging: (msg) => request.log.info(msg)
       });
+      const count = await Slot.count({
+        where: {
+          calnetid: slot.calnetid,
+          completed: {
+            [Op.not]: null
+          }
+        },
+        logging: (msg) => request.log.info(msg)
+      })
       if(!slot) {
         response.send({success: false});
       } else {
@@ -86,6 +95,7 @@ router.get('/slot', cas.block, async (request, response) => {
             uid: slot.uid,
             completed: slot.completed,
             name: `${slot.User.firstname} ${slot.User.lastname}`,
+            apptCount: count
           },
         });
       }
