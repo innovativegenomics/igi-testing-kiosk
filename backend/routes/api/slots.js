@@ -46,10 +46,16 @@ router.get('/available', cas.block, async (request, response) => {
           [Op.lt]: week.clone().add(1, 'week').toDate()
         }
       },
+      order: ['date'],
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
     const taken = await Slot.findAll({
+      attributes: [
+        'time',
+        'location',
+        [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'integer'), 'count']
+      ],
       where: {
         location: {
           [Op.not]: null,
@@ -58,11 +64,17 @@ router.get('/available', cas.block, async (request, response) => {
           [Op.between]: [week.toDate(), week.clone().add(1, 'week').toDate()]
         }
       },
-      attributes: ['time', 'location'],
+      group: ['time', 'location'],
+      order: ['time', 'location'],
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
     const reserved = await ReservedSlot.findAll({
+      attributes: [
+        'time',
+        'location',
+        [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'integer'), 'count']
+      ],
       where: {
         time: {
           [Op.between]: [week.toDate(), week.clone().add(1, 'week').toDate()],
@@ -71,40 +83,60 @@ router.get('/available', cas.block, async (request, response) => {
           [Op.gt]: moment().toDate()
         }
       },
+      group: ['time', 'location'],
+      order: ['time', 'location'],
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
     const now = moment();
-    const open = {};
-    for (let location of settings.locations) {
-      open[location] = {};
-      for (let day of days) {
-        if (now.isAfter(moment(day.date), 'day')) {
+    const available = {};
+    const locations = {};
+    const fmtDays = [];
+
+    days.forEach(d => {
+      if (now.isAfter(moment(d.date), 'day')) {
+        return;
+      }
+      const localLocations = [];
+      const formattedDay = moment(d.date).format('YYYY-MM-DD');
+      available[formattedDay] = {locations: [], slots: []};
+      for(let i = moment(d.date).set('hour', d.starthour).set('minute', d.startminute);i.isBefore(i.clone().set('hour', d.endhour).set('minute', d.endminute));i = i.add(d.window, 'minute')) {
+        if (i.isBefore(now)) {
           continue;
-        } else {
-          for (let i = moment(day.date).set('hour', day.starthour).set('minute', day.startminute); i.isBefore(i.clone().set('hour', day.endhour).set('minute', day.endminute)); i = i.add(day.window, 'minute')) {
-            // request.log.debug(`slot: ${i}`);
-            if (i.isBefore(now)) {
-              continue;
-            } else {
-              open[location][i.clone()] = day.buffer;
-            }
+        }
+        const agg = {};
+        
+        settings.locations.forEach(l => {
+          agg[l] = 0;
+        });
+
+        taken.filter(t => moment(t.time).isSame(i)).forEach(t => {
+          agg[t.location] += t.count;
+        });
+        reserved.filter(r => moment(r.time).isSame(i)).forEach(r => {
+          agg[r.location] += r.count;
+        });
+        request.log.debug(JSON.stringify(agg, null, 2));
+        const locs = Object.keys(agg).filter(v => agg[v] < d.buffer);
+        locs.forEach(v => {
+          if(!locations[v]) {
+            locations[v] = settings.locationlinks[settings.locations.indexOf(v)];
           }
+          if(!localLocations.includes(v)) localLocations.push(v);
+        });
+        if(locs.length > 0) {
+          available[formattedDay].slots.push({
+            time: i.toString(),
+            locations: locs
+          });
         }
       }
-    }
-    for (let slot of taken) {
-      if (open[slot.location][moment(slot.time)] !== undefined) {
-        open[slot.location][moment(slot.time)]--;
-      }
-    }
-    reserved.forEach(v => {
-      if (open[v.location][moment(v.time)] !== undefined) {
-        open[v.location][moment(v.time)]--;
-      }
+      available[formattedDay].locations = localLocations;
+      if(available[formattedDay].slots.length < 1) delete available[formattedDay];
+      else fmtDays.push(formattedDay);
     });
     await t.commit();
-    response.send({ success: true, available: open });
+    response.send({ success: true, available: available, locations: locations, days: fmtDays });
   } catch (err) {
     request.log.error(`Can't get available slots for user ${calnetid}`);
     request.log.error(err);
