@@ -250,7 +250,7 @@ export default class Scheduler extends Component {
     };
   }
   componentDidMount() {
-    getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true }, location: Object.keys(res.available)[0] }));
+    getAvailable().then(res => this.setState({ schedule: { ...res, loaded: true }, location: Object.keys(res.available)[0], month: moment(Object.keys(res.available[Object.keys(res.available)[0]])[0]).startOf('month').startOf('day') }));
   }
   handleRequest = async selected => {
     this.setState({selected: selected});
