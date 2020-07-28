@@ -22,6 +22,8 @@ import Reconsent from './components/private/reconsent.component';
 
 import Admin from './components/admin/admin.component';
 
+import Error404 from './components/404.component';
+
 import { getUser } from './actions/authActions';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -66,6 +68,8 @@ export default class App extends Component {
     this.reconsent = withTracker(Reconsent);
 
     this.admin = withTracker(Admin);
+
+    this.error404 = withTracker(Error404);
   }
   updateUser = values => {
     this.setState({
@@ -100,51 +104,56 @@ export default class App extends Component {
         <Router>
           <div className='App'>
             <Navigation authed={!this.state.auth.unauthed && this.state.auth.loaded} />
-
-            <Route path='/' exact render={props => (
-              <this.landing {...props} auth={this.state.auth} devmode={this.state.devmode} />
-            )} />
-            <Route path='/about' render={props => (
-              <this.about {...props} auth={this.state.auth} />
-            )} />
-            <Route path='/qrcode' render={props => (
-              <this.qrcode {...props} auth={this.state.auth} />
-            )} />
-            <Route path='/accessing-results' render={props => (
-              <this.accessingResults {...props} auth={this.state.auth} />
-            )} />
-            <Route path='/signup' render={props => (
-              <this.signup {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
-            )} />
-            <Route path='/create' render={props => (
-              <this.create {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
-            )} />
-            <Route path='/extlogin' render={props => (
-              <this.extlogin {...props} auth={this.state.auth} siteKey={this.state.siteKey} reloadProfile={this.reloadProfile} />
-            )} />
-            <Route path='/forgot' render={props => (
-              <this.forgot {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
-            )} />
-            <Route path='/reset' render={props => (
-              <this.reset {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
-            )} />
-
-            <Route path='/newuser' render={props => (
-              <this.newUser {...props} auth={this.state.auth} reloadProfile={this.reloadProfile} />
-            )} />
-            <Route path='/dashboard' render={props => (
-              <this.dashboard {...props} auth={this.state.auth} />
-            )} />
-            <Route path='/scheduler' render={props => (
-              <this.scheduler {...props} auth={this.state.auth} />
-            )} />
-            <Route path='/reconsent' render={props => (
-              <this.reconsent {...props} auth={this.state.auth} updateUser={this.updateUser} />
-            )} />
             
-            <Route path='/admin' render={props => (
-              <this.admin {...props} auth={this.state.auth} />
-            )} />
+            <Switch>
+              <Route path='/' exact render={props => (
+                <this.landing {...props} auth={this.state.auth} devmode={this.state.devmode} />
+              )} />
+              <Route path='/about' render={props => (
+                <this.about {...props} auth={this.state.auth} />
+              )} />
+              <Route path='/qrcode' render={props => (
+                <this.qrcode {...props} auth={this.state.auth} />
+              )} />
+              <Route path='/accessing-results' render={props => (
+                <this.accessingResults {...props} auth={this.state.auth} />
+              )} />
+              <Route path='/signup' render={props => (
+                <this.signup {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+              )} />
+              <Route path='/create' render={props => (
+                <this.create {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+              )} />
+              <Route path='/extlogin' render={props => (
+                <this.extlogin {...props} auth={this.state.auth} siteKey={this.state.siteKey} reloadProfile={this.reloadProfile} />
+              )} />
+              <Route path='/forgot' render={props => (
+                <this.forgot {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+              )} />
+              <Route path='/reset' render={props => (
+                <this.reset {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+              )} />
+
+              <Route path='/newuser' render={props => (
+                <this.newUser {...props} auth={this.state.auth} reloadProfile={this.reloadProfile} />
+              )} />
+              <Route path='/dashboard' render={props => (
+                <this.dashboard {...props} auth={this.state.auth} />
+              )} />
+              <Route path='/scheduler' render={props => (
+                <this.scheduler {...props} auth={this.state.auth} />
+              )} />
+              <Route path='/reconsent' render={props => (
+                <this.reconsent {...props} auth={this.state.auth} updateUser={this.updateUser} />
+              )} />
+              
+              <Route path='/admin' render={props => (
+                <this.admin {...props} auth={this.state.auth} />
+              )} />
+
+
+              <Route component={this.error404}/>
+            </Switch>
 
             <Footer/>
           </div>

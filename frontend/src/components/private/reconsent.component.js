@@ -129,7 +129,7 @@ export default class Reconsent extends Component {
                   understanding of asymptomatic epidemiology within the UC Berkeley campus community.
                 </Question>
                 <Form className='border-top pt-3'>
-                  <Button type='submit' onClick={this.submit} disabled={this.state.submitting}>Confirm</Button>
+                  <Button onClick={this.submit} disabled={this.state.submitting}>Confirm</Button>
                 </Form>
                 {this.state.error?
                   <Alert variant='danger' className='mb-0 mt-3'>
