@@ -12,6 +12,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Location.associate = function(models) {
     // associations can be defined here
+    Location.hasMany(models.OpenTime, {
+      foreignKey: 'location'
+    });
   };
   return Location;
 };
