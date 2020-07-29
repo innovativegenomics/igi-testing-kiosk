@@ -352,13 +352,14 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
     const t = await sequelize.transaction({logging: (msg) => helpers.logger.info(msg)});
     try {
       const expired = await User.findAll({
-        where: sequelize.literal(`(select max(time) from "Slots" as s where s.calnetid="User".calnetid)<'${moment().startOf('week').format()}'`),
+        where: sequelize.literal(`(select time from "Slots" as s where s.calnetid="User".calnetid and current=true)<'${moment().startOf('week').format()}'`),
         include: [
           {
             model: Slot,
             required: true,
-            order: [['time', 'desc']],
-            limit: 1
+            where: {
+              current: true
+            }
           }
         ],
         transaction: t,
@@ -370,16 +371,22 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
       expired.forEach((user, i) => {
         promises.push((async () => {
           if(user.Slots[0].location) {
+            user.Slots[0].current = false;
+            await user.Slots[0].save();
             await user.createSlot({
               calnetid: user.calnetid,
               time: beginning.clone().add(1, 'week').toDate(),
-              uid: short().new()
+              uid: short().new(),
+              current: true
             }, {transaction: t, logging: (msg) => helpers.logger.info(msg)});
           } else {
+            user.Slots[0].current = false;
+            await user.Slots[0].save();
             await user.createSlot({
               calnetid: user.calnetid,
               time: beginning.clone().toDate(),
-              uid: short().new()
+              uid: short().new(),
+              current: true
             }, {transaction: t, logging: (msg) => helpers.logger.info(msg)});
           }
         })());

@@ -31,14 +31,12 @@ router.get('/available', cas.block, async (request, response) => {
   const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
     const settings = await Settings.findOne({ transaction: t, logging: (msg) => request.log.info(msg) });
-    const week = moment((await Slot.findAll({
-      limit: 1,
-      where: { calnetid: calnetid },
+    const week = moment((await Slot.findOne({
+      where: { calnetid: calnetid, current: true },
       attributes: ['time'],
-      order: [['time', 'desc']],
       transaction: t,
       logging: (msg) => request.log.info(msg)
-    }))[0].time).startOf('week');
+    })).time).startOf('week');
     const days = await Day.findAll({
       where: {
         date: {
@@ -161,13 +159,11 @@ router.get('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   try {
     const settings = await Settings.findOne({});
-    const slot = (await Slot.findAll({
-      limit: 1,
+    const slot = await Slot.findOne({
       attributes: ['location', 'time', 'uid', 'completed'],
-      where: { calnetid: calnetid },
-      order: [['time', 'desc']],
+      where: { calnetid: calnetid, current: true },
       logging: (msg) => request.log.info(msg)
-    }))[0];
+    });
     response.json({ success: true, slot: {
       location: slot.location,
       time: slot.time,
@@ -202,13 +198,11 @@ router.post('/slot', cas.block, async (request, response) => {
     const reqlocation = request.body.location;
     const questions = request.body.questions;
     const settings = await Settings.findOne({transaction: t, logging: (msg) => request.log.info(msg)});
-    const slot = (await Slot.findAll({
-      limit: 1,
-      where: { calnetid: calnetid },
-      order: [['time', 'desc']],
+    const slot = await Slot.findOne({
+      where: { calnetid: calnetid, current: true },
       transaction: t,
       logging: (msg) => request.log.info(msg)
-    }))[0];
+    });
     const day = await Day.findOne({
       where: {
         date: {
@@ -345,13 +339,11 @@ router.delete('/slot', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
-    const slot = (await Slot.findAll({
-      limit: 1,
-      where: { calnetid: calnetid },
-      order: [['time', 'desc']],
+    const slot = await Slot.findOne({
+      where: { calnetid: calnetid, current: true },
       transaction: t,
       logging: (msg) => request.log.info(msg)
-    }))[0];
+    });
     if (!slot.completed) {
       slot.location = null;
       slot.scheduled = null;

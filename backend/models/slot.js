@@ -40,6 +40,11 @@ module.exports = (sequelize, DataTypes) => {
     question5: {
       type: DataTypes.STRING
     },
+    current: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false
+    }
   }, {});
   Slot.associate = function(models) {
     // associations can be defined here

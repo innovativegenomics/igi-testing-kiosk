@@ -144,8 +144,8 @@ router.get('/search/slots', cas.block, async (request, response) => {
               FROM "Slots" AS slot
               WHERE
                 slot.calnetid = "User".calnetid
-              ORDER BY time DESC
-              LIMIT 1
+              AND
+                slot.current = true
               )`),
             'slotTime'
           ]
@@ -156,8 +156,9 @@ router.get('/search/slots', cas.block, async (request, response) => {
       ],
       include: [{
         model: Slot,
-        order: [['time', 'desc']],
-        limit: 1,
+        where: {
+          current: true
+        }
       }],
       logging: (msg) => request.log.info(msg)
     });
