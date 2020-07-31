@@ -86,6 +86,12 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
+    },
+    availableStart: {
+      type: DataTypes.DATE
+    },
+    availableEnd: {
+      type: DataTypes.DATE
     }
   }, {});
   User.associate = function(models) {
