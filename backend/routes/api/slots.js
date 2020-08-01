@@ -3,7 +3,7 @@ const router = express.Router();
 // const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
 const moment = require('moment');
 
-const { sequelize, Sequelize, Slot, User, Day, ReservedSlot, Settings } = require('../../models');
+const { sequelize, Sequelize, Slot, User, Day, ReservedSlot, OpenTime, Settings, Location } = require('../../models');
 const { scheduleSlotConfirmEmail,
   scheduleSlotConfirmText,
   scheduleAppointmentReminderEmail,
@@ -30,109 +30,72 @@ router.get('/available', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const t = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
   try {
-    const settings = await Settings.findOne({ transaction: t, logging: (msg) => request.log.info(msg) });
-    const week = moment((await Slot.findOne({
-      where: { calnetid: calnetid, current: true },
-      attributes: ['time'],
-      transaction: t,
-      logging: (msg) => request.log.info(msg)
-    })).time).startOf('week');
-    const days = await Day.findAll({
+    const user = await User.findOne({
       where: {
-        date: {
-          [Op.gte]: week.toDate(),
-          [Op.lt]: week.clone().add(1, 'week').toDate()
-        }
+        calnetid: calnetid
       },
-      order: ['date'],
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
-    const taken = await Slot.findAll({
-      attributes: [
-        'time',
-        'location',
-        [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'integer'), 'count']
-      ],
+    console.log(user);
+    const availableWhere = {
+      starttime: {
+        [Op.gte]: moment(user.availableStart||undefined).toDate()
+      }
+    };
+    if(user.availableEnd) {
+      availableWhere.starttime[Op.lt] = moment(user.availableEnd).toDate();
+    }
+    if(moment(user.availableStart).isBefore(moment())) {
+      availableWhere.starttime[Op.gte] = moment().toDate();
+    }
+    const availableRaw = await OpenTime.findAll({
       where: {
-        location: {
-          [Op.not]: null,
-        },
-        time: {
-          [Op.between]: [week.toDate(), week.clone().add(1, 'week').toDate()]
+        ...availableWhere,
+        available: {
+          [Op.gt]: 0
         }
       },
-      group: ['time', 'location'],
-      order: ['time', 'location'],
+      include: {
+        model: Location
+      },
+      order: [['starttime', 'asc']],
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
-    const reserved = await ReservedSlot.findAll({
-      attributes: [
-        'time',
-        'location',
-        [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'integer'), 'count']
-      ],
-      where: {
-        time: {
-          [Op.between]: [week.toDate(), week.clone().add(1, 'week').toDate()],
-        },
-        expires: {
-          [Op.gt]: moment().toDate()
-        }
-      },
-      group: ['time', 'location'],
-      order: ['time', 'location'],
-      transaction: t,
-      logging: (msg) => request.log.info(msg)
-    });
-    const now = moment();
+
     const available = {};
     const locations = {};
     const fmtDays = [];
-
-    days.forEach(d => {
-      if (now.isAfter(moment(d.date), 'day')) {
-        return;
+    let lastTime;
+    let lastIndex;
+    availableRaw.forEach(v => {
+      if(!available[v.date]) {
+        available[v.date] = {
+          locations: [],
+          slots: []
+        };
+        fmtDays.push(v.date);
+        lastTime = null;
+        lastIndex = -1;
       }
-      const localLocations = [];
-      const formattedDay = moment(d.date).format('YYYY-MM-DD');
-      available[formattedDay] = {locations: [], slots: []};
-      for(let i = moment(d.date).set('hour', d.starthour).set('minute', d.startminute);i.isBefore(i.clone().set('hour', d.endhour).set('minute', d.endminute));i = i.add(d.window, 'minute')) {
-        if (i.isBefore(now)) {
-          continue;
-        }
-        const agg = {};
-        
-        settings.locations.forEach(l => {
-          agg[l] = 0;
-        });
-
-        taken.filter(t => moment(t.time).isSame(i)).forEach(t => {
-          agg[t.location] += t.count;
-        });
-        reserved.filter(r => moment(r.time).isSame(i)).forEach(r => {
-          agg[r.location] += r.count;
-        });
-        request.log.debug(JSON.stringify(agg, null, 2));
-        const locs = Object.keys(agg).filter(v => agg[v] < d.buffer);
-        locs.forEach(v => {
-          if(!locations[v]) {
-            locations[v] = settings.locationlinks[settings.locations.indexOf(v)];
-          }
-          if(!localLocations.includes(v)) localLocations.push(v);
-        });
-        if(locs.length > 0) {
-          available[formattedDay].slots.push({
-            time: i.toString(),
-            locations: locs
-          });
-        }
+      if (!available[v.date].locations.includes(v.Location.name)) {
+        available[v.date].locations.push(v.Location.name);
       }
-      available[formattedDay].locations = localLocations;
-      if(available[formattedDay].slots.length < 1) delete available[formattedDay];
-      else fmtDays.push(formattedDay);
+      if(!locations[v.Location.name]) {
+        locations[v.Location.name] = v.Location.map;
+      }
+      if(!moment(v.starttime).isSame(lastTime)) {
+        lastIndex = lastIndex + 1;
+        lastTime = moment(v.starttime);
+        available[v.date].slots.push({
+          time: lastTime.clone(),
+          locations: []
+        });
+      }
+      available[v.date].slots[lastIndex].locations.push(v.Location.name);
     });
+
     await t.commit();
     response.send({ success: true, available: available, locations: locations, days: fmtDays });
   } catch (err) {

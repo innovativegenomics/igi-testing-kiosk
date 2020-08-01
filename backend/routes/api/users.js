@@ -14,7 +14,7 @@ if(process.env.NODE_ENV !== 'production') {
 }
 const recaptchaScoreThreshold = 0.0;
 
-const { sequelize, Sequelize, User, Slot, Day, Settings, ExternalUser, ResetRequest } = require('../../models');
+const { sequelize, Sequelize, User, Settings, ExternalUser, ResetRequest } = require('../../models');
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
@@ -141,59 +141,10 @@ router.post('/profile', cas.block, async (request, response) => {
         email: request.body.email,
         phone: request.body.phone,
         questions: request.body.questions,
-        reconsented: true
+        reconsented: true,
+        availableStart: moment().startOf('week').toDate(),
+        availableEnd: null,
       }, { transaction: t1, logging: (msg) => request.log.info(msg) });
-      const settings = await Settings.findOne({logging: (msg) => request.log.info(msg)});
-      // Figure out which week this person should be assigned to
-      let week = moment().startOf('week');
-      while(true) {
-        const days = await Day.findAll({
-          where: {
-            date: {
-              [Op.gte]: week.toDate(),
-              [Op.lt]: week.clone().add(1, 'week').toDate()
-            }
-          },
-          order: [['date', 'asc']],
-          transaction: t1,
-          logging: (msg) => request.log.info(msg)
-        });
-        let available = 0;
-        days.forEach(v => {
-          available += settings.locations.length * v.buffer * Math.floor(moment.duration({hours: v.endhour-v.starthour, minutes: v.endminute-v.startminute}).asMinutes() / v.window);
-        });
-        const taken = await Slot.count({
-          where: {
-            time: {
-              [Op.gte]: week.toDate(),
-              [Op.lt]: week.clone().add(1, 'week').toDate()
-            }
-          },
-          transaction: t1,
-          logging: (msg) => request.log.info(msg)
-        });
-        request.log.debug(`available: ${available} taken: ${taken} between ${week.format()} and ${week.clone().add(1, 'week').format()}`);
-        if(available === 0) {
-          break;
-        }
-        if(taken < available) {
-          let lastDay = days[days.length-1];
-          if(moment(lastDay.date).set('hour', lastDay.endhour).set('minute', lastDay.endminute).isBefore(moment())) {
-            week = week.add(1, 'week');
-          } else {
-            break;
-          }
-        } else {
-          week = week.add(1, 'week');
-        }
-      }
-
-      await user.createSlot({
-        calnetid: calnetid,
-        time: week.toDate(),
-        uid: short().new()
-      }, { transaction: t1, logging: (msg) => request.log.info(msg) });
-
       await t1.commit();
       response.send({ success: true });
     } catch (err) {

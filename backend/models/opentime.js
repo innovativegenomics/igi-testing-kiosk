@@ -32,7 +32,9 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   OpenTime.associate = function(models) {
     // associations can be defined here
-    OpenTime.belongsTo(models.Location);
+    OpenTime.belongsTo(models.Location, {
+      foreignKey: 'location'
+    });
   };
   return OpenTime;
 };
