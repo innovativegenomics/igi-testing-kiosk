@@ -22,6 +22,7 @@ module.exports = {
       const end = start.clone().add(1, 'week');
       await queryInterface.sequelize.query(`update "Users" set "availableStart"='${start.format()}',"availableEnd"='${end.format()}' where calnetid='${s.calnetid}'`);
     }
+    await queryInterface.sequelize.query(`delete from "Slots" where location is null`);
   },
 
   down: async (queryInterface, Sequelize) => {

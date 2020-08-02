@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     Location.hasMany(models.OpenTime, {
       foreignKey: 'location'
     });
+    Location.hasMany(models.ReservedSlot, {
+      foreignKey: 'location'
+    });
   };
   return Location;
 };

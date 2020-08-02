@@ -1,5 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
+  const short = require('short-uuid');
   const Slot = sequelize.define('Slot', {
     calnetid: {
       type: DataTypes.STRING,
@@ -24,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
     uid: {
       type: DataTypes.STRING,
       allowNull: false,
+      defaultValue: () => short().new()
     },
     question1: {
       type: DataTypes.INTEGER
@@ -48,7 +50,11 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   Slot.associate = function(models) {
     // associations can be defined here
-    Slot.belongsTo(models.User);
+    Slot.belongsTo(models.User, {
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid'
+    });
+    Slot.belongsTo(models.OpenTime);
   };
   return Slot;
 };

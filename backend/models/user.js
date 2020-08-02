@@ -96,7 +96,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   User.associate = function(models) {
     // associations can be defined here
-    User.hasMany(models.Slot);
+    User.hasMany(models.Slot, {
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid'
+    });
   };
   return User;
 };

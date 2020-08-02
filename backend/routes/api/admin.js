@@ -4,7 +4,7 @@ const moment = require('moment');
 const contentDisposition = require('content-disposition');
 const short = require('short-uuid');
 // const pino = require('pino')({ level: process.env.LOG_LEVEL || 'info' });
-const { Sequelize, sequelize, Admin, Slot, User, Day, Settings, ExternalUser } = require('../../models');
+const { Sequelize, sequelize, Admin, Slot, User, Day, Settings, ExternalUser, OpenTime, Location } = require('../../models');
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
@@ -72,7 +72,16 @@ router.get('/slot', cas.block, async (request, response) => {
         where: {
           uid: request.query.uid || ''
         },
-        include: User,
+        include: [
+          {
+            model: User,
+            attributes: ['firstname', 'lastname']
+          },
+          {
+            model: OpenTime,
+            include: Location
+          }
+        ],
         logging: (msg) => request.log.info(msg)
       });
       const count = await Slot.count({
@@ -90,10 +99,7 @@ router.get('/slot', cas.block, async (request, response) => {
         response.send({
           success: true,
           slot: {
-            time: slot.time,
-            location: slot.location,
-            uid: slot.uid,
-            completed: slot.completed,
+            ...slot,
             name: `${slot.User.firstname} ${slot.User.lastname}`,
             apptCount: count
           },
@@ -158,7 +164,8 @@ router.get('/search/slots', cas.block, async (request, response) => {
         model: Slot,
         where: {
           current: true
-        }
+        },
+        required: true
       }],
       logging: (msg) => request.log.info(msg)
     });
@@ -243,104 +250,42 @@ router.get('/search/participants', cas.block, async (request, response) => {
  *   }
  * }
  */
-router.get('/stats/slots/scheduled', cas.block, async (request, response) => {
+router.get('/stats/slots', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
-    const day = await Day.findOne({
-      where: {
-        date: {
-          [Op.gte]: moment(request.query.day).startOf('day'),
-          [Op.lt]: moment(request.query.day).startOf('day').add(1, 'day'),
-        }
-      },
-      logging: (msg) => request.log.info(msg)
-    });
-    const starttime = moment(day.date).set('hour', day.starthour).set('minute', day.startminute);
-    const endtime = moment(day.date).set('hour', day.endhour).set('minute', day.endminute);
     try {
-      const res = await Slot.findAll({
-        attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],
-        group: ['time'],
-        order: [['time', 'asc']],
+      const scheduled = await OpenTime.findAll({
         where: {
-          time: {
-            [Op.lt]: endtime.toDate(),
-            [Op.gte]: starttime.toDate()
+          starttime: {
+            [Op.gte]: moment(request.query.starttime).toDate(),
+            [Op.lt]: moment(request.query.endtime).toDate()
           },
-          location: {
-            [Op.not]: null
-          },
-          completed: null
+          location: request.query.location
         },
-        logging: (msg) => request.log.info(msg)
-      });
-      request.log.debug(res);
-      response.send({success: true, scheduled: res});
-    } catch(err) {
-      request.log.error(`Can't get scheduled slots`);
-      request.log.error(err);
-      response.send({success: false});
-    }
-  } else {
-    request.log.info('unauthed');
-    response.status(401).send('Unauthorized');
-  }
-});
-
-/**
- * request:
- * {
- *   starttime: moment.Moment,
- *   endtime: moment.Moment
- * }
- * response:
- * {
- *   success: true,
- *   scheduled: {
- *     moment.Moment: 
- *   }
- * }
- */
-router.get('/stats/slots/completed', cas.block, async (request, response) => {
-  const calnetid = request.session.cas_user;
-  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
-  if(!!level && level >= 20) {
-    const day = await Day.findOne({
-      where: {
-        date: {
-          [Op.gte]: moment(request.query.day).startOf('day'),
-          [Op.lt]: moment(request.query.day).startOf('day').add(1, 'day'),
-        }
-      },
-      logging: (msg) => request.log.info(msg)
-    });
-    const starttime = moment(day.date).set('hour', day.starthour).set('minute', day.startminute);
-    const endtime = moment(day.date).set('hour', day.endhour).set('minute', day.endminute);
-    try {
-      const res = await Slot.findAll({
-        attributes: ['time', [sequelize.cast(sequelize.fn('count', sequelize.col('time')), 'integer'), 'count']],
-        group: ['time'],
-        order: [['time', 'asc']],
-        where: {
-          time: {
-            [Op.lt]: endtime.toDate(),
-            [Op.gte]: starttime.toDate()
-          },
-          location: {
-            [Op.not]: null
-          },
-          completed: {
-            [Op.not]: null
+        attributes: {
+          include: [[Sequelize.cast(Sequelize.fn('COUNT', Sequelize.col('Slots.id')), 'INTEGER'), 'completedCount']]
+        },
+        order: [['starttime', 'asc']],
+        include: [
+          {
+            model: Slot,
+            attributes: [],
+            where: {
+              completed: {
+                [Op.not]: null
+              }
+            },
+            required: false,
+            duplicating: false
           }
-        },
-        logging: (msg) => request.log.info(msg)
+        ],
+        group: ['OpenTime.id']
       });
-      request.log.debug(res);
-      response.send({success: true, completed: res});
+      response.send({success: true, slots: scheduled});
     } catch(err) {
-      request.log.error(`Can't get completed slots`);
-      request.log.error(err);
+      request.log.error(`Error getting slot statistics`);
+      request.log.error(err.stack);
       response.send({success: false});
     }
   } else {
@@ -355,7 +300,14 @@ router.get('/stats/general/scheduled', cas.block, async (request, response) => {
   if(!!level && level >= 20) {
     try {
       const count = await User.count({
-        where: sequelize.literal(`(select location from "Slots" as s where s.calnetid="User".calnetid order by time desc limit 1) is not null`)
+        include: {
+          model: Slot,
+          where: {
+            current: true
+          },
+          required: true
+        },
+        logging: (msg) => request.log.info(msg)
       });
       response.send({
         success: true,
@@ -377,13 +329,20 @@ router.get('/stats/general/unscheduled', cas.block, async (request, response) =>
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     try {
+      const totalCount = await User.count({});
       const count = await User.count({
-        where: sequelize.literal(`(select location from "Slots" as s where s.calnetid="User".calnetid order by time desc limit 1) is null`),
+        include: {
+          model: Slot,
+          where: {
+            current: true
+          },
+          required: true
+        },
         logging: (msg) => request.log.info(msg)
       });
       response.send({
         success: true,
-        unscheduled: count
+        unscheduled: totalCount - count
       });
     } catch(err) {
       request.log.error(`error getting unscheduled participants`);

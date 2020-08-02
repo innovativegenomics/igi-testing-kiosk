@@ -8,7 +8,8 @@ const twilio = new (require('twilio'))(config.twilio.accountSid, config.twilio.a
 const moment = require('moment');
 const short = require('short-uuid');
 
-const { User, Settings, Day, Slot, sequelize } = require('./models');
+const { User, Settings, Day, Slot, Location, OpenTime, sequelize } = require('./models');
+const Op = Sequelize.Op;
 
 const fs = require('fs');
 let versionHash;
@@ -107,11 +108,12 @@ const tasks = {
         },
         logging: (msg) => helpers.logger.info(msg)
       });
-      const settings = await Settings.findOne({logging: (msg) => helpers.logger.info(msg)});
-      const day = await Day.findOne({
+      const openTime = await OpenTime.findOne({
         where: {
-          date: moment(time).startOf('day').toDate()
+          starttime: moment(time).toDate(),
+          location: location
         },
+        include: Location,
         logging: (msg) => helpers.logger.info(msg)
       });
       const status = await sgMail.send({
@@ -120,10 +122,10 @@ const tasks = {
         replyTo: config.sendgrid.replyTo,
         templateId: 'd-8fdf653f576545539db3cfb2aef7fa71',
         dynamicTemplateData: {
-          location: location,
-          locationlink: settings.locationlinks[settings.locations.indexOf(location)],
+          location: openTime.Location.name,
+          locationlink: openTime.Location.map,
           starttime: moment(time).format('h:mm A'),
-          endtime: moment(time).add(day.window, 'minute').format('h:mm A'),
+          endtime: moment(time).add(openTime.window, 'minute').format('h:mm A'),
           day: moment(time).format('MMMM Do'),
           qrlink: `https://igi-fast.berkeley.edu/qrcode?uid=${uid}`,
           qrimg: `https://igi-fast.berkeley.edu/api/emails/qrimg?uid=${uid}`,
@@ -145,17 +147,18 @@ const tasks = {
         },
         logging: (msg) => helpers.logger.info(msg)
       });
-      const settings = await Settings.findOne({logging: (msg) => helpers.logger.info(msg)});
-      const day = await Day.findOne({
+      const openTime = await OpenTime.findOne({
         where: {
-          date: moment(time).startOf('day').toDate()
+          starttime: moment(time),
+          location: location
         },
+        include: Location,
         logging: (msg) => helpers.logger.info(msg)
       });
       const status = await twilio.messages.create({
         body: `Testing Appointment Confirmation for ${moment(time).format('MMMM Do')} 
-Please arrive between ${moment(time).format('h:mm A')} and ${moment(time).add(day.window, 'minute').format('h:mm A')} at location ${location}. 
-To view a map to this location, visit the following link ${settings.locationlinks[settings.locations.indexOf(location)]}. 
+Please arrive between ${moment(time).format('h:mm A')} and ${moment(time).add(openTime.window, 'minute').format('h:mm A')} at location ${openTime.Location.name}. 
+To view a map to this location, visit the following link ${openTime.Location.map}. 
 When you arrive, please present the QR code at the following link: https://igi-fast.berkeley.edu/qrcode?uid=${uid}. 
 To change or cancel this appointment, log into your testing account.`,
         to: user.phone,
@@ -352,66 +355,71 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
     const t = await sequelize.transaction({logging: (msg) => helpers.logger.info(msg)});
     try {
       const expired = await User.findAll({
-        where: sequelize.literal(`(select time from "Slots" as s where s.calnetid="User".calnetid and current=true)<'${moment().startOf('week').format()}'`),
-        include: [
-          {
-            model: Slot,
-            required: true,
-            where: {
-              current: true
+        where: {
+          [Op.or]: {
+            availableEnd: {
+              [Op.lte]: moment().startOf('week').toDate(),
+              [Op.not]: null
+            },
+            availableStart: {
+              [Op.lt]: moment().startOf('week').toDate()
             }
           }
-        ],
+        },
+        include: [{
+          model: Slot,
+          where: {
+            current: true
+          },
+          required: false
+        }],
         transaction: t,
         logging: (msg) => helpers.logger.info(msg)
       });
-      const beginning = moment().startOf('week');
       const promises = [];
-      let promiseChain = Promise.resolve(0);
-      expired.forEach((user, i) => {
+      expired.forEach(user => {
         promises.push((async () => {
-          if(user.Slots[0].location) {
-            user.Slots[0].current = false;
-            await user.Slots[0].save();
-            await user.createSlot({
-              calnetid: user.calnetid,
-              time: beginning.clone().add(1, 'week').toDate(),
-              uid: short().new(),
-              current: true
-            }, {transaction: t, logging: (msg) => helpers.logger.info(msg)});
-          } else {
-            user.Slots[0].current = false;
-            await user.Slots[0].save();
-            await user.createSlot({
-              calnetid: user.calnetid,
-              time: beginning.clone().toDate(),
-              uid: short().new(),
-              current: true
-            }, {transaction: t, logging: (msg) => helpers.logger.info(msg)});
-          }
-        })());
-        promiseChain = promiseChain.then(async () => {
           try {
-            // send email
-            const status = await sgMail.send({
-              to: user.email,
-              from: config.sendgrid.from,
-              replyTo: config.sendgrid.replyTo,
-              templateId: 'd-d9409e99ebd3421ab736539b8e49b5e5',
-              dynamicTemplateData: {
-                week: ((user.Slots[0].location)?beginning.clone().add(1, 'week'):beginning.clone()).format('MMMM Do')
+            if(!user.Slots[0]) {
+              user.availableStart = moment().startOf('week').toDate();
+              user.availableEnd = null;
+              await user.save();
+            } else {
+              if(!moment(user.Slots[0].time).isAfter(moment().startOf('week'))) {
+                user.Slots[0].current = false;
+                await user.Slots[0].save();
               }
-            });
-            helpers.logger.info(`${user.email}`);
-            helpers.logger.info(status);
+              if(!user.Slots[0].completed) {
+                user.availableStart = moment().startOf('week').toDate();
+                user.availableEnd = null;
+                await user.save();
+              } else {
+                user.availableStart = moment().startOf('week').add(1, 'week').toDate();
+                user.availableEnd = null;
+                await user.save();
+              }
+            }
+            try {
+              const status = await sgMail.send({
+                to: user.email,
+                from: config.sendgrid.from,
+                replyTo: config.sendgrid.replyTo,
+                templateId: 'd-d9409e99ebd3421ab736539b8e49b5e5',
+                dynamicTemplateData: {
+                  week: moment(user.availableStart).format('MMMM Do')
+                }
+              });
+            } catch(err) {
+              helpers.logger.error(`Error sending reschedule email to ${user.calnetid}`);
+              helpers.logger.error(err);
+            }
           } catch(err) {
-            helpers.logger.error(`${user.email}`);
+            helpers.logger.error(`Error rescheduling user ${user.calnetid}`);
             helpers.logger.error(err.stack);
           }
-        });
+        })());
       });
       await Promise.all(promises);
-      await promiseChain;
       await t.commit();
     } catch(err) {
       helpers.logger.error(`Can not update schedules`);

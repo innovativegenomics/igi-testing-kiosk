@@ -23,7 +23,13 @@ module.exports = (sequelize, DataTypes) => {
     },
     location: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'Locations',
+        key: 'id'
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'SET NULL'
     },
     available: {
       type: DataTypes.INTEGER,
@@ -35,6 +41,8 @@ module.exports = (sequelize, DataTypes) => {
     OpenTime.belongsTo(models.Location, {
       foreignKey: 'location'
     });
+    OpenTime.hasMany(models.Slot);
+    OpenTime.hasMany(models.ReservedSlot);
   };
   return OpenTime;
 };

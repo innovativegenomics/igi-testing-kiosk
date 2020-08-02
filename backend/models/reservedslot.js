@@ -21,6 +21,10 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   ReservedSlot.associate = function(models) {
     // associations can be defined here
+    ReservedSlot.belongsTo(models.Location, {
+      foreignKey: 'location'
+    });
+    ReservedSlot.belongsTo(models.OpenTime);
   };
   return ReservedSlot;
 };
