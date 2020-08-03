@@ -8,7 +8,7 @@ const twilio = new (require('twilio'))(config.twilio.accountSid, config.twilio.a
 const moment = require('moment');
 const short = require('short-uuid');
 
-const { User, Settings, Day, Slot, Location, OpenTime, sequelize } = require('./models');
+const { User, Settings, Day, Slot, Location, OpenTime, sequelize, Sequelize } = require('./models');
 const Op = Sequelize.Op;
 
 const fs = require('fs');
