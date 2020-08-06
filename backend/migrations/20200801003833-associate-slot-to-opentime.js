@@ -21,11 +21,7 @@ module.exports = {
     const moment = require('moment');
     const slots = (await queryInterface.sequelize.query(`select id,time,location from "Slots"`))[0];
     for(let s of slots) {
-      console.log(moment(s.time).format());
-      console.log(s.location);
-      console.log(`select id from "OpenTimes" where starttime='${moment(s.time).format()}' and location=${s.location}`);
       const ot = (await queryInterface.sequelize.query(`select id from "OpenTimes" where starttime='${moment(s.time).format()}' and location=${s.location}`))[0][0];
-      console.log(ot);
       try {
         await queryInterface.sequelize.query(`update "Slots" set "OpenTimeId"='${ot.id}' where id='${s.id}'`);
       } catch(err) {

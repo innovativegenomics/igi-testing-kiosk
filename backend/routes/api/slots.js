@@ -37,7 +37,6 @@ router.get('/available', cas.block, async (request, response) => {
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
-    console.log(user);
     const availableWhere = {
       starttime: {
         [Op.gte]: moment(user.availableStart||undefined).toDate()
@@ -77,7 +76,7 @@ router.get('/available', cas.block, async (request, response) => {
           required: false
         }
       ],
-      group: ['OpenTime.id'],
+      group: ['OpenTime.id', 'Location.id'],
       order: [['starttime', 'asc']],
       transaction: t,
       logging: (msg) => request.log.info(msg)
