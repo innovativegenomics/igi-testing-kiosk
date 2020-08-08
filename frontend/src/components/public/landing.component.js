@@ -47,11 +47,6 @@ export default class Landing extends Component {
               </p>
             </div>
           </div>
-          <Alert variant='warning'>
-            <p className='lead mb-0 text-center'>
-              The website is down temporarily for scheduled maintenance. Please check back in a few minutes.
-            </p>
-          </Alert>
         </div>
       </div>
     );
