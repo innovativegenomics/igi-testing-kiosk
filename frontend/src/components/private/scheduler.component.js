@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Container, Spinner, Card, ButtonGroup, Button, Row, Col, Table, Modal, Form } from 'react-bootstrap';
+import { Container, Spinner, Card, ButtonGroup, Button, Row, Col, Table, Modal, Form, Alert } from 'react-bootstrap';
 import { BsChevronLeft, BsChevronRight, BsBoxArrowUpRight } from 'react-icons/bs';
 import moment from 'moment';
 
@@ -88,7 +88,11 @@ class AppointmentTable extends Component {
           <tr>
             {
               locations.map(v => (
-                <th scope='col' key={v}><a href={this.props.locations[v]} target='_blank'>{v}<BsBoxArrowUpRight/></a></th>
+                <th scope='col' key={v}>
+                  <a href={this.props.locations[v]} target='_blank'>
+                    {v}<BsBoxArrowUpRight/>
+                  </a>
+                </th>
               ))
             }
           </tr>
@@ -250,6 +254,18 @@ export default class Scheduler extends Component {
 
     return (
       <Container>
+        <Row className='justify-content-center'>
+          <Col md={6}>
+            <Alert variant='info'>
+              <p className='lead mb-0'>
+                A new kiosk location will be opening at Latimer Hall.
+                When you are scheduling your next appointment,
+                please make sure you notice which location you
+                are choosing.
+              </p>
+            </Alert>
+          </Col>
+        </Row>
         <Calendar days={this.state.days} day={this.state.day} setDay={d => this.setState({day: d})}/>
         <Row className='justify-content-center mt-2'>
           <Col sm='auto'>
