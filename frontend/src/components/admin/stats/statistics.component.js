@@ -18,7 +18,7 @@ export default class Statistics extends Component {
             <Slots/>
           </Col>
           <Col lg className='pl-2 pr-2'>
-            {/* <General/> */}
+            <General/>
           </Col>
         </Row>
       </Container>

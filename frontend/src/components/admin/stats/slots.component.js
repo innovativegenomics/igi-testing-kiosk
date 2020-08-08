@@ -49,11 +49,16 @@ export default class Slots extends Component {
     const labels = [];
     const scheduledValues = [];
     const completedValues = [];
+    var scheduledAppointments = 0;
+    var completedAppointments = 0;
+    var totalAvailable = 0;
     this.state.slots.forEach(v => {
       labels.push(moment(v.starttime).format('H:mm'));
       scheduledValues.push(v.buffer-v.available-v.completedCount);
       completedValues.push(v.completedCount);
-
+      scheduledAppointments += v.buffer-v.available-v.completedCount;
+      completedAppointments += v.completedCount;
+      totalAvailable += v.buffer;
     });
     const data = {
       labels: labels,
@@ -128,9 +133,10 @@ export default class Slots extends Component {
             data={data}
             options={chartOptions}
           />
-          {/* <p className='lead m-0'>Scheduled Appointments: {scheduledTotal+completedTotal}</p>
-          <p className='lead m-0'>Completed Appointments: {completedTotal}</p>
-          <p className='lead m-0'>Appointments Left: {scheduledTotal}</p> */}
+          <p className='lead m-0'>Scheduled Appointments: {scheduledAppointments+completedAppointments}</p>
+          <p className='lead m-0'>Completed Appointments: {completedAppointments}</p>
+          <p className='lead m-0'>Appointments Left: {scheduledAppointments}</p>
+          <p className='lead m-0'>Total Available Today: {totalAvailable}</p>
         </Card.Body>
       </Card>
     );

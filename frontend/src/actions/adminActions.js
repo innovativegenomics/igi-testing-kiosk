@@ -124,6 +124,20 @@ export const getAvailableDays = async () => {
   }
 }
 
+/**
+ * returns array of locations
+ */
+export const getAvailableLocations = async () => {
+  try {
+    const response = await axios.get('/api/admin/settings/locations');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get locations`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 export const createDay = async data => {
   try {
     const response = await axios.post('/api/admin/settings/day', {...data, date: data.date.format()});
@@ -134,9 +148,9 @@ export const createDay = async data => {
     return { success: false };
   }
 }
-export const deleteDay = async id => {
+export const deleteDay = async (date, location) => {
   try {
-    const response = await axios.delete('/api/admin/settings/day', {params: {id: id}});
+    const response = await axios.delete('/api/admin/settings/day', {params: {date: date, location: location}});
     return response.data;
   } catch(err) {
     console.error(`Can't delete day`);

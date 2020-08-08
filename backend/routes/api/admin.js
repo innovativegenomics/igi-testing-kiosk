@@ -407,6 +407,10 @@ router.get('/settings/days', cas.block, async (request, response) => {
       attributes: [
         'date',
         [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count'],
+        [sequelize.fn('min', sequelize.col('starttime')), 'starttime'],
+        [sequelize.fn('max', sequelize.col('endtime')), 'endtime'],
+        [sequelize.fn('max', sequelize.col('window')), 'window'],
+        [sequelize.fn('max', sequelize.col('buffer')), 'buffer'],
       ],
       include: Location,
       order: [['date', 'desc']],
@@ -417,6 +421,88 @@ router.get('/settings/days', cas.block, async (request, response) => {
       success: true,
       days: res
     });
+  } else {
+    request.log.error(`Not authed`);
+    response.status(401).send();
+  }
+});
+
+router.get('/settings/locations', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 10) {
+    const res = await Location.findAll();
+    response.send({
+      success: true,
+      locations: res
+    });
+  } else {
+    request.log.error(`Not authed`);
+    response.status(401).send();
+  }
+});
+
+router.post('/settings/day', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const start = moment(request.body.date).set('hour', request.body.starthour).set('minute', request.body.startminute);
+      const end = moment(request.body.date).set('hour', request.body.endhour).set('minute', request.body.endminute);
+      const location = await Location.findOne({
+        where: {
+          id: request.body.location
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      const buffer = request.body.buffer;
+      const window = request.body.window;
+
+      for(let i = start.clone();i.isBefore(end);i = i.add(window, 'minute')) {
+        await location.createOpenTime({
+          starttime: i.clone().toDate(),
+          endtime: i.clone().add(window, 'minute').toDate(),
+          date: i.clone().startOf('day').toDate(),
+          buffer: buffer,
+          window: window,
+          available: buffer
+        }, {
+          logging: (msg) => request.log.info(msg)
+        });
+      }
+
+      response.send({success: true});
+    } catch(err) {
+      request.log.error(`error creating open slots`);
+      request.log.error(err.stack);
+    }
+  } else {
+    request.log.error(`Not authed`);
+    response.status(401).send();
+  }
+});
+
+router.delete('/settings/day', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const date = moment(request.query.date);
+      const location = request.query.location;
+
+      await OpenTime.destroy({
+        where: {
+          date: date.toDate(),
+          location: location
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+
+      response.send({success: true});
+    } catch(err) {
+      request.log.error(`error deleting open slots`);
+      request.log.error(err.stack);
+    }
   } else {
     request.log.error(`Not authed`);
     response.status(401).send();

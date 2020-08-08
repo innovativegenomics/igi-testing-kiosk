@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import { Container, Table, Button, Spinner, Modal, Form, Row, Col } from 'react-bootstrap';
 import moment from 'moment';
 
-import { getAvailableDays, createDay, deleteDay } from '../../actions/adminActions';
+import { getAvailableDays, getAvailableLocations, createDay, deleteDay } from '../../actions/adminActions';
 
 class CreateModal extends Component {
   constructor(props) {
@@ -15,10 +15,13 @@ class CreateModal extends Component {
       endminute: 0,
       window: 10,
       buffer: 10,
+      location: 0,
       date: moment().startOf('day').format('YYYY-MM-DD')
     };
   }
   render() {
+
+    console.log(this.props.locations[this.state.location]);
     return (
       <Modal show={this.props.show} onHide={this.props.onHide}>
         <Modal.Header closeButton>
@@ -77,6 +80,18 @@ class CreateModal extends Component {
               </Col>
             </Form.Group>
             <Form.Group as={Row}>
+              <Form.Label column sm={3}>Location</Form.Label>
+              <Col>
+                <Form.Control as='select' value={this.state.location} onChange={e => this.setState({location: e.target.value})}>
+                  {
+                    this.props.locations.map((v, i) => (
+                      <option value={i}>{v.name}</option>
+                    ))
+                  }
+                </Form.Control>
+              </Col>
+            </Form.Group>
+            <Form.Group as={Row}>
               <Form.Label column sm={3}>Time window</Form.Label>
               <Col>
                 <Form.Control type='number' value={this.state.window} onChange={e => this.setState({window: parseInt(e.target.value)})}/>
@@ -94,7 +109,7 @@ class CreateModal extends Component {
           <Button variant="secondary" onClick={this.props.onHide}>
             Close
           </Button>
-          <Button variant="primary" onClick={e => this.props.createDay(this.state)}>
+          <Button variant="primary" onClick={e => this.props.createDay({...this.state, location: this.props.locations[this.state.location].id})}>
             Create day
           </Button>
         </Modal.Footer>
@@ -116,7 +131,7 @@ class EditModal extends Component {
     return (
       <Modal show={this.props.show} onHide={this.props.onHide}>
         <Modal.Header closeButton>
-          <Modal.Title>Edit Day {this.props.day.date}</Modal.Title>
+          <Modal.Title>Edit Day {this.props.day.date} at {this.props.day.Location.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Button variant='danger' onClick={e => this.props.deleteDay()}>Delete day</Button>
@@ -139,6 +154,7 @@ export default class Days extends Component {
     super(props);
     this.state = {
       days: [],
+      locations: [],
       success: false,
       showCreateModal: false,
       loading: false,
@@ -146,13 +162,14 @@ export default class Days extends Component {
       showEditModal: false,
     };
   }
-  createDay = async ({starthour, startminute, endhour, endminute, date, window, buffer}) => {
+  createDay = async ({starthour, startminute, endhour, endminute, date, location, window, buffer}) => {
     const status = await createDay({
       starthour: starthour,
       startminute: startminute,
       endhour: endhour,
       endminute: endminute,
       date: moment(date),
+      location: location,
       window: window,
       buffer: buffer
     });
@@ -161,7 +178,7 @@ export default class Days extends Component {
     this.setState({...days, loading: false});
   }
   deleteSelectedDay = async () => {
-    const status = await deleteDay(this.state.days[this.state.selected].id);
+    const status = await deleteDay(this.state.days[this.state.selected].date, this.state.days[this.state.selected].Location.id);
     this.setState({showEditModal: false, loading: true});
     const days = await getAvailableDays();
     this.setState({...days, loading: false});
@@ -169,7 +186,8 @@ export default class Days extends Component {
   componentDidMount = async () => {
     this.setState({loading: true});
     const days = await getAvailableDays();
-    this.setState({...days, loading: false});
+    const locations = await getAvailableLocations();
+    this.setState({...days, ...locations, success: days.success && locations.success, loading: false});
   }
   render() {
     if(this.props.level < 30) {
@@ -184,6 +202,7 @@ export default class Days extends Component {
             <tr>
               <th>#</th>
               <th>Date</th>
+              <th>Location</th>
               <th>Start Time</th>
               <th>End Time</th>
               <th>Time Window</th>
@@ -196,8 +215,9 @@ export default class Days extends Component {
                 <tr key={i} onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>
                   <td>{i+1}</td>
                   <td>{v.date}</td>
-                  <td>{v.starthour>12?v.starthour-12:v.starthour}:{v.startminute<10?`0${v.startminute}`:v.startminute} {v.starthour>12?'PM':'AM'}</td>
-                  <td>{v.endhour>12?v.endhour-12:v.endhour}:{v.endminute<10?`0${v.endminute}`:v.endminute} {v.endhour>12?'PM':'AM'}</td>
+                  <td>{v.Location.name}</td>
+                  <td>{moment(v.starttime).format('h:mm A')}</td>
+                  <td>{moment(v.endtime).format('h:mm A')}</td>
                   <td>{v.window}</td>
                   <td>{v.buffer}</td>
                 </tr>
@@ -208,7 +228,7 @@ export default class Days extends Component {
         <div className='text-center'>
           <Spinner animation='border' role='status' className={this.state.loading?'':'d-none'}/>
         </div>
-        <CreateModal show={this.state.showCreateModal} onHide={e => this.setState({showCreateModal: false})} createDay={this.createDay}/>
+        <CreateModal show={this.state.showCreateModal} onHide={e => this.setState({showCreateModal: false})} createDay={this.createDay} locations={this.state.locations}/>
         <EditModal show={this.state.showEditModal} onHide={e => this.setState({showEditModal: false})} day={this.state.days[this.state.selected]} deleteDay={() => this.deleteSelectedDay()}/>
       </Container>
     );
