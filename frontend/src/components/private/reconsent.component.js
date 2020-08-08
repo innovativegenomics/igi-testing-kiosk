@@ -46,26 +46,41 @@ export default class Reconsent extends Component {
     this.setState({submitting: false, submitted: success, error: !success});
   }
   componentDidUpdate = (prevProps, prevState) => {
-    if(this.props.auth.user.questions !== prevProps.auth.user.questions) {
-      const qs = this.props.auth.user.questions;
-      this.setState({questions: qs});
+    try {
+      if(this.props.auth.user.questions !== prevProps.auth.user.questions) {
+        const qs = this.props.auth.user.questions;
+        this.setState({questions: qs});
+      }
+    } catch(err) {
+      
     }
   }
   render() {
-    if(this.state.submitted || this.props.auth.user.reconsented) {
+    if(this.state.submitted) {
       return <Redirect to='/dashboard' />;
     }
 
-    if (!this.props.auth.loaded || !this.state.questions) {
+    if (!this.props.auth.loaded) {
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
         </div>
       );
     } else if (this.props.auth.unauthed) {
-      return <Redirect to='/' />;
+      window.open(`/api/users/login?returnTo=${encodeURIComponent('https://igi-fast.berkeley.edu/reconsent')}`, '_self');
+      return <div/>;
+    } else if(!this.state.questions) {
+      return (
+        <div style={{width: '100%'}} className='text-center'>
+          <Spinner animation='border' role='status'/>
+        </div>
+      );
     } else if (!this.props.auth.success) {
       return <Redirect to='/newuser' />;
+    }
+
+    if(this.props.auth.user.reconsented) {
+      return <Redirect to='/dashboard' />;
     }
 
     return (
@@ -114,7 +129,7 @@ export default class Reconsent extends Component {
                   understanding of asymptomatic epidemiology within the UC Berkeley campus community.
                 </Question>
                 <Form className='border-top pt-3'>
-                  <Button type='submit' onClick={this.submit} disabled={this.state.submitting}>Confirm</Button>
+                  <Button onClick={this.submit} disabled={this.state.submitting}>Confirm</Button>
                 </Form>
                 {this.state.error?
                   <Alert variant='danger' className='mb-0 mt-3'>
