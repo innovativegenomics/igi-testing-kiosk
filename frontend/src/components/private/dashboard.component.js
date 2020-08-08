@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import { Row, Col, Alert, Spinner, Button } from 'react-bootstrap';
+import { Row, Col, Alert, Spinner, Button, Container } from 'react-bootstrap';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import moment from 'moment';
 
@@ -48,84 +48,91 @@ export default class Dashboard extends Component {
         </div>
       );
     }
-    console.log(this.state.slot)
+
     return (
-      <div>
-        <div className='container'>
-          <div className='row justify-content-center'>
-            <div className='col text-center'>
-              <p className='display-4'>{this.state.slot.completed?'Completed':'Next'} {(this.state.slot.location) ? '' : 'Open'} Appointment</p>
-            </div>
-          </div>
-          <div className='row justify-content-center mb-3'>
-            <div className='col text-center'>
-              <p className='h1 font-weight-light'>
-                {(this.state.slot.location) ? '' : 'Week of '}
-                {(this.state.slot.location) ? moment(this.state.slot.time).format('dddd, MMMM D h:mm A') : moment(this.state.slot.time).format('dddd, MMMM D')}
-                {(this.state.slot.location) ? ` at ` : ''}
-                {(this.state.slot.location) ? <TrackedLink ext to={this.state.slot.locationlink} target='_blank' >{this.state.slot.location}</TrackedLink>:<div/>}
-              </p>
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className='col text-center mb-3'>
-              <TrackedLink className={'btn btn-outline-success btn-lg '+(this.state.slot.completed?'d-none':'')} to='/scheduler' action='dashboard schedule button'>{(this.state.slot.location) ? 'Change time and location' : 'Select time and location'}</TrackedLink>
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className={`col text-center mb-3 ${!!this.state.slot.location && !this.state.slot.completed ? '' : 'd-none'}`}>
-              <TrackedButton variant='outline-danger' size='lg' onClick={this.requestCancel} label='cancel appointment' action='cancel appointment'>Cancel Appointment</TrackedButton>
-              <TrackedLink className='ml-3 btn btn-lg btn-outline-primary' to={`/qrcode?uid=${encodeURIComponent(this.state.slot.uid)}&time=${encodeURIComponent(this.state.slot.time)}&location=${encodeURIComponent(this.state.slot.location)}`} label='/qrcode' action='qr code button link'>View QR Code</TrackedLink>
-            </div>
-          </div>
-          {this.props.auth.user.reconsented?
-            undefined
-            :
-            <Row className='justify-content-center mb-3'>
-              <Col className='text-center' md='6'>
-                <Alert variant='info' md={2} className='text-left'>
-                  <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
-                  <p className='text-center'>
-                    We have updated the terms of our study. If you would like, you can review the new study informed 
-                    consent, and update the answers to the questions you answered when you first signed up.
-                  </p>
-                </Alert>
-                <Button variant='outline-info' size='lg' onClick={e => this.props.history.push('/reconsent')}>View updated study consent</Button>
-              </Col>
-            </Row>
-          }
-          <div className={'row justify-content-center '+(this.state.slot.completed?'':'d-none')}>
-            <div className='col col-md-6'>
-              <p className='lead alert alert-info text-center'>
-                Thanks for completing your appointment! You will be able to reschedule for another appointment starting this Sunday.
-              </p>
-            </div>
-          </div>
-          <Row className='justify-content-center'>
-            <Col md={8} className={!!this.state.slot.location&&!this.state.slot.completed?'':'d-none'}>
-              <Alert variant='success'>
-                <h3 className='font-weight-light text-center'>You have an upcoming appointment!</h3>
-                <p className='lead text-center mb-0'>
-                  You should have received an appointment confirmation email/text. If you didn't receive an email, check your spam.
-                  When you arrive for your appointment, please wear your mask, and 
-                  bring the QR code that you received in the confirmation email. You can
-                  also view the qr code <TrackedLink to={`/qrcode?uid=${encodeURIComponent(this.state.slot.uid)}&time=${encodeURIComponent(this.state.slot.time)}&location=${encodeURIComponent(this.state.slot.location)}`} label='/qrcode' action='alert qr code'>here</TrackedLink>.
+      <Container className='text-center'>
+        {
+          this.state.slot?
+          <>
+            <p className='display-4'>{this.state.slot.completed?'Completed':'Scheduled'} appointment</p>
+            <p className='h1 font-weight-light'>{moment(this.state.slot.time).format('dddd, MMMM Do [at] h:mm A')}</p>
+            <p className='h2 font-weight-light'>located at <TrackedLink ext to={this.state.slot.OpenTime.Location.map} target='_blank' >{this.state.slot.OpenTime.Location.name}</TrackedLink></p>
+            {
+              this.state.slot.completed?
+              <>
+                <Row className='justify-content-center'>
+                  <Col md={6}>
+                    <Alert variant='success'>
+                      <p className='lead mb-0'>
+                        Thanks for completing your appointment!
+                        You will be able to schedule your next
+                        appointment starting this sunday. If you
+                        have any more questions, please email the
+                        study coordinator, Alex Ehrenberg, at <TrackedLink ext to='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</TrackedLink>.
+                      </p>
+                    </Alert>
+                  </Col>
+                </Row>
+              </>
+              :
+              <>
+                <TrackedLink className={'btn btn-outline-success btn-lg mt-2 '+(this.state.slot.completed?'d-none':'')} to='/scheduler' action='dashboard reschedule button'>Change time and location</TrackedLink>
+                <TrackedButton variant='outline-danger' size='lg' className='d-block ml-auto mr-auto mt-3' onClick={this.requestCancel} label='cancel appointment' action='cancel appointment'>Cancel Appointment</TrackedButton>
+                <Row className='justify-content-center mt-3'>
+                  <Col md={6}>
+                    <Alert variant='success'>
+                      <h3 className='font-weight-light text-center'>You have an upcoming appointment!</h3>
+                      <p className='lead text-center mb-0'>
+                        You should have received an appointment confirmation email/text. If you didn't receive an email, check your spam.
+                        When you arrive for your appointment, please wear your mask, and 
+                        bring the QR code that you received in the confirmation email. You can
+                        also view the qr code <TrackedLink to={`/qrcode?uid=${encodeURIComponent(this.state.slot.uid)}&time=${encodeURIComponent(this.state.slot.time)}&location=${encodeURIComponent(this.state.slot.OpenTime.Location.name)}`} label='/qrcode' action='alert qr code'>here</TrackedLink>.
+                      </p>
+                    </Alert>
+                  </Col>
+                </Row>
+              </>
+            }
+          </>
+          :
+          <>
+            <p className='display-4'>Appointments available</p>
+            <p className='h1 font-weight-light'>Starting week of {moment(this.props.auth.user.availableStart).startOf('week').format('dddd, MMMM Do')}</p>
+            <TrackedLink className={'btn btn-outline-success btn-lg'} to='/scheduler' action='dashboard schedule button'>Select time and location</TrackedLink>
+            {
+              this.state.showCancelledMessage?
+              <Row className='justify-content-center mt-3'>
+                <Col md={6}>
+                  <Alert variant='info'>
+                    <h3 className='font-weight-light text-center'>Appointment Cancelled</h3>
+                    <p className='lead mb-0'>
+                      You can schedule a different time by clicking the button above.
+                    </p>
+                  </Alert>
+                </Col>
+              </Row>
+              :
+              undefined
+            }
+          </>
+        }
+        {this.props.auth.user.reconsented?
+          undefined
+          :
+          <Row className='justify-content-center mb-3 mt-3'>
+            <Col className='text-center' md='6'>
+              <Alert variant='info' md={2} className='text-left'>
+                <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
+                <p className='text-center mb-0 lead'>
+                  We have updated the terms of our study. If you would like, you can review the new study informed 
+                  consent, and update the answers to the questions you answered when you first signed up.
                 </p>
               </Alert>
+              <TrackedButton variant='outline-info' size='lg' onClick={e => this.props.history.push('/reconsent')} label='reconsent' action='reconsent'>View updated study consent</TrackedButton>
             </Col>
           </Row>
-          <Row className='justify-content-center'>
-            <Col md={8} className={this.state.showCancelledMessage?'':'d-none'}>
-              <Alert variant='info'>
-                <h3 className='font-weight-light text-center'>Appointment Cancelled</h3>
-                <p className='lead text-center'>
-                  You can schedule a different time by clicking the button above.
-                </p>
-              </Alert>
-            </Col>
-          </Row>
-        </div>
-      </div>
+        }
+      </Container>
     );
   }
 }

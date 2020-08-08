@@ -205,6 +205,7 @@ export default class Scheduler extends Component {
       days: [],
       day: null, // moment
       slot: {},
+      oldSlot: null,
       showConfirmModal: false
     };
   }
@@ -243,6 +244,8 @@ export default class Scheduler extends Component {
       return <Redirect to='/' />;
     } else if (!this.props.auth.success) {
       return <Redirect to='/newuser' />;
+    } else if(this.state.oldSlot && this.state.oldSlot.completed) {
+      return <Redirect to='/dashboard'/>;
     }
 
     return (

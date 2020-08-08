@@ -9,6 +9,7 @@ const Op = Sequelize.Op;
 
 const cas = require('../../cas');
 const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail } = require('../../worker');
+const { request } = require('express');
 
 /**
  * User admin levels:
@@ -126,61 +127,70 @@ router.get('/search/slots', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 0) {
-    const term = request.query.term || '';
-    const perpage = parseInt(request.query.perpage);
-    const page = parseInt(request.query.page);
-    const { count, rows } = await User.findAndCountAll({
-      limit: perpage,
-      offset: perpage*page,
-      where: {
-        [Op.or]: {
-          firstname: {
-            [Op.iLike]: `${term}%`,
-          },
-          lastname: {
-            [Op.iLike]: `${term}%`,
-          },
-        },
-      },
-      attributes: {
-        include: [
-          [
-            sequelize.literal(`(
-              SELECT time
-              FROM "Slots" AS slot
-              WHERE
-                slot.calnetid = "User".calnetid
-              AND
-                slot.current = true
-              )`),
-            'slotTime'
-          ]
-        ]
-      },
-      order: [
-        [sequelize.literal('"slotTime"'), 'asc']
-      ],
-      include: [{
-        model: Slot,
+    try {
+      const term = request.query.term || '';
+      const perpage = parseInt(request.query.perpage);
+      const page = parseInt(request.query.page);
+      const { count, rows } = await User.findAndCountAll({
+        limit: perpage,
+        offset: perpage*page,
         where: {
-          current: true
+          [Op.or]: {
+            firstname: {
+              [Op.iLike]: `${term}%`,
+            },
+            lastname: {
+              [Op.iLike]: `${term}%`,
+            },
+          },
         },
-        required: true
-      }],
-      logging: (msg) => request.log.info(msg)
-    });
-    const res = [];
-    rows.forEach(v => {
-      res.push({
-        time: v.Slots[0].time,
-        location: v.Slots[0].location,
-        uid: v.Slots[0].uid,
-        completed: v.Slots[0].completed,
-        name: `${v.firstname} ${v.lastname}`,
-        calnetid: v.calnetid,
+        // attributes: {
+        //   include: [
+        //     [
+        //       sequelize.literal(`(
+        //         SELECT time
+        //         FROM "Slots" AS slot
+        //         WHERE
+        //           slot.calnetid = "User".calnetid
+        //         AND
+        //           slot.current = true
+        //         )`),
+        //       'slotTime'
+        //     ]
+        //   ]
+        // },
+        // order: [
+        //   [sequelize.literal('"slotTime"'), 'asc']
+        // ],
+        include: [{
+          model: Slot,
+          where: {
+            current: true
+          },
+          required: false,
+          include: {
+            model: OpenTime,
+            include: Location
+          }
+        }],
+        logging: (msg) => request.log.info(msg)
       });
-    });
-    response.send({success: true, results: res, count: count});
+      const res = [];
+      rows.forEach(v => {
+        res.push({
+          time: v.Slots[0] ? v.Slots[0].time : v.availableStart,
+          location: v.Slots[0] ? v.Slots[0].OpenTime.Location.name : null,
+          uid: v.Slots[0] ? v.Slots[0].uid : null,
+          completed: v.Slots[0] ? v.Slots[0].completed : null,
+          name: `${v.firstname} ${v.lastname}`,
+          calnetid: v.calnetid,
+        });
+      });
+      response.send({success: true, results: res, count: count});
+    } catch(err) {
+      request.log.error(`error searching slots`);
+      request.log.error(err.stack);
+    }
   } else {
     request.log.info('unauthed');
     response.status(401).send('Unauthorized');
@@ -280,7 +290,8 @@ router.get('/stats/slots', cas.block, async (request, response) => {
             duplicating: false
           }
         ],
-        group: ['OpenTime.id']
+        group: ['OpenTime.id'],
+        logging: (msg) => request.log.info(msg)
       });
       response.send({success: true, slots: scheduled});
     } catch(err) {
@@ -385,6 +396,30 @@ router.get('/stats/general/reconsented', cas.block, async (request, response) =>
   } else {
     request.log.info('unauthed');
     response.status(401).send('Unauthorized');
+  }
+});
+
+router.get('/settings/days', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 10) {
+    const res = await OpenTime.findAll({
+      attributes: [
+        'date',
+        [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count'],
+      ],
+      include: Location,
+      order: [['date', 'desc']],
+      group: ['date', 'Location.id'],
+      logging: (msg) => request.log.info(msg)
+    });
+    response.send({
+      success: true,
+      days: res
+    });
+  } else {
+    request.log.error(`Not authed`);
+    response.status(401).send();
   }
 });
 

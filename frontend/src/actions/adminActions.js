@@ -66,20 +66,9 @@ export const searchParticipants = async (term, perpage, page) => {
   }
 }
 
-export const getScheduledSlotsStat = async m => {
+export const getScheduledSlotsStat = async (location, starttime, endtime) => {
   try {
-    const response = await axios.get('/api/admin/stats/slots/scheduled', { params: { day: m } });
-    return response.data;
-  } catch(err) {
-    console.error(`Can't search slots`);
-    console.error(err);
-    return { success: false };
-  }
-}
-
-export const getCompletedSlotsStat = async m => {
-  try {
-    const response = await axios.get('/api/admin/stats/slots/completed', { params: { day: m } });
+    const response = await axios.get('/api/admin/stats/slots', { params: { location: location, starttime: starttime, endtime: endtime } });
     return response.data;
   } catch(err) {
     console.error(`Can't search slots`);
