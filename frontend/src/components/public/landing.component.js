@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Alert } from 'react-bootstrap';
 
 import { TrackedButton } from '../../tracker';
 import './landing.css';
@@ -44,25 +45,13 @@ export default class Landing extends Component {
                   negative test result is truly negative for SARS-CoV-2 or will later become infected with COVID-19.
                 </i>
               </p>
-              <p className='lead text-center'>To enroll and schedule an appointment:</p>
             </div>
           </div>
-          <div className={`row justify-content-center ${(this.props.devmode) ? '' : 'd-none'}`}>
-            <div className='col-md-4 text-center pb-2'>
-              <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({ devuser: e.target.value })} autoComplete='off' autoCorrect='off' autoCapitalize='none' />
-            </div>
-          </div>
-          <div className='row justify-content-center mb-2'>
-            <div className='col text-center'>
-              <TrackedButton variant='primary' size='lg' onClick={this.handleLoginButton} category='login' action='calnet user login'>
-                Log in with CalNet ID
-              </TrackedButton>
-              <br />
-              <TrackedButton className='mt-2' variant='outline-primary' size='lg' onClick={e => this.props.history.push('/extlogin')} category='login' action='signin'>Log in without a CalNet ID</TrackedButton>
-              <p className='mt-4 lead'>Don't have a CalNet ID, but still want to enroll?</p>
-              <TrackedButton variant='outline-primary' size='lg' onClick={e => this.props.history.push('/signup')} category='login' action='signup'>Sign up without a CalNet ID</TrackedButton>
-            </div>
-          </div>
+          <Alert variant='warning'>
+            <p className='lead mb-0 text-center'>
+              The website is down temporarily for scheduled maintenance. Please check back in a few minutes.
+            </p>
+          </Alert>
         </div>
       </div>
     );
