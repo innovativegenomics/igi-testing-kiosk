@@ -56,7 +56,7 @@ export const withTracker = (WrappedComponent, options = {}) => {
 export const TrackedButton = props => {
   return <Button {...props} onClick={e => {
     ReactGA.event({
-      category: props.category,
+      category: 'tracked button',
       action: props.action,
       label: props.label,
       value: props.value,
@@ -66,7 +66,6 @@ export const TrackedButton = props => {
 }
 
 TrackedButton.propTypes = {
-  category: PropTypes.string.isRequired,
   action: PropTypes.string.isRequired,
   label: PropTypes.string,
   value: PropTypes.any
@@ -89,8 +88,8 @@ export const TrackedLink = props => {
   return <Link {...otherProps} onClick={e => {
     ReactGA.event({
       category: 'internal link',
-      action: props.to,
-      label: props.label
+      action: props.action,
+      label: props.label||props.to
     });
     return (props.onClick||(u => undefined))(e);
   }}/>;
@@ -98,7 +97,8 @@ export const TrackedLink = props => {
 
 TrackedLink.propTypes = {
   ext: PropTypes.bool,
-  label: PropTypes.string
+  label: PropTypes.string,
+  action: PropTypes.string
 };
 
 export class TrackedModal extends Component {

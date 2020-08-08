@@ -86,11 +86,20 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BOOLEAN,
       allowNull: false,
       defaultValue: false
+    },
+    availableStart: {
+      type: DataTypes.DATE
+    },
+    availableEnd: {
+      type: DataTypes.DATE
     }
   }, {});
   User.associate = function(models) {
     // associations can be defined here
-    User.hasMany(models.Slot);
+    User.hasMany(models.Slot, {
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid'
+    });
   };
   return User;
 };

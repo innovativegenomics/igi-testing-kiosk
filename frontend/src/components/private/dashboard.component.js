@@ -1,35 +1,34 @@
 import React, { Component } from 'react';
 import { Link, Redirect } from 'react-router-dom';
-import { Row, Col, Alert, Spinner, Button } from 'react-bootstrap';
+import { Row, Col, Alert, Spinner, Button, Container } from 'react-bootstrap';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import moment from 'moment';
 
 import { getSlot, cancelSlot } from '../../actions/slotActions';
+import { TrackedLink, TrackedButton } from '../../tracker';
 
 export default class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      slot: {
-        slot: {},
-        success: false,
-        loaded: false
-      },
+      slot: {},
+      success: false,
+      loaded: false,
       showCancelledMessage: false,
     };
   }
   requestCancel = e => {
     cancelSlot().then(res => {
       if (res.success) {
-        this.setState({ slot: { ...this.state.slot, loaded: false }, showCancelledMessage: true });
-        getSlot().then(res => this.setState({ slot: { ...res, loaded: true } }));
+        this.setState({ loaded: false, showCancelledMessage: true });
+        getSlot().then(res => this.setState({ ...res, loaded: true }));
       } else {
         alert(`Couldn't cancel your appointment! Please try again.`);
       }
     });
   }
   componentDidMount() {
-    getSlot().then(res => this.setState({ slot: { ...res, loaded: true } }));
+    getSlot().then(res => this.setState({ ...res, loaded: true }));
   }
   render() {
     if (!this.props.auth.loaded) {
@@ -42,88 +41,98 @@ export default class Dashboard extends Component {
       return <Redirect to='/' />;
     } else if (!this.props.auth.success) {
       return <Redirect to='/newuser' />;
-    } else if (!this.state.slot.loaded) {
+    } else if (!this.state.loaded) {
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
         </div>
       );
     }
+
     return (
-      <div>
-        <div className='container'>
-          <div className='row justify-content-center'>
-            <div className='col text-center'>
-              <p className='display-4'>{this.state.slot.slot.completed?'Completed':'Next'} {(this.state.slot.slot.location) ? '' : 'Open'} Appointment</p>
-            </div>
-          </div>
-          <div className='row justify-content-center mb-3'>
-            <div className='col text-center'>
-              <p className='h1 font-weight-light'>
-                {(this.state.slot.slot.location) ? '' : 'Week of '}
-                {(this.state.slot.slot.location) ? moment(this.state.slot.slot.time).format('dddd, MMMM D h:mm A') : moment(this.state.slot.slot.time).format('dddd, MMMM D')}
-                {(this.state.slot.slot.location) ? ` at ${this.state.slot.slot.location}` : ''}
-              </p>
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className='col text-center mb-3'>
-              <Link className={'btn btn-outline-success btn-lg '+(this.state.slot.slot.completed?'d-none':'')} to='/scheduler'>{(this.state.slot.slot.location) ? 'Change time and location' : 'Select time and location'}</Link>
-            </div>
-          </div>
-          <div className='row justify-content-center'>
-            <div className='col text-center mb-3'>
-              <button className={`btn btn-outline-danger btn-lg ${!!this.state.slot.slot.location && !this.state.slot.slot.completed ? '' : 'd-none'}`} onClick={this.requestCancel}>Cancel Appointment</button>
-            </div>
-          </div>
-          {this.props.auth.user.reconsented?
-            undefined
-            :
-            <Row className='justify-content-center mb-3'>
-              <Col className='text-center' md='6'>
-                <Alert variant='info' md={2} className='text-left'>
-                  <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
-                  <p className='text-center'>
-                    We have updated the terms of our study. If you would like, you can review the new study informed 
-                    consent, and update the answers to the questions you answered when you first signed up.
-                  </p>
-                </Alert>
-                <Button variant='outline-info' size='lg' onClick={e => this.props.history.push('/reconsent')}>View updated study consent</Button>
-              </Col>
-            </Row>
-          }
-          <div className={'row justify-content-center '+(this.state.slot.slot.completed?'':'d-none')}>
-            <div className='col col-md-6'>
-              <p className='lead alert alert-info text-center'>
-                Thanks for completing your appointment! You will be able to reschedule for another appointment starting this Sunday.
-              </p>
-            </div>
-          </div>
-          <Row className='justify-content-center'>
-            <Col md={8} className={!!this.state.slot.slot.location&&!this.state.slot.slot.completed?'':'d-none'}>
-              <Alert variant='success'>
-                <h3 className='font-weight-light text-center'>You have an upcoming appointment!</h3>
-                <p className='lead text-center'>
-                  You should have received an appointment confirmation email/text. If you didn't receive an email, check your spam.
-                  When you arrive for your appointment, please wear your mask, and 
-                  bring the QR code that you received in the confirmation email. You can
-                  also view the qr code <Link to={'/qrcode?uid='+this.state.slot.slot.uid}>here</Link>.
+      <Container className='text-center'>
+        {
+          this.state.slot?
+          <>
+            <p className='display-4'>{this.state.slot.completed?'Completed':'Scheduled'} appointment</p>
+            <p className='h1 font-weight-light'>{moment(this.state.slot.time).format('dddd, MMMM Do [at] h:mm A')}</p>
+            <p className='h2 font-weight-light'>located at <TrackedLink ext to={this.state.slot.OpenTime.Location.map} target='_blank' >{this.state.slot.OpenTime.Location.name}</TrackedLink></p>
+            {
+              this.state.slot.completed?
+              <>
+                <Row className='justify-content-center'>
+                  <Col md={6}>
+                    <Alert variant='success'>
+                      <p className='lead mb-0'>
+                        Thanks for completing your appointment!
+                        You will be able to schedule your next
+                        appointment starting this sunday. If you
+                        have any more questions, please email the
+                        study coordinator, Alex Ehrenberg, at <TrackedLink ext to='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</TrackedLink>.
+                      </p>
+                    </Alert>
+                  </Col>
+                </Row>
+              </>
+              :
+              <>
+                <TrackedLink className={'btn btn-outline-success btn-lg mt-2 '+(this.state.slot.completed?'d-none':'')} to='/scheduler' action='dashboard reschedule button'>Change time and location</TrackedLink>
+                <TrackedButton variant='outline-danger' size='lg' className='d-block ml-auto mr-auto mt-3' onClick={this.requestCancel} label='cancel appointment' action='cancel appointment'>Cancel Appointment</TrackedButton>
+                <Row className='justify-content-center mt-3'>
+                  <Col md={6}>
+                    <Alert variant='success'>
+                      <h3 className='font-weight-light text-center'>You have an upcoming appointment!</h3>
+                      <p className='lead text-center mb-0'>
+                        You should have received an appointment confirmation email/text. If you didn't receive an email, check your spam.
+                        When you arrive for your appointment, please wear your mask, and 
+                        bring the QR code that you received in the confirmation email. You can
+                        also view the qr code <TrackedLink to={`/qrcode?uid=${encodeURIComponent(this.state.slot.uid)}&time=${encodeURIComponent(this.state.slot.time)}&location=${encodeURIComponent(this.state.slot.OpenTime.Location.name)}`} label='/qrcode' action='alert qr code'>here</TrackedLink>.
+                      </p>
+                    </Alert>
+                  </Col>
+                </Row>
+              </>
+            }
+          </>
+          :
+          <>
+            <p className='display-4'>Appointments available</p>
+            <p className='h1 font-weight-light'>Starting week of {moment(this.props.auth.user.availableStart).startOf('week').format('dddd, MMMM Do')}</p>
+            <TrackedLink className={'btn btn-outline-success btn-lg'} to='/scheduler' action='dashboard schedule button'>Select time and location</TrackedLink>
+            {
+              this.state.showCancelledMessage?
+              <Row className='justify-content-center mt-3'>
+                <Col md={6}>
+                  <Alert variant='info'>
+                    <h3 className='font-weight-light text-center'>Appointment Cancelled</h3>
+                    <p className='lead mb-0'>
+                      You can schedule a different time by clicking the button above.
+                    </p>
+                  </Alert>
+                </Col>
+              </Row>
+              :
+              undefined
+            }
+          </>
+        }
+        {this.props.auth.user.reconsented?
+          undefined
+          :
+          <Row className='justify-content-center mb-3 mt-3'>
+            <Col className='text-center' md='6'>
+              <Alert variant='info' md={2} className='text-left'>
+                <BsFillInfoCircleFill className='position-absolute' style={{marginLeft: '-15px', marginTop: '-5px'}}/>
+                <p className='text-center mb-0 lead'>
+                  We have updated the terms of our study. If you would like, you can review the new study informed 
+                  consent, and update the answers to the questions you answered when you first signed up.
                 </p>
               </Alert>
+              <TrackedButton variant='outline-info' size='lg' onClick={e => this.props.history.push('/reconsent')} label='reconsent' action='reconsent'>View updated study consent</TrackedButton>
             </Col>
           </Row>
-          <Row className='justify-content-center'>
-            <Col md={8} className={this.state.showCancelledMessage?'':'d-none'}>
-              <Alert variant='info'>
-                <h3 className='font-weight-light text-center'>Appointment Cancelled</h3>
-                <p className='lead text-center'>
-                  You can schedule a different time by clicking the button above.
-                </p>
-              </Alert>
-            </Col>
-          </Row>
-        </div>
-      </div>
+        }
+      </Container>
     );
   }
 }
