@@ -32,16 +32,16 @@ export class Navigation extends Component {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse>
           <Nav className='mr-auto'>
-            <Nav.Link as={TrackedLink} to='/about' label='navbar'>About</Nav.Link>
-            <Nav.Link as={TrackedLink} to='/dashboard' label='navbar' className={this.props.authed?'':'d-none'}>Appointments</Nav.Link>
-            <Nav.Link as={TrackedLink} to='/accessing-results' label='navbar' className={this.props.authed?'':'d-none'}>Accessing Results</Nav.Link>
+            <Nav.Link as={TrackedLink} to='/about' action='navbar'>About</Nav.Link>
+            <Nav.Link as={TrackedLink} to='/dashboard' action='navbar' className={this.props.authed?'':'d-none'}>Appointments</Nav.Link>
+            <Nav.Link as={TrackedLink} to='/accessing-results' action='navbar' className={this.props.authed?'':'d-none'}>Accessing Results</Nav.Link>
           </Nav>
           <Form inline className={this.props.authed?'':'d-none'}>
             <Nav.Link as={TrackedLink} ext to='/api/users/logout' className='btn btn-primary text-white'>
               {calnetid.substring(0,1)==='E'?
-                'CalNet Logout'
-                :
                 'Logout'
+                :
+                'CalNet Logout'
               }
             </Nav.Link>
           </Form>
@@ -57,7 +57,7 @@ export class Footer extends Component {
       <div>
         <Card className='position-fixed fixed-bottom d-table p-0 border-0'>
           <Card.Body className='p-3'>
-            <TrackedLink to='mailto:igi-fast@berkeley.edu?subject=Website Issue' ext label='report issue'>Report an issue</TrackedLink>
+            <TrackedLink to='mailto:igi-fast@berkeley.edu?subject=Website Issue' ext action='report issue'>Report an issue</TrackedLink>
           </Card.Body>
         </Card>
         <Card className='position-fixed fixed-bottom d-table p-0 border-0' style={{left: 'auto', right: '0'}}>

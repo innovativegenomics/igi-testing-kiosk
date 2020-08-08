@@ -118,7 +118,7 @@ export default class App extends Component {
               <Route path='/accessing-results' render={props => (
                 <this.accessingResults {...props} auth={this.state.auth} />
               )} />
-              {/* <Route path='/signup' render={props => (
+              <Route path='/signup' render={props => (
                 <this.signup {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
               )} />
               <Route path='/create' render={props => (
@@ -149,7 +149,7 @@ export default class App extends Component {
               
               <Route path='/admin' render={props => (
                 <this.admin {...props} auth={this.state.auth} />
-              )} /> */}
+              )} />
 
 
               <Route component={this.error404}/>

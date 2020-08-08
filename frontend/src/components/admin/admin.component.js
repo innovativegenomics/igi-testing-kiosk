@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Redirect, Route, Link } from 'react-router-dom';
 import { Nav, Spinner } from 'react-bootstrap';
 
-import { getAdminLevel, getSettings } from '../../actions/adminActions';
+import { getAdminLevel } from '../../actions/adminActions';
 import SlotSearch from './slotsearch.component';
 import AdminUsers from './adminusers.component';
 import Statistics from './stats/statistics.component';
@@ -17,15 +17,14 @@ export default class Admin extends Component {
     super(props);
     const path = props.location.pathname.split('/');
     this.state = {
-      settings: null,
       loaded: false,
       level: null,
       active: path[path.length-1],
     };
   }
   componentDidMount = async () => {
-    const [admin, settings] = await Promise.all([getAdminLevel(), getSettings()]);
-    this.setState({loaded: true, level: admin.level, settings: settings.settings});
+    const [admin] = await Promise.all([getAdminLevel()]);
+    this.setState({loaded: true, level: admin.level});
   }
   render() {
     if(!this.state.loaded) {
@@ -37,12 +36,6 @@ export default class Admin extends Component {
     } else if(this.state.loaded && !this.state.level) {
       window.open('/api/admin/login', '_self');
       return <br />;
-    } else if(!this.state.settings) {
-      return (
-        <div style={{width: '100%'}} className='text-center'>
-          <Spinner animation='border' role='status'/>
-        </div>
-      );
     } else if(this.props.match.path === this.props.location.pathname) {
       return <Redirect to={`${this.props.match.path}/search`} />
     }
@@ -79,56 +72,56 @@ export default class Admin extends Component {
           exact
           path={`${this.props.match.path}/search`}
           render={(props) => {
-            return <SlotSearch {...props} level={this.state.level} settings={this.state.settings} />;
+            return <SlotSearch {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/days`}
           render={(props) => {
-            return <Days {...props} level={this.state.level} settings={this.state.settings} />;
+            return <Days {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/extusers`}
           render={(props) => {
-            return <ExtUsers {...props} level={this.state.level} settings={this.state.settings} />;
+            return <ExtUsers {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/admins`}
           render={(props) => {
-            return <AdminUsers {...props} level={this.state.level} settings={this.state.settings} />;
+            return <AdminUsers {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/stats`}
           render={(props) => {
-            return <Statistics {...props} level={this.state.level} settings={this.state.settings} />;
+            return <Statistics {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/participants`}
           render={(props) => {
-            return <Participants {...props} level={this.state.level} settings={this.state.settings} />;
+            return <Participants {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/scanner`}
           render={(props) => {
-            return <Scanner {...props} level={this.state.level} settings={this.state.settings} />;
+            return <Scanner {...props} level={this.state.level} />;
           }}
         />
         <Route
           exact
           path={`${this.props.match.path}/study`}
           render={(props) => {
-            return <Study {...props} level={this.state.level} settings={this.state.settings} />;
+            return <Study {...props} level={this.state.level} />;
           }}
         />
       </div>
