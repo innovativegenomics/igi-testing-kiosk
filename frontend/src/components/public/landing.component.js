@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import { Alert } from 'react-bootstrap';
 
 import { TrackedButton } from '../../tracker';
 import './landing.css';
@@ -63,6 +64,11 @@ export default class Landing extends Component {
               <TrackedButton variant='outline-primary' size='lg' onClick={e => this.props.history.push('/signup')} label='/signup' action='external sign up'>Sign up without a CalNet ID</TrackedButton>
             </div>
           </div>
+          <Alert variant='warning'>
+            <p className='lead mb-0 text-center'>
+              The website is down temporarily for scheduled maintenance. Please check back in a few minutes.
+            </p>
+          </Alert>
         </div>
       </div>
     );
