@@ -110,6 +110,17 @@ export const getReconsentedParticipantsStat = async () => {
   }
 }
 
+export const getNewUsersStat = async () => {
+  try {
+    const response = await axios.get('/api/admin/stats/newusers');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get newuser stats`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 /**
  * returns array of day dates
  */

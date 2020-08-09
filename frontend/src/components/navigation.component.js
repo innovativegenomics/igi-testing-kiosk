@@ -55,12 +55,12 @@ export class Footer extends Component {
   render() {
     return (
       <div>
-        <Card className='position-fixed fixed-bottom d-table p-0 border-0'>
+        <Card className='position-fixed fixed-bottom d-table p-0 border-1'>
           <Card.Body className='p-3'>
             <TrackedLink to='mailto:igi-fast@berkeley.edu?subject=Website Issue' ext action='report issue'>Report an issue</TrackedLink>
           </Card.Body>
         </Card>
-        <Card className='position-fixed fixed-bottom d-table p-0 border-0' style={{left: 'auto', right: '0'}}>
+        <Card className='position-fixed fixed-bottom d-table p-0 border-1' style={{left: 'auto', right: '0'}}>
           <Card.Body className='p-0'>
             <img style={{width:'8rem', left: 0}} src={berkeleyLogo} />
           </Card.Body>

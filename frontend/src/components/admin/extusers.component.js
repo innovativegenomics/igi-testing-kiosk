@@ -80,14 +80,14 @@ export default class ExtUsers extends Component {
             {
               this.state.extUsers.map((v, i) => (
                 <tr key={v.uid} style={{cursor: 'pointer'}}>
-                  <td style={{whiteSpace: 'nowrap'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{i+1}</td>
-                  <td style={{whiteSpace: 'nowrap'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.name}</td>
-                  <td style={{whiteSpace: 'nowrap'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.email}</td>
-                  <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '8rem'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.jobDescription}</td>
-                  <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '6rem'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.employer}</td>
-                  <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '6rem'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.workFrequency}</td>
-                  <td style={{whiteSpace: 'nowrap'}}>{moment(v.createdAt).format('MMM Do HH:mm')}</td>
-                  <td style={{whiteSpace: 'nowrap'}}>
+                  <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{i+1}</td>
+                  <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.name}</td>
+                  <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.email}</td>
+                  <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '8rem', verticalAlign: 'middle'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.jobDescription}</td>
+                  <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '6rem', verticalAlign: 'middle'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.employer}</td>
+                  <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '6rem', verticalAlign: 'middle'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.workFrequency}</td>
+                  <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>{moment(v.createdAt).format('MMM Do HH:mm')}</td>
+                  <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
                     {(v.approved)?
                       <Button size='sm' variant='secondary' disabled>Approved</Button>
                       :
@@ -97,7 +97,7 @@ export default class ExtUsers extends Component {
                       </div>
                     }
                   </td>
-                  <td style={{whiteSpace: 'nowrap'}}>
+                  <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
                     {v.User?moment(v.User.createdAt).format('MMM Do HH:mm'):'False'}
                   </td>
                 </tr>

@@ -51,14 +51,14 @@ export default class SlotSearch extends Component {
     const resultRows = [];
     this.state.results.forEach((v, i) => {
       resultRows.push(<tr key={i}>
-        <td>{i+1+(this.state.page*this.state.perpage)}</td>
-        <td>{v.calnetid}</td>
-        <td>{v.name}</td>
-        <td>{!!v.location?moment(v.time).format('dddd, MMMM D h:mm A'):'Week of '+moment(v.time).format('dddd, MMMM D')}</td>
-        <td>{v.location}</td>
-        <td>{!!v.completed?moment(v.completed).format('dddd, MMMM D h:mm A'):'Not Completed'}</td>
+        <td style={{verticalAlign: 'middle'}}>{i+1+(this.state.page*this.state.perpage)}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.calnetid}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.name}</td>
+        <td style={{verticalAlign: 'middle'}}>{!!v.location?moment(v.time).format('MMM D h:mm A'):'Week of '+moment(v.time).format('ddd, MMM Do')}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.location}</td>
+        <td style={{verticalAlign: 'middle'}}>{!!v.completed?moment(v.completed).format('MMM D h:mm A'):'Not Completed'}</td>
         {this.props.level>=10?
-          <td>
+          <td style={{verticalAlign: 'middle'}}>
             {!!v.completed?
               <Button variant='secondary' size='sm' className={!!v.location?'':'d-none'} onClick={e => this.markAsUncomplete(v.uid)}>Mark uncompleted</Button>
               :
@@ -67,7 +67,7 @@ export default class SlotSearch extends Component {
           </td>
           // <td><Button size='sm' className={!!v.location?'':'d-none'} variant={!!v.completed?'secondary':'primary'} onClick={e => this.markAsComplete(v.uid)} disabled={!!v.completed}>{!!v.completed?`Completed`:`Mark as Complete`}</Button></td>
           :
-          <td></td>
+          <td style={{verticalAlign: 'middle'}}></td>
         }
       </tr>);
     });

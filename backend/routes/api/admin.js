@@ -403,6 +403,35 @@ router.get('/stats/general/reconsented', cas.block, async (request, response) =>
   }
 });
 
+router.get('/stats/newusers', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 20) {
+    try {
+      const newusers = await User.findAll({
+        attributes: [
+          [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count'],
+          [sequelize.cast(sequelize.col('createdAt'), 'DATE'), 'date']
+        ],
+        group: [sequelize.cast(sequelize.col('createdAt'), 'DATE')],
+        order: [[sequelize.cast(sequelize.col('createdAt'), 'DATE'), 'asc']],
+        logging: (msg) => request.log.info(msg)
+      });
+      response.send({
+        success: true,
+        newusers: newusers
+      });
+    } catch(err) {
+      request.log.error(`error getting newuser stats`);
+      request.log.error(err);
+      response.send({success: false});
+    }
+  } else {
+    request.log.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.get('/settings/days', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;

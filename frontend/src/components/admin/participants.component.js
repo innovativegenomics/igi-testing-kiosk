@@ -147,33 +147,33 @@ export default class Participants extends Component {
     const resultRows = [];
     this.state.results.forEach((v, i) => {
       resultRows.push(<tr key={v.calnetid}>
-        <td style={{whiteSpace: 'nowrap'}}>{i+1+(this.state.page*this.state.perpage)}</td>
-        <td style={{whiteSpace: 'nowrap'}}>{v.calnetid}</td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>{i+1+(this.state.page*this.state.perpage)}</td>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>{v.calnetid}</td>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.firstname} onSave={nv => this.updateUser(i, {firstname: nv})}/>
           <EditableBox value={v.middlename} onSave={nv => this.updateUser(i, {middlename: nv})}/>
           <EditableBox value={v.lastname} onSave={nv => this.updateUser(i, {lastname: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.dob} onSave={nv => this.updateUser(i, {dob: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.email} onSave={nv => this.updateUser(i, {email: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.phone} onSave={nv => this.updateUser(i, {phone: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.sex} onSave={nv => this.updateUser(i, {sex: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.pbuilding} onSave={nv => this.updateUser(i, {pbuilding: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <EditableBox value={v.patientid} onSave={nv => this.updateUser(i, {patientid: nv})}/>
         </td>
-        <td style={{whiteSpace: 'nowrap'}}>{moment(v.datejoined).format('YYYY-MM-DD h:mm A')}</td>
-        <td style={{whiteSpace: 'nowrap'}}>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>{moment(v.datejoined).format('YYYY-MM-DD h:mm A')}</td>
+        <td style={{whiteSpace: 'nowrap', verticalAlign: 'middle'}}>
           <Button variant='danger' size='sm' onClick={e => this.deleteUser(v.calnetid)}>Delete participant</Button>
         </td>
       </tr>);

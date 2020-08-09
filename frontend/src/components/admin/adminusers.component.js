@@ -118,22 +118,22 @@ export default class AdminUsers extends Component {
     const adminRows = [];
     this.state.admins.forEach((v, i) => {
       adminRows.push(<tr key={i}>
-        <td>{i+1}</td>
-        <td>{v.name}</td>
-        <td>{v.email}</td>
-        <td>{v.level}</td>
-        <td><Button size='sm' onClick={e => this.removeAdmin(v.uid)}>Remove</Button></td>
+        <td style={{verticalAlign: 'middle'}}>{i+1}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.name}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.email}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.level}</td>
+        <td style={{verticalAlign: 'middle'}}><Button size='sm' onClick={e => this.removeAdmin(v.uid)}>Remove</Button></td>
       </tr>);
     });
 
     const adminPendingRows = [];
     this.state.adminsPending.forEach((v, i) => {
       adminPendingRows.push(<tr key={i}>
-        <td>{i+1}</td>
-        <td>{v.name}</td>
-        <td>{v.email}</td>
-        <td>{v.level}</td>
-        <td><Button size='sm' onClick={e => this.removeAdmin(v.uid)}>Remove</Button></td>
+        <td style={{verticalAlign: 'middle'}}>{i+1}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.name}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.email}</td>
+        <td style={{verticalAlign: 'middle'}}>{v.level}</td>
+        <td style={{verticalAlign: 'middle'}}><Button size='sm' onClick={e => this.removeAdmin(v.uid)}>Remove</Button></td>
       </tr>);
     });
 
