@@ -162,6 +162,10 @@ router.get('/search/slots', cas.block, async (request, response) => {
         // order: [
         //   [sequelize.literal('"slotTime"'), 'asc']
         // ],
+        order: [
+          [Slot, 'time', 'asc'],
+          ['availableStart', 'asc']
+        ],
         include: [{
           model: Slot,
           where: {
