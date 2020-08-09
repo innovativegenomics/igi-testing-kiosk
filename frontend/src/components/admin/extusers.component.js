@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Table, Form, Row, Col, Button, Spinner, Modal } from 'react-bootstrap';
+import moment from 'moment';
 
 import { getExternalUsers, approveExternalUser, rejectExternalUser } from '../../actions/adminActions';
 
@@ -70,7 +71,9 @@ export default class ExtUsers extends Component {
               <th>Job Description</th>
               <th>Employer</th>
               <th>Work Frequency</th>
+              <th>Request received</th>
               <th>Approve</th>
+              <th>Account Created</th>
             </tr>
           </thead>
           <tbody>
@@ -83,6 +86,7 @@ export default class ExtUsers extends Component {
                   <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '8rem'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.jobDescription}</td>
                   <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '6rem'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.employer}</td>
                   <td style={{whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', maxWidth: '6rem'}} onClick={e => this.setState({selectedIndex: i, showDetailModal: true})}>{v.workFrequency}</td>
+                  <td style={{whiteSpace: 'nowrap'}}>{moment(v.createdAt).format('MMM Do HH:mm')}</td>
                   <td style={{whiteSpace: 'nowrap'}}>
                     {(v.approved)?
                       <Button size='sm' variant='secondary' disabled>Approved</Button>
@@ -92,6 +96,9 @@ export default class ExtUsers extends Component {
                         <Button size='sm' variant='danger' className='ml-1' onClick={e => this.rejectUser(v.uid)}>Reject</Button>
                       </div>
                     }
+                  </td>
+                  <td style={{whiteSpace: 'nowrap'}}>
+                    {v.User?moment(v.User.createdAt).format('MMM Do HH:mm'):'False'}
                   </td>
                 </tr>
               ))

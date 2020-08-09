@@ -49,6 +49,10 @@ module.exports = (sequelize, DataTypes) => {
   });
   ExternalUser.associate = function(models) {
     // associations can be defined here
+    ExternalUser.hasOne(models.User, {
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid'
+    });
   };
   return ExternalUser;
 };

@@ -100,6 +100,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'calnetid',
       sourceKey: 'calnetid'
     });
+    User.belongsTo(models.ExternalUser, {
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid'
+    });
   };
   return User;
 };

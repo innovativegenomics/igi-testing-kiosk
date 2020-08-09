@@ -763,6 +763,10 @@ router.get('/external/users', cas.block, async (request, response) => {
             }
           }
         },
+        include: {
+          model: User,
+          required: false
+        },
         logging: (msg) => request.log.info(msg)
       });
       response.send({
