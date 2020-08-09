@@ -45,7 +45,6 @@ export default class Slots extends Component {
     await this.runSlotsStats({day: day});
   }
   render() {
-    console.log(this.state.slots);
     const labels = [];
     const scheduledValues = [];
     const completedValues = [];
@@ -122,7 +121,7 @@ export default class Slots extends Component {
                 <Form.Control as='select' value={this.state.day} onChange={e => this.updateDay(e.target.value)}>
                   {
                     this.state.availableDays.map((v, i) => (
-                      <option value={i}>{moment(v.date).format('dddd, MMMM Do')} at {v.Location.name}</option>
+                      <option value={i} key={i}>{moment(v.date).format('dddd, MMMM Do')} at {v.Location.name}</option>
                     ))
                   }
                 </Form.Control>

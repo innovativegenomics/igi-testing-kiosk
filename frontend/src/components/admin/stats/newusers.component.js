@@ -3,6 +3,8 @@ import { Card, Row, Col, Form, OverlayTrigger, Tooltip, Button, Spinner } from '
 import { BsArrowClockwise } from 'react-icons/bs';
 import { Line } from 'react-chartjs-2';
 import moment from 'moment';
+import DatePicker from 'react-datepicker';
+import "react-datepicker/dist/react-datepicker.css";
 
 import { getNewUsersStat } from '../../../actions/adminActions';
 
@@ -12,12 +14,31 @@ export default class NewUsers extends Component {
     this.state = {
       loading: false,
       success: null,
-      newusers: []
+      newusers: [],
+      fromDate: moment().subtract(1, 'month').toDate(),
+      toDate: moment().toDate()
     };
   }
   componentDidMount = async () => {
     this.setState({loading: true});
-    const newusers = await getNewUsersStat();
+    const newusers = await getNewUsersStat(this.state.fromDate, this.state.toDate);
+    this.setState({
+      ...newusers,
+      loading: false
+    });
+  }
+  changeFromDate = async d => {
+    console.log(d);
+    this.setState({fromDate: d, loading: true});
+    const newusers = await getNewUsersStat(d, this.state.toDate);
+    this.setState({
+      ...newusers,
+      loading: false
+    });
+  }
+  changeToDate = async d => {
+    this.setState({toDate: d, loading: true});
+    const newusers = await getNewUsersStat(this.state.fromDate, d);
     this.setState({
       ...newusers,
       loading: false
@@ -25,7 +46,7 @@ export default class NewUsers extends Component {
   }
   refreshButton = async () => {
     this.setState({loading: true});
-    const newusers = await getNewUsersStat();
+    const newusers = await getNewUsersStat(this.state.fromDate, this.state.toDate);
     this.setState({
       ...newusers,
       loading: false
@@ -105,6 +126,15 @@ export default class NewUsers extends Component {
                     <BsArrowClockwise className={''+(this.state.loading?'d-none':'')}/>
                   </Button>
                 </OverlayTrigger>
+              </Col>
+              <Col xs='auto'>
+                <DatePicker selected={this.state.fromDate} onChange={this.changeFromDate} maxDate={new Date()}/>
+              </Col>
+              <Col xs='auto'>
+                <p className='lead'>to</p>
+              </Col>
+              <Col xs='auto'>
+                <DatePicker selected={this.state.toDate} onChange={this.changeToDate} maxDate={new Date()}/>
               </Col>
             </Row>
           </Form>

@@ -110,9 +110,12 @@ export const getReconsentedParticipantsStat = async () => {
   }
 }
 
-export const getNewUsersStat = async () => {
+export const getNewUsersStat = async (fromDate, toDate) => {
   try {
-    const response = await axios.get('/api/admin/stats/newusers');
+    const response = await axios.get('/api/admin/stats/newusers', {params: {
+      fromDate: fromDate,
+      toDate: toDate
+    }});
     return response.data;
   } catch(err) {
     console.error(`Can't get newuser stats`);

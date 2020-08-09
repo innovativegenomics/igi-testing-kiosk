@@ -408,7 +408,17 @@ router.get('/stats/newusers', cas.block, async (request, response) => {
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     try {
+      const fromDate = request.query.fromDate?moment(request.query.fromDate).startOf('day'):undefined;
+      const toDate = request.query.toDate?moment(request.query.toDate).startOf('day').add(1, 'day'):undefined;
+      request.log.debug(fromDate.format());
+      request.log.debug(toDate.format());
       const newusers = await User.findAll({
+        where: {
+          createdAt: {
+            [Op.gte]: fromDate.toDate(),
+            [Op.lte]: toDate.toDate()
+          }
+        },
         attributes: [
           [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count'],
           [sequelize.cast(sequelize.col('createdAt'), 'DATE'), 'date']
@@ -472,7 +482,6 @@ router.get('/stats/completion', cas.block, async (request, response) => {
           notCompleted: notCompleted ? notCompleted.dataValues.count : 0,
         });
       });
-      request.log.debug(JSON.stringify(res, null, 2));
       response.send({
         success: true,
         res: res
