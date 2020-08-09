@@ -121,6 +121,17 @@ export const getNewUsersStat = async () => {
   }
 }
 
+export const getCompletionStat = async () => {
+  try {
+    const response = await axios.get('/api/admin/stats/completion');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get completion stats`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 /**
  * returns array of day dates
  */

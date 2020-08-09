@@ -432,6 +432,62 @@ router.get('/stats/newusers', cas.block, async (request, response) => {
   }
 });
 
+router.get('/stats/completion', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 20) {
+    try {
+      const completion = await Slot.findAll({
+        attributes: [
+          [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count'],
+          [sequelize.literal(`"Slot".completed is not null`), 'isCompleted'],
+          [sequelize.cast(sequelize.fn('date_trunc', 'week', sequelize.cast(sequelize.col('time'), 'DATE')), 'DATE'), 'week']
+        ],
+        group: ['week', 'isCompleted'],
+        order: [
+          [sequelize.literal(`"week"`), 'asc'],
+          [sequelize.literal(`"isCompleted"`), 'asc']
+        ],
+        logging: (msg) => request.log.info(msg)
+      });
+      const available = await OpenTime.findAll({
+        attributes: [
+          [sequelize.cast(sequelize.fn('sum', sequelize.col('buffer')), 'INTEGER'), 'sum'],
+          [sequelize.cast(sequelize.fn('date_trunc', 'week', sequelize.col('date')), 'DATE'), 'week']
+        ],
+        group: ['week'],
+        order: [
+          [sequelize.literal(`"week"`), 'asc']
+        ],
+        logging: (msg) => request.log.info(msg)
+      });
+      const res = [];
+      available.forEach(v => {
+        const completed = completion.find(c => c.dataValues.week === v.dataValues.week && c.dataValues.isCompleted);
+        const notCompleted = completion.find(c => c.dataValues.week === v.dataValues.week && !c.dataValues.isCompleted);
+        res.push({
+          week: v.dataValues.week,
+          total: v.dataValues.sum,
+          completed: completed ? completed.dataValues.count : 0,
+          notCompleted: notCompleted ? notCompleted.dataValues.count : 0,
+        });
+      });
+      request.log.debug(JSON.stringify(res, null, 2));
+      response.send({
+        success: true,
+        res: res
+      });
+    } catch(err) {
+      request.log.error(`error getting completion stats`);
+      request.log.error(err);
+      response.send({success: false});
+    }
+  } else {
+    request.log.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.get('/settings/days', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;

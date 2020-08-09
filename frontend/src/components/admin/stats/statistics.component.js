@@ -5,6 +5,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 import Slots from './slots.component';
 import General from './general.component';
 import NewUsers from './newusers.component';
+import Completion from './completion.component';
 
 export default class Statistics extends Component {
   render() {
@@ -14,19 +15,18 @@ export default class Statistics extends Component {
     
     return (
       <Container>
-        <Row className='mt-3'>
-          <Col lg className='pl-2 pr-2'>
+        <Row lg={2}>
+          <Col lg className='pl-2 pr-2 mt-3'>
             <Slots/>
           </Col>
-          <Col lg className='pl-2 pr-2'>
+          <Col lg className='pl-2 pr-2 mt-3'>
             <General/>
           </Col>
-        </Row>
-        <Row className='mt-3'>
-          <Col lg className='pl-2 pr-2'>
+          <Col lg className='pl-2 pr-2 mt-3'>
             <NewUsers/>
           </Col>
-          <Col lg className='pl-2 pr-2'>
+          <Col lg className='pl-2 pr-2 mt-3'>
+            <Completion/>
           </Col>
         </Row>
       </Container>

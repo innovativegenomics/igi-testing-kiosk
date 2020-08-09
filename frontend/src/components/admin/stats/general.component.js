@@ -102,6 +102,11 @@ export default class Slots extends Component {
                   </Button>
                 </OverlayTrigger>
               </Col>
+              <Col>
+                <p className='lead' style={{verticalAlign: 'middle'}}>
+                  Test
+                </p>
+              </Col>
             </Row>
           </Form>
           <Doughnut data={data}/>
