@@ -97,7 +97,7 @@ export default class Scanner extends Component {
             <p className='lead'>Name: <a onClick={e => {this.nameRef.current.select();document.execCommand('copy');this.setState({copied: true})}} href='#'>{this.state.slot.name}</a></p>
             <p className='lead'>Time: {moment(this.state.slot.time).format('dddd, MMMM D h:mm A')}</p>
             <p className={'lead '+(this.state.slot.completed?'':'d-none')}>Completed: {moment(this.state.slot.completed).format('dddd, MMMM D h:mm A')}</p>
-            <p className='lead'>Location: {this.state.slot.Location.name}</p>
+            <p className='lead'>Location: {this.state.slot.OpenTime.Location.name}</p>
             <p className='lead'>Has had previous appointment: {this.state.slot.apptCount > 0?'Yes':'No'}</p>
           </Col>
           :

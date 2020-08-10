@@ -75,10 +75,10 @@ router.get('/slot', cas.block, async (request, response) => {
           uid: request.query.uid
         },
         include: [
-          // {
-          //   model: User,
-          //   attributes: ['firstname', 'lastname']
-          // },
+          {
+            model: User,
+            attributes: ['firstname', 'lastname']
+          },
           {
             model: OpenTime,
             include: Location
@@ -86,12 +86,12 @@ router.get('/slot', cas.block, async (request, response) => {
         ],
         logging: (msg) => request.log.info(msg)
       });
-      const user = await User.findOne({
-        where: {
-          calnetid: slot.dataValues.calnetid
-        },
-        logging: (msg) => request.log.info(msg)
-      });
+      // const user = await User.findOne({
+      //   where: {
+      //     calnetid: slot.dataValues.calnetid
+      //   },
+      //   logging: (msg) => request.log.info(msg)
+      // });
       const count = await Slot.count({
         where: {
           calnetid: slot.dataValues.calnetid,
@@ -108,7 +108,7 @@ router.get('/slot', cas.block, async (request, response) => {
           success: true,
           slot: {
             ...slot.dataValues,
-            name: `${user.firstname} ${user.lastname}`,
+            name: `${slot.User.firstname} ${slot.User.lastname}`,
             apptCount: count
           },
         });
