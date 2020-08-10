@@ -207,7 +207,8 @@ To change or cancel this appointment, log into your testing account.`,
           replyTo: config.sendgrid.replyTo,
           templateId: 'd-be653a90c94b4c50ba124180b9b6a739',
           dynamicTemplateData: {
-            time: moment(time).format('h:mm A, MMMM Do')
+            time: moment(time).format('h:mm A, MMMM Do'),
+            qrimg: `https://igi-fast.berkeley.edu/api/emails/qrimg?uid=${uid}`,
           }
         });
         helpers.logger.info('Sent legacy email');
@@ -226,7 +227,8 @@ To change or cancel this appointment, log into your testing account.`,
           replyTo: config.sendgrid.replyTo,
           templateId: 'd-be653a90c94b4c50ba124180b9b6a739',
           dynamicTemplateData: {
-            time: moment(time).format('h:mm A, MMMM Do')
+            time: moment(time).format('h:mm A, MMMM Do'),
+            qrimg: `https://igi-fast.berkeley.edu/api/emails/qrimg?uid=${uid}`,
           }
         });
         helpers.logger.info('Sent email');
