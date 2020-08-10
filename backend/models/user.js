@@ -98,11 +98,13 @@ module.exports = (sequelize, DataTypes) => {
     // associations can be defined here
     User.hasMany(models.Slot, {
       foreignKey: 'calnetid',
-      sourceKey: 'calnetid'
+      sourceKey: 'calnetid',
+      targetKey: 'calnetid'
     });
     User.belongsTo(models.ExternalUser, {
       foreignKey: 'calnetid',
-      sourceKey: 'calnetid'
+      sourceKey: 'calnetid',
+      targetKey: 'calnetid'
     });
   };
   return User;

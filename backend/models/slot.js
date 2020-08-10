@@ -51,15 +51,9 @@ module.exports = (sequelize, DataTypes) => {
   Slot.associate = function(models) {
     // associations can be defined here
     Slot.belongsTo(models.User, {
-      foreignKey: {
-        name: 'calnetid',
-        type: DataTypes.STRING
-      },
-      sourceKey: {
-        name: 'calnetid',
-        type: DataTypes.STRING
-      },
-
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid',
+      targetKey: 'calnetid'
     });
     Slot.belongsTo(models.OpenTime);
   };

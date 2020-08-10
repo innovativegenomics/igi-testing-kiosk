@@ -101,23 +101,31 @@ const moment = require('moment');
   //   }
   // });
 
-  const res = await OpenTime.findAll({
-    attributes: [
-      [sequelize.cast(sequelize.fn('sum', sequelize.col('buffer')), 'INTEGER'), 'sum'],
-      [sequelize.cast(sequelize.fn('date_trunc', 'week', sequelize.col('date')), 'DATE'), 'week']
-    ],
+  // const res = await OpenTime.findAll({
+  //   attributes: [
+  //     [sequelize.cast(sequelize.fn('sum', sequelize.col('buffer')), 'INTEGER'), 'sum'],
+  //     [sequelize.cast(sequelize.fn('date_trunc', 'week', sequelize.col('date')), 'DATE'), 'week']
+  //   ],
+  //   include: [
+  //     {
+  //       model: Slot,
+  //       attributes: [
+  //         [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count']
+  //       ]
+  //     }
+  //   ],
+  //   group: ['week'],
+  //   order: [
+  //     [sequelize.literal(`"week"`), 'asc']
+  //   ],
+  // });
+
+  const res = await Slot.findOne({
     include: [
       {
-        model: Slot,
-        attributes: [
-          [sequelize.cast(sequelize.fn('count', sequelize.col('*')), 'INTEGER'), 'count']
-        ]
+        model: User
       }
-    ],
-    group: ['week'],
-    order: [
-      [sequelize.literal(`"week"`), 'asc']
-    ],
+    ]
   });
 
   console.log(JSON.stringify(res, null, 2));
