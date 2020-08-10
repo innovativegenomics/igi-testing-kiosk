@@ -818,28 +818,34 @@ router.delete('/participant', cas.block, async (request, response) => {
         where: {
           calnetid: request.query.calnetid
         },
-        transaction: t,
-        logging: (msg) => request.log.info(msg)
-      });
-      await rec.destroy();
-      const slots = await Slot.findAll({
-        where: {
-          calnetid: request.query.calnetid
-        },
+        include: [
+          {
+            model: Slot,
+            required: false
+          },
+          {
+            model: ExternalUser,
+            required: false
+          }
+        ],
         transaction: t,
         logging: (msg) => request.log.info(msg)
       });
       const promises = [];
-      slots.forEach(slot => {
+      rec.Slots.forEach(slot => {
         promises.push((async () => await slot.destroy())());
       });
       await Promise.all(promises);
+      if(rec.ExternalUser) {
+        await rec.ExternalUser.destroy();
+      }
+      await rec.destroy();
       await t.commit();
       response.send({success: true});
     } catch(err) {
       await t.rollback();
       request.log.error(`Couldn't delete user ${request.query.calnetid}`);
-      request.log.error(err);
+      request.log.error(err.stack);
       response.send({success: false});
     }
   } else {
