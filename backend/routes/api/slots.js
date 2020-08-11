@@ -229,6 +229,10 @@ router.post('/slot', cas.block, async (request, response) => {
     }
     let slot = await Slot.findOne({
       where: { calnetid: calnetid, current: true },
+      include: {
+        model: OpenTime,
+        required: false
+      },
       transaction: t,
       logging: (msg) => request.log.info(msg)
     });
@@ -236,8 +240,11 @@ router.post('/slot', cas.block, async (request, response) => {
       if(slot.completed) {
         throw new Error(`Current appointment already completed`);
       }
+      slot.OpenTime.available += 1;
+      await slot.OpenTime.save();
       slot.time = reqtime.toDate();
       slot.location = reqlocation.id;
+      slot.OpenTimeId = openTime.id;
       slot.scheduled = moment().toDate();
       slot.question1 = questions.question1;
       slot.question2 = questions.question2;
@@ -259,6 +266,9 @@ router.post('/slot', cas.block, async (request, response) => {
         question3: questions.question3,
         question4: questions.question4,
         question5: questions.question5,
+      }, {
+        transaction: t,
+        logging: (msg) => request.log.info(msg)
       });
       openTime.available -= 1;
       await openTime.save();
