@@ -77,7 +77,7 @@ router.get('/slot', cas.block, async (request, response) => {
         include: [
           {
             model: User,
-            attributes: ['firstname', 'lastname']
+            attributes: ['firstname', 'lastname', 'patientid']
           },
           {
             model: OpenTime,
@@ -109,6 +109,7 @@ router.get('/slot', cas.block, async (request, response) => {
           slot: {
             ...slot.dataValues,
             name: `${slot.User.firstname} ${slot.User.lastname}`,
+            patientid: slot.User.patientid,
             apptCount: count
           },
         });
