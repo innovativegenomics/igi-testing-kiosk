@@ -876,6 +876,7 @@ router.get('/external/users', cas.block, async (request, response) => {
           model: User,
           required: false
         },
+        order: [['createdAt', 'desc']],
         logging: (msg) => request.log.info(msg)
       });
       response.send({
