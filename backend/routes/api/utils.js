@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
+const { User, Slot, Location, Sequelize } = require('../../models');
+const Op = Sequelize.Op;
+
 let siteKey;
 if(process.env.NODE_ENV !== 'production') {
   siteKey = '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
@@ -24,6 +27,42 @@ router.get('/recaptcha', async (request, response) => {
 
 router.get('/sitekey', (request, response) => {
   response.send({siteKey: siteKey});
+});
+
+router.get('/participants', async (request, response) => {
+  try {
+    const count = await User.count({
+      logging: (msg) => request.log.info(msg)
+    });
+    response.send({success: true, count: count});
+  } catch(err) {
+    response.status(500).send();
+  }
+});
+router.get('/tests', async (request, response) => {
+  try {
+    const count = await Slot.count({
+      where: {
+        completed: {
+          [Op.not]: null
+        }
+      },
+      logging: (msg) => request.log.info(msg)
+    });
+    response.send({success: true, count: count});
+  } catch(err) {
+    response.status(500).send();
+  }
+});
+router.get('/locations', async (request, response) => {
+  try {
+    const count = await Location.count({
+      logging: (msg) => request.log.info(msg)
+    });
+    response.send({success: true, count: count});
+  } catch(err) {
+    response.status(500).send();
+  }
 });
 
 module.exports = router;
