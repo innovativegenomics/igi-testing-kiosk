@@ -14,7 +14,7 @@ export default class Statistics extends Component {
     }
     
     return (
-      <Container>
+      <Container fluid>
         <Row lg={2}>
           <Col lg className='pl-2 pr-2 mt-3'>
             <Slots/>

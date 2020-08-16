@@ -195,7 +195,7 @@ export default class Days extends Component {
     }
 
     return (
-      <Container>
+      <Container fluid>
         <Button className='m-2' onClick={e => this.setState({showCreateModal: true})}>Add Day</Button>
         <Table hover size='sm' responsive>
           <thead>

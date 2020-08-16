@@ -15,7 +15,7 @@ export default class Study extends Component {
     }
 
     return (
-      <Container className='mt-3'>
+      <Container className='mt-3' fluid>
         <h1 className='font-weight-light'>Downloads</h1>
         <Button onClick={e => window.open('/api/admin/study/participantinfo', '_blank')}>Participant Info</Button>
       </Container>

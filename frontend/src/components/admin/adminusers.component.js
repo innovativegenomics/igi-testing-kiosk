@@ -138,7 +138,7 @@ export default class AdminUsers extends Component {
     });
 
     return (
-      <Container>
+      <Container fluid>
         <Button className='m-2' onClick={e => this.setState({showNewUser: true})}>Create new admin</Button>
         <Table size='sm' hover responsive>
           <thead>

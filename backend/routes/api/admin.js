@@ -250,6 +250,7 @@ router.get('/search/participants', cas.block, async (request, response) => {
           },
         },
       },
+      order: [['datejoined', 'desc']],
       logging: (msg) => request.log.info(msg)
     });
     response.send({success: true, results: rows, count: count});

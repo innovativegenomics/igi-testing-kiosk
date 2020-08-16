@@ -53,7 +53,7 @@ export default class ExtUsers extends Component {
   render() {
     const selected = this.state.extUsers[this.state.selectedIndex]||{};
     return (
-      <Container>
+      <Container fluid>
         <Form className='mt-3'>
           <Form.Group as={Row}>
             <Form.Label column sm={1} className='lead'>Search</Form.Label>

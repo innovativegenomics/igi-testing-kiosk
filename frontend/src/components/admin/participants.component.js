@@ -180,7 +180,7 @@ export default class Participants extends Component {
     });
 
     return (
-      <Container className='mt-3'>
+      <Container className='mt-3' fluid>
         <Form className='p-2'>
           <Form.Group as={Row} controlId='search-box'>
             <Form.Label column sm={1} className='lead'>Search</Form.Label>
