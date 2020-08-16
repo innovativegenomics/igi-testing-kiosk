@@ -86,7 +86,6 @@ export default class Landing extends Component {
               </Col>
             </Row>
             <p className='lead'>To enroll and schedule an appointment</p>
-            <input className='form-control' placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({ devuser: e.target.value })} autoComplete='off' autoCorrect='off' autoCapitalize='none' />
             <TrackedButton variant='primary' size='lg' onClick={this.handleLoginButton} label='/api/users/login' action='calnet user login' className='m-2'>
               Log in with CalNet ID
             </TrackedButton>
