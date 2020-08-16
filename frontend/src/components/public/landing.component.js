@@ -23,8 +23,8 @@ export default class Landing extends Component {
     }
   }
   componentDidMount = async () => {
-    const multiplier = 1.035;
-    const cycles = 100;
+    const multiplier = 1.005;
+    const cycles = 200;
     const counterFunc = (final, prop) => {
       let time = 1;
       let interval = Math.max(Math.floor(final/cycles), 1);
@@ -56,7 +56,7 @@ export default class Landing extends Component {
       <Container fluid>
         <p className='display-4 text-center'>IGI FAST: Free Asymptomatic Saliva Testing</p>
         <Row className=''>
-          <Col md>
+          <Col lg>
             <p className='lead'>
               The Innovative Genomics Institute (IGI) at UC Berkeley is piloting a new, saliva-based test for 
               COVID-19. The FAST study aims to establish a testing model for our campus. If you are a UC 
@@ -70,7 +70,7 @@ export default class Landing extends Component {
               </i>
             </p>
           </Col>
-          <Col md className='text-center'>
+          <Col lg className='text-center'>
             <Row>
               <Col>
                 <p className='h2 font-weight-light'>{this.state.pCount}</p>
@@ -86,6 +86,7 @@ export default class Landing extends Component {
               </Col>
             </Row>
             <p className='lead'>To enroll and schedule an appointment</p>
+            <input className={this.props.devmode?'form-control':'d-none'} placeholder='Development username' value={this.state.devuser} onChange={e => this.setState({ devuser: e.target.value })} autoComplete='off' autoCorrect='off' autoCapitalize='none'/>
             <TrackedButton variant='primary' size='lg' onClick={this.handleLoginButton} label='/api/users/login' action='calnet user login' className='m-2'>
               Log in with CalNet ID
             </TrackedButton>
