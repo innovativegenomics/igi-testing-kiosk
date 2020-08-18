@@ -25,7 +25,7 @@ export class Navigation extends Component {
       calnetid = '';
     }
     return (
-      <Navbar bg='white' expand='sm' className='mb-2 border-bottom'>
+      <Navbar bg='white' expand='md' className='mb-2 border-bottom'>
         <Navbar.Brand>
           <Link to='/'><img src={igiFast} style={{width: '15rem'}}/></Link>
         </Navbar.Brand>
