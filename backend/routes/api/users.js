@@ -128,21 +128,24 @@ router.post('/profile', cas.block, async (request, response) => {
   } else {
     try {
       const user = await User.create({
-        firstname: request.body.firstname,
-        middlename: request.body.middlename,
-        lastname: request.body.lastname,
+        firstname: request.body.firstname, //
+        middlename: request.body.middlename, //
+        lastname: request.body.lastname, //
         calnetid: calnetid,
-        dob: moment.utc(request.body.dob).format('YYYY-MM-DD'),
-        street: request.body.street,
-        city: request.body.city,
-        state: request.body.state,
-        county: request.body.county,
-        zip: request.body.zip,
-        sex: request.body.sex,
-        pbuilding: request.body.pbuilding,
-        email: request.body.email,
-        phone: request.body.phone,
-        questions: request.body.questions,
+        dob: moment.utc(request.body.dob).format('YYYY-MM-DD'), //
+        street: request.body.street, //
+        city: request.body.city, //
+        state: request.body.state, //
+        county: request.body.county, //
+        zip: request.body.zip, //
+        sex: request.body.sex, //
+        pbuilding: request.body.pbuilding, //
+        email: request.body.email, //
+        phone: request.body.phone, //
+        affiliation: request.body.affiliation, //
+        housing: request.body.housing,
+        residents: request.body.residents,
+        questions: request.body.questions, //
         reconsented: true,
         availableStart: moment().startOf('week').toDate(),
         availableEnd: null,

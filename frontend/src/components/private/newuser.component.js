@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router';
-import { Container, Form, Col, Row, Card, Button, Modal, Spinner } from 'react-bootstrap';
+import { Container, Form, Col, Row, Card, Button, Modal, Spinner, Alert } from 'react-bootstrap';
 import { Formik } from 'formik';
 import moment from 'moment';
 import { postcodeValidator } from 'postcode-validator';
@@ -9,6 +9,7 @@ import { PhoneNumberUtil, PhoneNumberFormat } from 'google-libphonenumber';
 
 import { TrackedLink } from '../../tracker';
 import ToSModal from './tos.component';
+import { createUser } from '../../actions/authActions';
 
 class TextInput extends Component {
   render() {
@@ -150,7 +151,8 @@ export default class NewUser extends Component {
       questions: [true, true, true, true, null],
       showToS: true,
       showNotApproved: false,
-      showDeclineTerms: false
+      showDeclineTerms: false,
+      success: null
     };
   }
   agree = () => {
@@ -173,6 +175,10 @@ export default class NewUser extends Component {
       return <Redirect to='/' />
     } else if (this.state.success || this.props.auth.success) {
       return <Redirect to='/dashboard' />
+    }
+
+    if(this.state.success === true) {
+      return <Redirect to='/dashboard' />;
     }
 
     return (
@@ -249,15 +255,25 @@ export default class NewUser extends Component {
 
                 return errors;
               }}
-              onSubmit={(values, { setSubmitting }) => {
+              onSubmit={async (values, { setSubmitting }) => {
                 if(values.approved === 'No') {
                   this.setState({showNotApproved: true});
                   return;
                 }
-                setTimeout(() => {
-                  alert(JSON.stringify(values, null, 2));
+                
+                const payload = {
+                  ...values,
+                  phone: PhoneNumberUtil.getInstance().format(PhoneNumberUtil.getInstance().parse(values.phone, 'US'), PhoneNumberFormat.E164)
+                };
+                payload.questions = this.state.questions;
+                const res = await createUser(payload);
+                if(!res.success) {
+                  this.setState({ success: false });
                   setSubmitting(false);
-                }, 400);
+                } else {
+                  await this.props.reloadProfile();
+                  this.setState({ success: true });
+                }
               }}
             >
               {({
@@ -268,6 +284,8 @@ export default class NewUser extends Component {
                 handleBlur,
                 handleSubmit,
                 isSubmitting,
+                submitCount,
+                isValid,
                 /* and other goodies */
               }) => (
                 <Form onSubmit={handleSubmit}>
@@ -472,6 +490,15 @@ export default class NewUser extends Component {
                     handleBlur={handleBlur}
                     required
                   />
+                  <Alert variant='warning' className={submitCount>0&&!isValid?'':'d-none'}>
+                    Some fields aren't completely filled out!
+                    Please go back and fix the displayed issues.
+                  </Alert>
+                  <Alert variant='danger' className={this.state.success===false?'':'d-none'}>
+                    There was an error submitting the form. Please try again!
+                    If the problem persists, please click the "Report an issue"
+                    link at the bottom of the page.
+                  </Alert>
                   <Row>
                     <Col sm='auto'>
                       <Button type='submit' disabled={isSubmitting}>Submit</Button>

@@ -87,6 +87,21 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       defaultValue: false
     },
+    affiliation: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'N/A'
+    },
+    housing: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'N/A'
+    },
+    residents: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: null
+    },
     availableStart: {
       type: DataTypes.DATE
     },
