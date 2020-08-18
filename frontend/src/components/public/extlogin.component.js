@@ -105,9 +105,9 @@ export default class ExtLogin extends Component {
                       <Col md='auto'>
                         <Button type='submit' disabled={isSubmitting}>Submit</Button>
                       </Col>
-                      <Col className='m-auto'>
+                      {/* <Col className='m-auto'>
                         <p className='m-0'>Don't have an account? <Link to='/signup'>Enroll!</Link></p>
-                      </Col>
+                      </Col> */}
                     </Row>
                   </Form>
                 )}

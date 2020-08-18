@@ -213,46 +213,46 @@ router.post('/reconsent', cas.block, async (request, response) => {
   }
 });
 
-router.post('/external/signup', Recaptcha.middleware.verify, async (request, response) => {
-  if(!request.recaptcha.error) {
-    request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
-    if(request.recaptcha.data.score < recaptchaScoreThreshold) {
-      request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
-      response.status(401);
-    } else {
-      request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
-      try {
-        await ExternalUser.create({
-          email: request.body.email,
-          name: request.body.name,
-          calnetid: `E${short().new().substring(0, 8)}`,
-          uid: short().new(),
-          jobDescription: request.body.jobDescription,
-          employer: request.body.employer,
-          workFrequency: request.body.workFrequency,
-        }, {logging: (msg) => request.log.info(msg)});
-        // schedule email
-        try {
-          await scheduleExternalRequestEmail({
-            email: request.body.email,
-            name: request.body.name
-          });
-        } catch(err) {
-          request.log.error(`error sending signup email to ${request.body.name}`);
-          request.log.error(err.stack);
-        }
-        response.send({success: true});
-      } catch(err) {
-        request.log.error('error creating new external user');
-        response.send({success: false});
-      }
-    }
-  } else {
-    request.log.error(`Could not get recaptcha response`);
-    request.log.error(request.recaptcha.error);
-    response.status(500).send();
-  }
-});
+// router.post('/external/signup', Recaptcha.middleware.verify, async (request, response) => {
+//   if(!request.recaptcha.error) {
+//     request.log.info(`recaptcha score: ${request.recaptcha.data.score}`);
+//     if(request.recaptcha.data.score < recaptchaScoreThreshold) {
+//       request.log.info(`recaptcha score less than ${recaptchaScoreThreshold}`);
+//       response.status(401);
+//     } else {
+//       request.log.info(`recaptcha score greater than or equal to ${recaptchaScoreThreshold}`);
+//       try {
+//         await ExternalUser.create({
+//           email: request.body.email,
+//           name: request.body.name,
+//           calnetid: `E${short().new().substring(0, 8)}`,
+//           uid: short().new(),
+//           jobDescription: request.body.jobDescription,
+//           employer: request.body.employer,
+//           workFrequency: request.body.workFrequency,
+//         }, {logging: (msg) => request.log.info(msg)});
+//         // schedule email
+//         try {
+//           await scheduleExternalRequestEmail({
+//             email: request.body.email,
+//             name: request.body.name
+//           });
+//         } catch(err) {
+//           request.log.error(`error sending signup email to ${request.body.name}`);
+//           request.log.error(err.stack);
+//         }
+//         response.send({success: true});
+//       } catch(err) {
+//         request.log.error('error creating new external user');
+//         response.send({success: false});
+//       }
+//     }
+//   } else {
+//     request.log.error(`Could not get recaptcha response`);
+//     request.log.error(request.recaptcha.error);
+//     response.status(500).send();
+//   }
+// });
 
 router.post('/external/create', Recaptcha.middleware.verify, async (request, response) => {
   if(!request.recaptcha.error) {

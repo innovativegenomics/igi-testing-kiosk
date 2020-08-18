@@ -59,8 +59,8 @@ export default class Landing extends Component {
           <Col lg>
             <p className='lead'>
               The Innovative Genomics Institute (IGI) at UC Berkeley is piloting a new, saliva-based test for 
-              COVID-19. The FAST study aims to establish a testing model for our campus. If you are a UC 
-              Berkeley employee approved to work on campus during the pandemic, you are invited.
+              COVID-19. The FAST study aims to establish a testing model for our campus. If you have a CalNet ID,
+              you are invited.
             </p>
             <p className='lead'>
               <i>
@@ -93,10 +93,10 @@ export default class Landing extends Component {
             <TrackedButton className='m-2' variant='outline-primary' size='lg' onClick={e => this.props.history.push('/extlogin')} label='/extlogin' action='external sign in'>
               Log in without a CalNet ID
             </TrackedButton>
-            <p className='lead mb-0'>or</p>
+            {/* <p className='lead mb-0'>or</p>
             <TrackedButton className='m-2' variant='outline-primary' size='lg' onClick={e => this.props.history.push('/signup')} label='/signup' action='external sign up'>
               Sign up without a CalNet ID
-            </TrackedButton>
+            </TrackedButton> */}
           </Col>
         </Row>
       </Container>
