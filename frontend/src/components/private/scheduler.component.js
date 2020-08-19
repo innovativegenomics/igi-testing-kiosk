@@ -252,6 +252,10 @@ export default class Scheduler extends Component {
       return <Redirect to='/dashboard'/>;
     }
 
+    if(!this.props.auth.user.reconsented) {
+      return <Redirect to='/reconsent' />;
+    }
+
     return (
       <Container>
         <Row className='justify-content-center'>

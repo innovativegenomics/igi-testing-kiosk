@@ -88,6 +88,12 @@ export default class Reconsent extends Component {
         <Row>
           <Col lg='1'/>
           <Col>
+            <Alert variant='info'>
+              We are requiring everyone to reconsent to the new informed consent document.
+              Once you reconsent, you may continue scheduling appointments. If you already
+              did this before, we have changed the informed consent document once again, so
+              thats why you are seeing this page a second time.
+            </Alert>
             <Card>
               <Card.Body>
                 <Card.Title>Reconsent</Card.Title>
@@ -103,9 +109,11 @@ export default class Reconsent extends Component {
                 </p>
                 <p className='lead'>Questions</p>
                 <Question value={this.state.questions[0]} onChange={v => {const tmp = this.state.questions; tmp[0]=v; this.setState({questions: tmp})}}>
-                  My saliva samples and associated data may be used to detect SARS-CoV-2 infection. 
-                  I consent to be contacted with my results. These results are for research purposes 
-                  only and will not become part of my medical health record.
+                  My saliva samples and associated data may be used to detect SARS-CoV-2 infection. I consent to
+                  be contacted with my results. These results are for research purposes only and will not become
+                  part of my medical health record; however, they may be securely communicated to University
+                  Health Services or primary care clinicians you direct us to if the result is of clinical or
+                  public health concern.
                 </Question>
                 <Question value={this.state.questions[1]} onChange={v => {const tmp = this.state.questions; tmp[1]=v; this.setState({questions: tmp})}}>
                   I consent for data I enter into this consent form, the study enrollment form, or this study’s 
@@ -128,9 +136,9 @@ export default class Reconsent extends Component {
                   IGI FAST Study investigators. The purpose of sharing these data will be to improve the 
                   understanding of asymptomatic epidemiology within the UC Berkeley campus community.
                 </Question>
-                <Form className='border-top pt-3'>
+                <div className='border-top pt-3'>
                   <Button onClick={this.submit} disabled={this.state.submitting}>Confirm</Button>
-                </Form>
+                </div>
                 {this.state.error?
                   <Alert variant='danger' className='mb-0 mt-3'>
                     There was an issue submitting your responses, please try again!

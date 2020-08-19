@@ -49,6 +49,10 @@ export default class Dashboard extends Component {
       );
     }
 
+    if(!this.props.auth.user.reconsented) {
+      return <Redirect to='/reconsent' />;
+    }
+
     return (
       <Container className='text-center'>
         {
