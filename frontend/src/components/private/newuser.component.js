@@ -150,7 +150,6 @@ export default class NewUser extends Component {
     this.state = {
       questions: [true, true, true, true, null],
       showToS: true,
-      showNotApproved: false,
       showDeclineTerms: false,
       success: null
     };
@@ -204,7 +203,6 @@ export default class NewUser extends Component {
                 email: '',
                 phone: '',
                 affiliation: '--none--',
-                approved: '--none--',
                 pbuilding: '',
                 housing: '--none--',
                 residents: 0
@@ -247,7 +245,6 @@ export default class NewUser extends Component {
                 }
 
                 if(values.affiliation === '--none--') errors.affiliation = 'Required';
-                if(values.approved === '--none--') errors.approved = 'Required';
 
                 if(!values.pbuilding) errors.pbuilding = 'Required';
 
@@ -256,11 +253,6 @@ export default class NewUser extends Component {
                 return errors;
               }}
               onSubmit={async (values, { setSubmitting }) => {
-                if(values.approved === 'No') {
-                  this.setState({showNotApproved: true});
-                  return;
-                }
-                
                 const payload = {
                   ...values,
                   phone: PhoneNumberUtil.getInstance().format(PhoneNumberUtil.getInstance().parse(values.phone, 'US'), PhoneNumberFormat.E164)
@@ -438,17 +430,6 @@ export default class NewUser extends Component {
                     options={['--none--', 'Undergraduate student', 'Graduate student', 'Academic staff', 'Non-Academic Staff']}
                     required
                   />
-                  <SelectInput
-                    name='approved'
-                    label='Are you approved to work on campus?'
-                    values={values}
-                    errors={errors}
-                    touched={touched}
-                    handleChange={handleChange}
-                    handleBlur={handleBlur}
-                    options={['--none--', 'Yes', 'No']}
-                    required
-                  />
                   <TextInput
                     name='pbuilding'
                     placeholder='primary building'
@@ -528,30 +509,6 @@ export default class NewUser extends Component {
           }
           } show={this.state.showToS}
         />
-        <Modal show={this.state.showNotApproved} backdrop='static' keyboard={false} size='lg'>
-          <Modal.Header>
-            <Modal.Title>Not Approved</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p className='lead'>
-              You must be approved for on-campus work to participate
-              in this study. If you receive approval at a later date,
-              you may complete this enrollment process again.
-            </p>
-            <p className='lead'>
-              If you have questions related to your health or receiving
-              clinical COVID-19 testing, please see <TrackedLink ext to='https://uhs.berkeley.edu/coronavirus-covid-19-information'>https://uhs.berkeley.edu/coronavirus-covid-19-information</TrackedLink>
-            </p>
-            <p className='lead'>
-              If you have other questions related to this study,
-              please contact the study coordinator, Alexander
-              Ehrenberg, at <TrackedLink ext to='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</TrackedLink>.
-            </p>
-          </Modal.Body>
-          <Modal.Footer>
-            <TrackedLink className='btn btn-primary' ext to='/api/users/logout'>Ok</TrackedLink>
-          </Modal.Footer>
-        </Modal>
         <Modal show={this.state.showDeclineTerms} backdrop='static' keyboard={false} size='lg'>
           <Modal.Header>
             <Modal.Title>Declined Study Terms</Modal.Title>
