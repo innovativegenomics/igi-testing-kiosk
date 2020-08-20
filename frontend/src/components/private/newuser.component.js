@@ -221,8 +221,10 @@ export default class NewUser extends Component {
 
                 if(values.dob === '') {
                   errors.dob = 'Required';
-                } else if(moment(values.dob).isAfter(moment().subtract(13, 'years')) || moment(values.dob).isBefore(moment().set('year', 1900))) {
+                } else if(moment(values.dob).isBefore(moment().set('year', 1900))) {
                   errors.dob = 'Invalid';
+                } else if(moment(values.dob).isAfter(moment().subtract(18, 'years'))) {
+                  errors.dob = 'You must be 18 or older to participate in the study. In the future, we will be updating the study to allow those under 18 to enroll. If you have questions, please contact Alex Ehrenberg at igi-fast@berkeley.edu';
                 }
 
                 if(!values.street) errors.street = 'Required';

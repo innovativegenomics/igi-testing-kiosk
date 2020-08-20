@@ -141,8 +141,6 @@ router.get('/search/slots', cas.block, async (request, response) => {
       const perpage = parseInt(request.query.perpage);
       const page = parseInt(request.query.page);
       const { count, rows } = await User.findAndCountAll({
-        limit: perpage,
-        offset: perpage*page,
         where: {
           [Op.or]: {
             firstname: {
@@ -181,11 +179,14 @@ router.get('/search/slots', cas.block, async (request, response) => {
             current: true
           },
           required: false,
+          duplicating: false,
           include: {
             model: OpenTime,
             include: Location
           }
         }],
+        limit: perpage,
+        offset: perpage*page,
         logging: (msg) => request.log.info(msg)
       });
       const res = [];

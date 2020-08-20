@@ -18,6 +18,7 @@ export default class Dashboard extends Component {
     };
   }
   requestCancel = e => {
+    console.log('cancel');
     cancelSlot().then(res => {
       if (res.success) {
         this.setState({ loaded: false, showCancelledMessage: true });
