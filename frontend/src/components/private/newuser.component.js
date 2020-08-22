@@ -248,8 +248,6 @@ export default class NewUser extends Component {
 
                 if(values.affiliation === '--none--') errors.affiliation = 'Required';
 
-                if(!values.pbuilding) errors.pbuilding = 'Required';
-
                 if(values.housing === '--none--') errors.housing = 'Required';
 
                 return errors;
@@ -441,7 +439,6 @@ export default class NewUser extends Component {
                     touched={touched}
                     handleChange={handleChange}
                     handleBlur={handleBlur}
-                    required
                   />
                   <SelectInput
                     name='housing'

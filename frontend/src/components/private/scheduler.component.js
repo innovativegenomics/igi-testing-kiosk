@@ -9,6 +9,21 @@ import './calendar.css';
 
 class DateButton extends Component {
   render() {
+    return (
+      <Col className='m-0 p-0'>
+        <Button
+          variant={this.props.grey?'outline-secondary':(this.props.selected?'outline-success':'outline-primary')}
+          size='sm'
+          className={`border-0 btn-circle ${(this.props.active||this.props.selected)?'active':''}`}
+          disabled={!(this.props.active||this.props.selected)}
+          onClick={this.props.onClick}
+        >
+          {this.props.day}
+        </Button>
+      </Col>
+    );
+
+
     if (this.props.grey) {
       return <Col className='m-0 p-0'><Button variant='outline-primary' size='sm' className='border-0 btn-circle text-secondary' disabled>{this.props.day}</Button></Col>;
     } else if (this.props.invisible) {
@@ -40,14 +55,14 @@ class Calendar extends Component {
       let btnRow = [];
       for (var d = 0; d < 7; d++) {
         let day = i * 7 + d;
+        const dayMoment = this.state.month.clone().set('date', day - startDay + 1);
+        const active = this.props.days.includes(dayMoment.format('YYYY-MM-DD'));
         if (day < startDay) {
-          btnRow.push(<DateButton grey={true} day={lastMonth.daysInMonth() - startDay + 1 + day} key={day}/>);
+          btnRow.push(<DateButton grey active={active} day={lastMonth.daysInMonth() - startDay + 1 + day} key={day} onClick={e => {this.props.setDay(null); this.setState({month: this.state.month.subtract(1, 'month')})}}/>);
         } else if (day >= startDay && day < this.state.month.daysInMonth() + startDay) {
-          const dayMoment = this.state.month.clone().set('date', day - startDay + 1);
-          const active = this.props.days.includes(dayMoment.format('YYYY-MM-DD'));
           btnRow.push(<DateButton active={active} selected={dayMoment.isSame(this.props.day)} day={day - startDay + 1} onClick={e => this.props.setDay(dayMoment)} key={day} />);
         } else {
-          btnRow.push(<DateButton invisible={true} day={day - startDay + 1} key={day} />);
+          btnRow.push(<DateButton grey active={active} day={dayMoment.get('date')} key={day} onClick={e => {this.props.setDay(null); this.setState({month: this.state.month.add(1, 'month')})}} />);
         }
       }
       btns.push(<Row key={i} className='m-0 p-0'>{btnRow}</Row>);
