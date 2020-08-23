@@ -140,7 +140,7 @@ class EditModal extends Component {
             <option value=''>none</option>
             <option value='air_quality'>air quality</option>
           </Form.Control>
-          <Button variant='danger' onClick={e => this.props.deleteDay(this.state.reason)}>Delete day</Button>
+          <Button variant='danger' onClick={e => this.props.deleteDay(this.state.reason)} disabled={this.props.submitting}>Delete day</Button>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={this.props.onHide}>
@@ -166,6 +166,7 @@ export default class Days extends Component {
       loading: false,
       selected: null,
       showEditModal: false,
+      deleting: false
     };
   }
   createDay = async ({starthour, startminute, endhour, endminute, date, location, window, buffer}) => {
@@ -184,8 +185,9 @@ export default class Days extends Component {
     this.setState({...days, loading: false});
   }
   deleteSelectedDay = async (reason) => {
+    this.setState({deleting: true});
     const status = await deleteDay(this.state.days[this.state.selected].date, this.state.days[this.state.selected].Location.id, reason);
-    this.setState({showEditModal: false, loading: true});
+    this.setState({showEditModal: false, loading: true, deleting: false});
     const days = await getAvailableDays();
     this.setState({...days, loading: false});
   }
@@ -235,7 +237,7 @@ export default class Days extends Component {
           <Spinner animation='border' role='status' className={this.state.loading?'':'d-none'}/>
         </div>
         <CreateModal show={this.state.showCreateModal} onHide={e => this.setState({showCreateModal: false})} createDay={this.createDay} locations={this.state.locations}/>
-        <EditModal show={this.state.showEditModal} onHide={e => this.setState({showEditModal: false})} day={this.state.days[this.state.selected]} deleteDay={(reason) => this.deleteSelectedDay(reason)}/>
+        <EditModal show={this.state.showEditModal} onHide={e => this.setState({showEditModal: false})} day={this.state.days[this.state.selected]} deleteDay={(reason) => this.deleteSelectedDay(reason)} submitting={this.state.deleting}/>
       </Container>
     );
   }
