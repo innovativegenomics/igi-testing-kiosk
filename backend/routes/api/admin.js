@@ -622,6 +622,14 @@ router.delete('/settings/day', cas.block, async (request, response) => {
           contacts.push([s.User.firstname, s.User.email]);
         });
         deletePromises.push((async () => {
+          await User.update({
+            availableEnd: null
+          }, {
+            where: {
+              calnetid: v.Slots.map(s => s.calnetid)
+            },
+            logging: (msg) => request.log.info(msg)
+          });
           await Slot.destroy({
             where: {
               id: v.Slots.map(s => s.id)
