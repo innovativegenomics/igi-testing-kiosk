@@ -122,6 +122,7 @@ class EditModal extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      reason: ''
     };
   }
   render() {
@@ -134,7 +135,12 @@ class EditModal extends Component {
           <Modal.Title>Edit Day {this.props.day.date} at {this.props.day.Location.name}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Button variant='danger' onClick={e => this.props.deleteDay()}>Delete day</Button>
+          <p className='lead'>Reason for deletion</p>
+          <Form.Control as='select' value={this.state.reason} onChange={e => this.setState({reason: e.target.value})}>
+            <option value=''>none</option>
+            <option value='air_quality'>air quality</option>
+          </Form.Control>
+          <Button variant='danger' onClick={e => this.props.deleteDay(this.state.reason)}>Delete day</Button>
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={this.props.onHide}>
@@ -177,8 +183,8 @@ export default class Days extends Component {
     const days = await getAvailableDays();
     this.setState({...days, loading: false});
   }
-  deleteSelectedDay = async () => {
-    const status = await deleteDay(this.state.days[this.state.selected].date, this.state.days[this.state.selected].Location.id);
+  deleteSelectedDay = async (reason) => {
+    const status = await deleteDay(this.state.days[this.state.selected].date, this.state.days[this.state.selected].Location.id, reason);
     this.setState({showEditModal: false, loading: true});
     const days = await getAvailableDays();
     this.setState({...days, loading: false});
@@ -229,7 +235,7 @@ export default class Days extends Component {
           <Spinner animation='border' role='status' className={this.state.loading?'':'d-none'}/>
         </div>
         <CreateModal show={this.state.showCreateModal} onHide={e => this.setState({showCreateModal: false})} createDay={this.createDay} locations={this.state.locations}/>
-        <EditModal show={this.state.showEditModal} onHide={e => this.setState({showEditModal: false})} day={this.state.days[this.state.selected]} deleteDay={() => this.deleteSelectedDay()}/>
+        <EditModal show={this.state.showEditModal} onHide={e => this.setState({showEditModal: false})} day={this.state.days[this.state.selected]} deleteDay={(reason) => this.deleteSelectedDay(reason)}/>
       </Container>
     );
   }

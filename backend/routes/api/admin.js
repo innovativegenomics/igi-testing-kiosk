@@ -8,7 +8,7 @@ const { Sequelize, sequelize, Admin, Slot, User, Day, Settings, ExternalUser, Op
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
-const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail } = require('../../worker');
+const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail, scheduleAirQualityCancellation } = require('../../worker');
 const { request } = require('express');
 
 /**
@@ -599,13 +599,52 @@ router.delete('/settings/day', cas.block, async (request, response) => {
       const date = moment(request.query.date);
       const location = request.query.location;
 
-      await OpenTime.destroy({
+      const toBeDeleted = await OpenTime.findAll({
         where: {
           date: date.toDate(),
           location: location
         },
+        include: {
+          model: Slot,
+          where: {
+            current: true
+          },
+          required: false,
+          include: User
+        },
         logging: (msg) => request.log.info(msg)
       });
+
+      const contacts = [];
+      const deletePromises = [];
+      toBeDeleted.forEach(v => {
+        v.Slots.forEach(s => {
+          contacts.push([s.User.firstname, s.User.email]);
+        });
+        deletePromises.push((async () => {
+          await Slot.destroy({
+            where: {
+              id: v.Slots.map(s => s.id)
+            },
+            logging: (msg) => request.log.info(msg)
+          })
+        })());
+      });
+      deletePromises.push((async () => {
+        await OpenTime.destroy({
+          where: {
+            id: toBeDeleted.map(v => v.id)
+          },
+          logging: (msg) => request.log.info(msg)
+        })
+      })());
+      await Promise.all(deletePromises);
+
+      if(request.query.reason === 'air_quality') {
+        for(let i of contacts) {
+          await scheduleAirQualityCancellation({name: i[0], email: i[1]});
+        }
+      }
 
       response.send({success: true});
     } catch(err) {

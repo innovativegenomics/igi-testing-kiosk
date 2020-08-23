@@ -173,9 +173,9 @@ export const createDay = async data => {
     return { success: false };
   }
 }
-export const deleteDay = async (date, location) => {
+export const deleteDay = async (date, location, reason) => {
   try {
-    const response = await axios.delete('/api/admin/settings/day', {params: {date: date, location: location}});
+    const response = await axios.delete('/api/admin/settings/day', {params: {date: date, location: location, reason: reason}});
     return response.data;
   } catch(err) {
     console.error(`Can't delete day`);
