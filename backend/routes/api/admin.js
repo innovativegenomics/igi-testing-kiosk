@@ -602,12 +602,16 @@ router.delete('/settings/day', cas.block, async (request, response) => {
       const toBeDeleted = await OpenTime.findAll({
         where: {
           date: date.toDate(),
+          starttime: {
+            [Op.gte]: moment().toDate()
+          },
           location: location
         },
         include: {
           model: Slot,
           where: {
-            current: true
+            current: true,
+            completed: null
           },
           required: false,
           include: User
