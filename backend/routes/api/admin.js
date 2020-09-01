@@ -1023,6 +1023,43 @@ router.delete('/external/user', cas.block, async (request, response) => {
   }
 });
 
+router.patch('/settings/day/buffer', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const date = request.body.date;
+      const loc = request.body.loc;
+      const buffer = request.body.buffer;
+      const example = await OpenTime.findOne({
+        where: {
+          date: date,
+          location: loc
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      await OpenTime.update({
+        buffer: buffer,
+        available: sequelize.literal(`available + ${parseInt(buffer - example.buffer)}`)
+      }, {
+        where: {
+          date: date,
+          location: loc
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      response.send({success: true});
+    } catch(err) {
+      request.log.error(`error setting day buffer ${request.body.uid}`);
+      request.log.error(err.stack);
+      response.send({ success: false });
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
 
 
 router.get('/study/participantinfo', cas.block, async (request, response) => {

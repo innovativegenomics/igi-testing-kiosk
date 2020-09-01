@@ -1,9 +1,89 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Container, Table, Button, Spinner, Modal, Form, Row, Col } from 'react-bootstrap';
+import ContentEditable from 'react-contenteditable';
 import moment from 'moment';
 
-import { getAvailableDays, getAvailableLocations, createDay, deleteDay } from '../../actions/adminActions';
+import { getAvailableDays, getAvailableLocations, createDay, deleteDay, updateDayBuffer } from '../../actions/adminActions';
+
+class EditableBox extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: this.props.value||'',
+      oldValue: this.props.value||'',
+      success: null,
+    };
+    this.tout = null;
+  }
+  onSave = async () => {
+    if(this.state.value === this.state.oldValue) {
+      return;
+    }
+    window.clearTimeout(this.tout);
+    this.setState({success: null});
+    const success = await this.props.onSave(this.state.value);
+    let values = {};
+    if(success) {
+      values = {oldValue: this.state.value};
+    } else {
+      values = {value: this.state.oldValue};
+    }
+    this.setState({success: success, ...values});
+    this.tout = window.setTimeout(() => {
+      this.setState({success: null});
+    }, 2000);
+  }
+  onFocus = () => {
+    window.clearTimeout(this.tout);
+    this.highlightAll();
+    this.setState({success: null});
+  }
+  onChange = e => {
+    const trimSpaces = string => (
+      string
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&gt;/g, '>')
+        .replace(/&lt;/g, '<')
+    );
+    this.setState({value: trimSpaces(e.target.value)});
+  }
+  disableNewlines = (event) => {
+    const keyCode = event.keyCode || event.which
+  
+    if (keyCode === 13) {
+      event.returnValue = false
+      if (event.preventDefault) event.preventDefault()
+      event.target.blur();
+    }
+  }
+  pasteAsPlainText = e => {
+    e.preventDefault();
+  
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertHTML', false, text);
+  }
+  highlightAll = () => {
+    setTimeout(() => {
+      document.execCommand('selectAll', false, null)
+    }, 0)
+  }
+  render() {
+    return (
+      <ContentEditable
+        tagName='span'
+        html={this.state.value}
+        className={'p-1 ' + (this.state.success?'border rounded border-success':(this.state.success===false?'border rounded border-danger':''))}
+        onChange={this.onChange}
+        onFocus={this.onFocus}
+        onBlur={this.onSave}
+        onPaste={this.pasteAsPlainText}
+        onKeyPress={this.disableNewlines}
+      />
+    );
+  }
+}
 
 class CreateModal extends Component {
   constructor(props) {
@@ -85,7 +165,7 @@ class CreateModal extends Component {
                 <Form.Control as='select' value={this.state.location} onChange={e => this.setState({location: e.target.value})}>
                   {
                     this.props.locations.map((v, i) => (
-                      <option value={i}>{v.name}</option>
+                      <option value={i} key={i}>{v.name}</option>
                     ))
                   }
                 </Form.Control>
@@ -191,6 +271,19 @@ export default class Days extends Component {
     const days = await getAvailableDays();
     this.setState({...days, loading: false});
   }
+  updateBuffer = async (i, v) => {
+    const { success } = await updateDayBuffer(this.state.days[i].date, this.state.days[i].Location.id, v);
+    if (success) {
+      const tmpRes = this.state.days;
+      tmpRes[i] = {...tmpRes[i], buffer: v};
+      this.setState({
+        days: tmpRes
+      });
+      return true;
+    } else {
+      return false;
+    }
+  }
   componentDidMount = async () => {
     this.setState({loading: true});
     const days = await getAvailableDays();
@@ -220,14 +313,16 @@ export default class Days extends Component {
           <tbody>
             {
               this.state.days.map((v, i) => (
-                <tr key={i} onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>
-                  <td>{i+1}</td>
-                  <td>{v.date}</td>
-                  <td>{v.Location.name}</td>
-                  <td>{moment(v.starttime).format('h:mm A')}</td>
-                  <td>{moment(v.endtime).format('h:mm A')}</td>
-                  <td>{v.window}</td>
-                  <td>{v.buffer}</td>
+                <tr key={i}>
+                  <td onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>{i+1}</td>
+                  <td onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>{v.date}</td>
+                  <td onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>{v.Location.name}</td>
+                  <td onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>{moment(v.starttime).format('h:mm A')}</td>
+                  <td onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>{moment(v.endtime).format('h:mm A')}</td>
+                  <td onClick={e => this.setState({showEditModal: true, selected: i})} style={{cursor: 'pointer'}}>{v.window}</td>
+                  <td>
+                    <EditableBox value={v.buffer.toString()} onSave={nv => this.updateBuffer(i, parseInt(nv))}/>
+                  </td>
                 </tr>
               ))
             }

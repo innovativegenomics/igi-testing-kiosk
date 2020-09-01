@@ -304,3 +304,14 @@ export const rejectExternalUser = async uid => {
     return { success: false };
   }
 }
+
+export const updateDayBuffer = async (date, loc, buffer) => {
+  try {
+    const response = await axios.patch('/api/admin/settings/day/buffer', {date, loc, buffer});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't update day buffer`);
+    console.error(err);
+    return { success: false };
+  }
+}
