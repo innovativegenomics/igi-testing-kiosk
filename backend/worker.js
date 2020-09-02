@@ -451,9 +451,9 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
     }
   },
   airQualityCancellation: async (payload, helpers) => {
-    const { email, name } = payload;
+    const { email, name, phone } = payload;
     try {
-      const status = await sgMail.send({
+      await sgMail.send({
         to: email,
         from: config.sendgrid.from,
         replyTo: config.sendgrid.replyTo,
@@ -462,17 +462,23 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
           name: name
         }
       });
-      helpers.logger.info('Sent email');
-      helpers.logger.info(status);
+      await twilio.messages.create({
+        body: `We are sorry to inform you that your currently scheduled testing appointment 
+has been cancelled due to poor air quality. You can schedule a new appointment for a different 
+day at igi-fast.berkeley.edu.`,
+        to:phone,
+        from: config.twilio.sender
+      });
+      helpers.logger.info('Sent email and text');
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err);
     }
   },
   labCapacityCancellation: async (payload, helpers) => {
-    const { email, name } = payload;
+    const { email, name, phone } = payload;
     try {
-      const status = await sgMail.send({
+      await sgMail.send({
         to: email,
         from: config.sendgrid.from,
         replyTo: config.sendgrid.replyTo,
@@ -481,8 +487,14 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
           name: name
         }
       });
-      helpers.logger.info('Sent email');
-      helpers.logger.info(status);
+      await twilio.messages.create({
+        body: `We are sorry to inform you that your currently scheduled testing appointment 
+has been cancelled due to supply chain issues. You can schedule a new appointment for a different 
+day at igi-fast.berkeley.edu. If you have any questions, please email igi-fast@berkeley.edu.`,
+        to:phone,
+        from: config.twilio.sender
+      });
+      helpers.logger.info('Sent email and text');
     } catch(err) {
       helpers.logger.error(`Could not send email`);
       helpers.logger.error(err);
