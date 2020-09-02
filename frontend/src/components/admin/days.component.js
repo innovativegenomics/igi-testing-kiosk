@@ -219,6 +219,7 @@ class EditModal extends Component {
           <Form.Control as='select' value={this.state.reason} onChange={e => this.setState({reason: e.target.value})}>
             <option value=''>none</option>
             <option value='air_quality'>air quality</option>
+            <option value='lab_capacity'>lab capacity</option>
           </Form.Control>
           <Button variant='danger' onClick={e => this.props.deleteDay(this.state.reason)} disabled={this.props.submitting}>Delete day</Button>
         </Modal.Body>

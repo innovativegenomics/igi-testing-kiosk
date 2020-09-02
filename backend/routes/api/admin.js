@@ -8,7 +8,7 @@ const { Sequelize, sequelize, Admin, Slot, User, Day, Settings, ExternalUser, Op
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
-const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail, scheduleAirQualityCancellation } = require('../../worker');
+const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail, scheduleAirQualityCancellation, scheduleLabCapacityCancellation } = require('../../worker');
 const { request } = require('express');
 
 /**
@@ -623,7 +623,7 @@ router.delete('/settings/day', cas.block, async (request, response) => {
       const deletePromises = [];
       toBeDeleted.forEach(v => {
         v.Slots.forEach(s => {
-          contacts.push([s.User.firstname, s.User.email]);
+          contacts.push([s.User.firstname, s.User.email, s.User.phone, s.User.calnetid]);
         });
         deletePromises.push((async () => {
           await User.update({
@@ -652,9 +652,11 @@ router.delete('/settings/day', cas.block, async (request, response) => {
       })());
       await Promise.all(deletePromises);
 
-      if(request.query.reason === 'air_quality') {
-        for(let i of contacts) {
-          await scheduleAirQualityCancellation({name: i[0], email: i[1]});
+      for(let i of contacts) {
+        if(request.query.reason === 'air_quality') {
+          await scheduleAirQualityCancellation({name: i[0], email: i[1], phone: i[2], calnetid: i[3]});
+        } else if(request.query.reason === 'lab_capacity') {
+          await scheduleLabCapacityCancellation({name: i[0], email: i[1], phone: i[2], calnetid: i[3]});
         }
       }
 

@@ -469,6 +469,25 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
       helpers.logger.error(err);
     }
   },
+  labCapacityCancellation: async (payload, helpers) => {
+    const { email, name } = payload;
+    try {
+      const status = await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-12a702ad9d174fdbaa249ff67b6b2084',
+        dynamicTemplateData: {
+          name: name
+        }
+      });
+      helpers.logger.info('Sent email');
+      helpers.logger.info(status);
+    } catch(err) {
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
+    }
+  },
 };
 
 module.exports.startWorker = async () => {
@@ -586,6 +605,22 @@ module.exports.deleteAppointmentReminders = async (calnetid) => {
   });
 }
 
-module.exports.scheduleAirQualityCancellation = async (params = { email, name }) => {
+module.exports.scheduleAirQualityCancellation = async (params = { email, name, phone, calnetid }) => {
+  await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.email}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.phone}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-email`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-text`]);
+  });
   await workerUtils.addJob('airQualityCancellation', params);
+}
+
+module.exports.scheduleLabCapacityCancellation = async (params = { email, name, phone, calnetid }) => {
+  await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.email}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.phone}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-email`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-text`]);
+  });
+  await workerUtils.addJob('labCapacityCancellation', params);
 }
