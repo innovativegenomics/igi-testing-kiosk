@@ -121,6 +121,22 @@ export default class Dashboard extends Component {
             }
           </>
         }
+        <Row className='justify-content-center mb-3 mt-3'>
+          <Col className='text-center' md='6'>
+            <Alert variant='warning' md={2} className='text-left'>
+              <h2 className='text-center'>Announcement</h2>
+              <p className='text-center mb-0 lead'>
+                Due to recent supply chain issues with our Covid 19 testing
+                lab, we have had to temporarily pause testing appointments.
+                New appointments for the week of 9/14 will become available
+                starting 9/6. Please check back on 9/6 to schedule your next appointment.
+              </p>
+              {/* <p className='text-center mb-0 lead'>
+                To view the full announcement, click <TrackedLink to='/'>here</TrackedLink>.
+              </p> */}
+            </Alert>
+          </Col>
+        </Row>
         {this.props.auth.user.reconsented?
           undefined
           :
