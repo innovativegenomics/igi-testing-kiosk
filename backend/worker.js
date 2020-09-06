@@ -397,7 +397,8 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
                 await user.save();
               } else {
                 user.availableStart = moment().startOf('week').add(1, 'week').toDate();
-                user.availableEnd = moment().startOf('week').add(2, 'week').toDate();
+                // user.availableEnd = moment().startOf('week').add(2, 'week').toDate();
+                user.availableEnd = null;
                 await user.save();
               }
             }
