@@ -239,17 +239,6 @@ export const createAdmin = async (name, email, level) => {
   }
 }
 
-export const getSettings = async () => {
-  try {
-    const response = await axios.get('/api/admin/settings');
-    return response.data;
-  } catch(err) {
-    console.error(`Can't get settings`);
-    console.error(err);
-    return { success: false };
-  }
-}
-
 export const updateUser = async (calnetid, params) => {
   try {
     const response = await axios.patch('/api/admin/participant', {calnetid: calnetid, params: params});
@@ -311,6 +300,28 @@ export const updateDayBuffer = async (date, loc, buffer) => {
     return response.data;
   } catch(err) {
     console.error(`Can't update day buffer`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const getSettings = async () => {
+  try {
+    const response = await axios.get('/api/admin/settings');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get current settings`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
+export const patchSettings = async settings => {
+  try {
+    const response = await axios.patch('/api/admin/settings', {...settings});
+    return response.data;
+  } catch(err) {
+    console.error(`Can't patch current settings`);
     console.error(err);
     return { success: false };
   }

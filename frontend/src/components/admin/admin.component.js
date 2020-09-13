@@ -11,6 +11,7 @@ import Study from './study.component';
 import Days from './days.component';
 import Participants from './participants.component';
 import ExtUsers from './extusers.component';
+import Settings from './settings.component';
 
 export default class Admin extends Component {
   constructor(props) {
@@ -62,6 +63,9 @@ export default class Admin extends Component {
           </Nav.Item>
           <Nav.Item className={this.state.level>=30?'':'d-none'}>
             <Nav.Link as={Link} eventKey='admins' to='admins' onClick={e => this.setState({active: 'admins'})}>Manage Admins</Nav.Link>
+          </Nav.Item>
+          <Nav.Item className={this.state.level>=30?'':'d-none'}>
+            <Nav.Link as={Link} eventKey='settings' to='settings' onClick={e => this.setState({active: 'settings'})}>Settings</Nav.Link>
           </Nav.Item>
           <Nav.Item className={this.state.level>=40?'':'d-none'}>
             <Nav.Link as={Link} eventKey='study' to='study' onClick={e => this.setState({active: 'study'})}>Study</Nav.Link>
@@ -115,6 +119,13 @@ export default class Admin extends Component {
           path={`${this.props.match.path}/scanner`}
           render={(props) => {
             return <Scanner {...props} level={this.state.level} />;
+          }}
+        />
+        <Route
+          exact
+          path={`${this.props.match.path}/settings`}
+          render={(props) => {
+            return <Settings {...props} level={this.state.level} />;
           }}
         />
         <Route
