@@ -356,6 +356,10 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
   rescheduleUsers: async (payload, helpers) => {
     const t = await sequelize.transaction({logging: (msg) => helpers.logger.info(msg)});
     try {
+      const settings = await Settings.findOne({
+        attributes: ['sendRescheduleEmails'],
+        logging: (msg) => helpers.logger.info(msg)
+      });
       const expired = await User.findAll({
         where: {
           [Op.or]: {
@@ -402,19 +406,21 @@ You can view your appointment by logging into https://igi-fast.berkeley.edu`,
                 await user.save();
               }
             }
-            try {
-              const status = await sgMail.send({
-                to: user.email,
-                from: config.sendgrid.from,
-                replyTo: config.sendgrid.replyTo,
-                templateId: 'd-d9409e99ebd3421ab736539b8e49b5e5',
-                dynamicTemplateData: {
-                  week: moment(user.availableStart).format('MMMM Do')
-                }
-              });
-            } catch(err) {
-              helpers.logger.error(`Error sending reschedule email to ${user.calnetid}`);
-              helpers.logger.error(err);
+            if(settings.sendRescheduleEmails) {
+              try {
+                const status = await sgMail.send({
+                  to: user.email,
+                  from: config.sendgrid.from,
+                  replyTo: config.sendgrid.replyTo,
+                  templateId: 'd-d9409e99ebd3421ab736539b8e49b5e5',
+                  dynamicTemplateData: {
+                    week: moment(user.availableStart).format('MMMM Do')
+                  }
+                });
+              } catch(err) {
+                helpers.logger.error(`Error sending reschedule email to ${user.calnetid}`);
+                helpers.logger.error(err);
+              }
             }
           } catch(err) {
             helpers.logger.error(`Error rescheduling user ${user.calnetid}`);

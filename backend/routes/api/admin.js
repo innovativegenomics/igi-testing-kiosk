@@ -1062,6 +1062,51 @@ router.patch('/settings/day/buffer', cas.block, async (request, response) => {
   }
 });
 
+router.get('/settings', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const settings = await Settings.findOne({
+        attributes: {
+          exclude: ['accesstoken', 'refreshtoken', 'EmailAccessToken', 'EmailRefreshToken']
+        },
+        logging: (msg) => request.log.info(msg)
+      });
+      response.send({success: true, settings});
+    } catch(err) {
+      request.log.error(err.stack);
+      response.send({ success: false });
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
+router.patch('/settings', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 30) {
+    try {
+      const {accesstoken, refreshtoken, EmailAccessToken, EmailRefreshToken, ...rest} = request.body;
+      await Settings.update({
+        ...rest
+      }, {
+        where: {},
+        logging: (msg) => request.log.info(msg)
+      });
+      response.send({success: true});
+    } catch(err) {
+      request.log.error(err.stack);
+      response.send({ success: false });
+    }
+  } else {
+    request.log.error('Not authed');
+    response.status(401).send();
+  }
+});
+
 
 
 router.get('/study/participantinfo', cas.block, async (request, response) => {
