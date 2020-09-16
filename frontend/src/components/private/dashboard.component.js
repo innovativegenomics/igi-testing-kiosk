@@ -121,6 +121,17 @@ export default class Dashboard extends Component {
             }
           </>
         }
+        <Row className='justify-content-center mt-3'>
+          <Col md='6'>
+            <Alert variant='info'>
+              <h1>Announcement</h1>
+              <p className='lead'>
+                We are now open 5 days a week. Until further notice, Mondays
+                and Fridays will be at GPB and Tuesdays-Thursdays will be at Latimer.
+              </p>
+            </Alert>
+          </Col>
+        </Row>
         {this.props.auth.user.reconsented?
           undefined
           :
