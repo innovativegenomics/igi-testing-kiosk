@@ -14,7 +14,7 @@ if(process.env.NODE_ENV !== 'production') {
 }
 const recaptchaScoreThreshold = 0.0;
 
-const { sequelize, Sequelize, User, Settings, ExternalUser, ResetRequest } = require('../../models');
+const { sequelize, Sequelize, User, Settings, ExternalUser, ResetRequest, OpenTime } = require('../../models');
 const Op = Sequelize.Op;
 const { newPatient } = require('../../lims');
 const cas = require('../../cas');
@@ -90,7 +90,38 @@ router.get('/profile', cas.block, async (request, response) => {
       logging: (msg) => request.log.info(msg)
   });
   if (profile) {
-    response.send({ success: true, user: profile });
+    const availableStart = await OpenTime.findAll({
+      where: {
+        starttime: {
+          [Op.and]: {
+            [Op.gt]: moment(profile.availableStart).toDate(),
+            [Op.gt]: moment().toDate(),
+          }
+        },
+        available: {
+          [Op.gt]: 0
+        }
+      },
+      limit: 1,
+      order: [['starttime', 'asc']],
+      logging: (msg) => request.log.info(msg)
+    });
+    if(availableStart[0]) {
+      response.send({
+        success: true, 
+        user: {
+          ...profile.dataValues,
+          availableStart: availableStart[0].starttime
+        }
+      });
+    } else {
+      response.send({
+        success: true, 
+        user: {
+          ...profile.dataValues,
+        }
+      });
+    }
   } else {
     response.send({ success: false, user: {} });
   }

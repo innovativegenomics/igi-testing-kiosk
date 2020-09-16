@@ -121,34 +121,6 @@ export default class Dashboard extends Component {
             }
           </>
         }
-        <Row className='justify-content-center mb-3 mt-3'>
-          <Col className='text-center' md='6'>
-            <Alert variant='warning' md={2} className='text-left'>
-              <h2 className='text-center'>Announcement</h2>
-              <p className='text-center mb-0 lead'>
-                Due to recent supply chain issues with our Covid 19 testing
-                lab, we have had to temporarily pause testing appointments.
-              </p>
-              <p>
-                In our last email, we said appointments would be opening 9/6.
-                However, we have decided not to open appointments yet until we
-                know for sure that we have the capacity to process more samples.
-              </p>
-            </Alert>
-          </Col>
-        </Row>
-        <Row className='justify-content-center mb-3 mt-3'>
-          <Col className='text-center' md='6'>
-            <Alert variant='primary' md={2} className='text-left'>
-              <h2 className='text-center'>Announcement</h2>
-              <p className='text-center mb-0 lead'>
-                You may have gotten an email this morning saying appointments are open.
-                This was an error on our part, and we are sorry for the confusion. We will
-                be sure to notify everyone when we are opening back up.
-              </p>
-            </Alert>
-          </Col>
-        </Row>
         {this.props.auth.user.reconsented?
           undefined
           :
