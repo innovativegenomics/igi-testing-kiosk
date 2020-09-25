@@ -508,6 +508,34 @@ router.get('/stats/completion', cas.block, async (request, response) => {
   }
 });
 
+router.get('/stats/affiliation', cas.block, async (request, response) => {
+  const calnetid = request.session.cas_user;
+  const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
+  if(!!level && level >= 20) {
+    try {
+      const res = await User.findAll({
+        attributes: [
+          [Sequelize.cast(Sequelize.fn('count', Sequelize.col('*')), 'INTEGER'), 'count'],
+          'affiliation'
+        ],
+        group: ['affiliation'],
+        logging: (msg) => request.log.info(msg)
+      });
+      response.send({
+        success: true,
+        res: res
+      });
+    } catch(err) {
+      request.log.error(`error getting affiliation stats`);
+      request.log.error(err);
+      response.send({success: false});
+    }
+  } else {
+    request.log.info('unauthed');
+    response.status(401).send('Unauthorized');
+  }
+});
+
 router.get('/settings/days', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
