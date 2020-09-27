@@ -65,8 +65,7 @@ export default class Landing extends Component {
             <p className='lead'>
               <i>
                 Please note that this test is experimental. All positive and inconclusive results will be validated 
-                with clinically-approved tests. Additionally, we cannot guarantee that an individual with a 
-                negative test result is truly negative for SARS-CoV-2 or will later become infected with COVID-19.
+                with clinically-approved tests. Additionally, we cannot guarantee that an individual with a negative test result is truly negative for SARS-CoV-2 or will not later become infected with COVID-19.
               </i>
             </p>
           </Col>
@@ -122,8 +121,7 @@ export default class Landing extends Component {
     //           <p>
     //             <i>
     //               Please note that this test is experimental. All positive and inconclusive results will be validated 
-    //               with clinically-approved tests. Additionally, we cannot guarantee that an individual with a 
-    //               negative test result is truly negative for SARS-CoV-2 or will later become infected with COVID-19.
+    //               with clinically-approved tests. Additionally, we cannot guarantee that an individual with a negative test result is truly negative for SARS-CoV-2 or will not later become infected with COVID-19.
     //             </i>
     //           </p>
     //           <Row>
