@@ -135,6 +135,17 @@ export const getCompletionStat = async () => {
   }
 }
 
+export const getAffiliationStat = async () => {
+  try {
+    const response = await axios.get('/api/admin/stats/affiliation');
+    return response.data;
+  } catch(err) {
+    console.error(`Can't get affiliation stats`);
+    console.error(err);
+    return { success: false };
+  }
+}
+
 /**
  * returns array of day dates
  */

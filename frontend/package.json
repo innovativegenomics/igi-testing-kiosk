@@ -10,6 +10,7 @@
     "axios": "^0.19.2",
     "bootstrap": "^4.5.0",
     "chart.js": "^2.9.3",
+    "chartjs-plugin-datalabels": "^0.7.0",
     "email-validator": "^2.0.4",
     "formik": "^2.1.5",
     "google-libphonenumber": "^3.2.10",

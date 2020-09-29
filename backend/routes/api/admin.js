@@ -513,9 +513,9 @@ router.get('/stats/affiliation', cas.block, async (request, response) => {
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 20) {
     try {
-      const affiliations = await User.findAll({
+      const res = await User.findAll({
         attributes: [
-          [Sequelize.cast(Sequelize.fn('count', Sequelize.col('affiliation')), 'INTEGER'), 'count'],
+          [Sequelize.cast(Sequelize.fn('count', Sequelize.col('*')), 'INTEGER'), 'count'],
           'affiliation'
         ],
         group: ['affiliation'],
@@ -523,7 +523,7 @@ router.get('/stats/affiliation', cas.block, async (request, response) => {
       });
       response.send({
         success: true,
-        affiliations: affiliations
+        res: res
       });
     } catch(err) {
       request.log.error(`error getting affiliation stats`);

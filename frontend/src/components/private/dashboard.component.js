@@ -124,10 +124,10 @@ export default class Dashboard extends Component {
         <Row className='justify-content-center mt-3'>
           <Col md='6'>
             <Alert variant='info'>
-              <h1>Announcement</h1>
               <p className='lead'>
-                We are now open 5 days a week. Until further notice, Mondays
-                and Fridays will be at GPB and Tuesdays-Thursdays will be at Latimer.
+              We suggest testing once every two weeks as a part of IGI FAST,
+              however you are welcome to schedule an appointment off this cadence.
+              Please note that you can only have one appointment scheduled at a time.
               </p>
             </Alert>
           </Col>
