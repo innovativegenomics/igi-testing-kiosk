@@ -116,6 +116,11 @@ module.exports = (sequelize, DataTypes) => {
       sourceKey: 'calnetid',
       targetKey: 'calnetid'
     });
+    User.hasMany(models.Tube, {
+      foreignKey: 'calnetid',
+      sourceKey: 'calnetid',
+      targetKey: 'calnetid'
+    });
     User.belongsTo(models.ExternalUser, {
       foreignKey: 'calnetid',
       sourceKey: 'calnetid',

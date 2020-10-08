@@ -86,7 +86,8 @@ router.get('/profile', cas.block, async (request, response) => {
       'questions',
       'reconsented',
       'availableStart',
-      'availableEnd'], where: { calnetid: calnetid },
+      'availableEnd',
+      'atHomeParticipant'], where: { calnetid: calnetid },
       logging: (msg) => request.log.info(msg)
   });
   if (profile) {

@@ -100,6 +100,10 @@ export default class App extends Component {
     });
   }
   render() {
+    if(!this.state.auth.loaded) {
+      return <div></div>;
+    }
+
     return (
         <Router>
           <div className='App'>

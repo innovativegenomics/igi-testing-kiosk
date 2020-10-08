@@ -24,6 +24,7 @@ const ExpressPinoLogger = require('express-pino-logger');
 const { sequelize } = require('./models');
 const users = require('./routes/api/users');
 const slots = require('./routes/api/slots');
+const tubes = require('./routes/api/tubes');
 const admin = require('./routes/api/admin');
 const emails = require('./routes/api/emails');
 const slack = require('./routes/api/slack');
@@ -96,6 +97,7 @@ module.exports = (async () => {
 
     app.use('/api/users', users);
     app.use('/api/slots', slots);
+    app.use('/api/tubes', tubes);
     app.use('/api/admin', admin);
     app.use('/api/emails', emails);
     app.use('/api/slack', slack);
