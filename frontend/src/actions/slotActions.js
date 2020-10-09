@@ -16,19 +16,6 @@ export const getSlot = async () => {
 /**
  * @returns {Promise} Promise resolves when user loaded
  */
-export const getTube = async () => {
-  try {
-    const response = await axios.get('/api/tubes/tube');
-    return response.data;
-  } catch (err) {
-    console.error('error loading tube');
-    console.error(err);
-    return { success: false };
-  }
-}
-/**
- * @returns {Promise} Promise resolves when user loaded
- */
 export const getAvailable = async () => {
   try {
     const response = await axios.get('/api/slots/available');

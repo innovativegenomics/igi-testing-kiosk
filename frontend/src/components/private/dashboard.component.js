@@ -4,7 +4,8 @@ import { Row, Col, Alert, Spinner, Button, Container } from 'react-bootstrap';
 import { BsFillInfoCircleFill } from 'react-icons/bs';
 import moment from 'moment';
 
-import { getSlot, getTube, cancelSlot } from '../../actions/slotActions';
+import { getSlot, cancelSlot } from '../../actions/slotActions';
+import { getTube, cancelDropoff } from '../../actions/tubeActions';
 import { TrackedLink, TrackedButton } from '../../tracker';
 
 export default class Dashboard extends Component {
@@ -28,6 +29,11 @@ export default class Dashboard extends Component {
         alert(`Couldn't cancel your appointment! Please try again.`);
       }
     });
+  }
+  cancelDropoff = async () => {
+    const { success } = await cancelDropoff();
+    const res = await getTube();
+    this.setState({ ...res, loaded: true });
   }
   componentDidMount() {
     console.log(this.props.auth.user);
@@ -140,7 +146,13 @@ export default class Dashboard extends Component {
               <>
                 <p className='display-4'>{this.state.tube.scheduledDropoff?`Scheduled Dropoff ${moment(this.state.tube.scheduledDropoff).format('MMM D')}`:'Choose a dropoff date for your tube'}</p>
                 {this.state.tube.scheduledDropoff?<p className='h1 font-weight-light'>{`anytime from ${moment(this.state.tube.DropoffDay.starttime).format('h:mm A')} to ${moment(this.state.tube.DropoffDay.endtime).format('h:mm A')}`}</p>:<></>}
-                <Button variant='outline-primary' size='lg' onClick={() => this.props.history.push('/scheduler')}>Choose a date</Button>
+                <Button variant='outline-primary' size='lg' onClick={() => this.props.history.push('/scheduler')}>Choose a {this.state.tube.scheduledDropoff?'new':''} date</Button>
+                <br />
+                {this.state.tube.scheduledDropoff?
+                  <Button variant='outline-danger' className='mt-2' size='lg' onClick={this.cancelDropoff}>Cancel selected dropoff</Button>
+                  :
+                  <></>
+                }
               </>
               :
               <>

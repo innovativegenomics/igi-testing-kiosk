@@ -19,6 +19,7 @@ import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
 import Scheduler from './components/private/scheduler.component';
 import Reconsent from './components/private/reconsent.component';
+import Dropoff from './components/private/dropoff.component';
 
 import Admin from './components/admin/admin.component';
 
@@ -66,6 +67,7 @@ export default class App extends Component {
     this.dashboard = withTracker(Dashboard);
     this.scheduler = withTracker(Scheduler);
     this.reconsent = withTracker(Reconsent);
+    this.dropoff = withTracker(Dropoff);
 
     this.admin = withTracker(Admin);
 
@@ -149,6 +151,9 @@ export default class App extends Component {
               )} />
               <Route path='/reconsent' render={props => (
                 <this.reconsent {...props} auth={this.state.auth} updateUser={this.updateUser} />
+              )} />
+              <Route path='/dropoff' render={props => (
+                <this.dropoff {...props} auth={this.state.auth} />
               )} />
               
               <Route path='/admin' render={props => (

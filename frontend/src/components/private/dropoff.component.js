@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { Redirect } from 'react-router-dom';
-import { Container, Spinner, Card, ButtonGroup, Button, Row, Col, Table, Modal, Form, Alert } from 'react-bootstrap';
-import { BsChevronLeft, BsChevronRight, BsBoxArrowUpRight } from 'react-icons/bs';
+import { Container, Spinner, Card, ButtonGroup, Button, Row, Col, Alert, Modal } from 'react-bootstrap';
+import { BsChevronLeft, BsChevronRight } from 'react-icons/bs';
 import moment from 'moment';
 
-import { getAvailable, requestSlot, reserveSlot, deleteReservedSlot } from '../../actions/slotActions';
+import { getAvailableDropoffs, requestDropoff, reserveDropoff, deleteReservedDropoff } from '../../actions/tubeActions';
 import './calendar.css';
+import { nodeName } from 'jquery';
 
 class DateButton extends Component {
   render() {
@@ -22,21 +23,6 @@ class DateButton extends Component {
         </Button>
       </Col>
     );
-
-
-    if (this.props.grey) {
-      return <Col className='m-0 p-0'><Button variant='outline-primary' size='sm' className='border-0 btn-circle text-secondary' disabled>{this.props.day}</Button></Col>;
-    } else if (this.props.invisible) {
-      return <Col className='m-0 p-0'><Button variant='outline-primary' size='sm' className='border-0 btn-circle invisible' disabled>{this.props.day}</Button></Col>;
-    } else if (this.props.active) {
-      if (this.props.selected) {
-        return <Col className='m-0 p-0'><Button variant='outline-success' size='sm' className='border-0 btn-circle active' onClick={e => this.props.onClick()}>{this.props.day}</Button></Col>;
-      } else {
-        return <Col className='m-0 p-0'><Button variant='outline-primary' size='sm' className='border-0 btn-circle active' onClick={e => this.props.onClick()}>{this.props.day}</Button></Col>;
-      }
-    } else {
-      return <Col className='m-0 p-0'><Button variant='outline-primary' size='sm' className='border-0 btn-circle' disabled>{this.props.day}</Button></Col>;
-    }
   }
 }
 
@@ -93,7 +79,30 @@ class Calendar extends Component {
   }
 }
 
-export default class Scheduler extends Component {
+class ConfirmModal extends Component {
+  render() {
+    return (
+      <Modal onHide={this.props.onClose} show={this.props.show}>
+        <Modal.Body>
+          {this.props.dropoff?
+            <p className='lead'>
+              Confirm that you would like to dropoff your current tube
+              on {moment(this.props.dropoff.date).format('MMM Do')} at {this.props.dropoff.Dropoff.name} between {moment(this.props.dropoff.starttime).format('h:mm A')} and {moment(this.props.dropoff.endtime).format('h:mm A')}?
+            </p>
+            :
+            <></>
+          }
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant='primary' onClick={this.props.handleConfirm}>Ok</Button>
+          <Button variant='secondary' onClick={this.props.onClose}>Cancel</Button>
+        </Modal.Footer>
+      </Modal>
+    );
+  }
+}
+
+export default class Dropoff extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -104,13 +113,35 @@ export default class Scheduler extends Component {
       day: null, // moment
       slot: {},
       oldSlot: null,
+      selectedDropoff: null,
       showConfirmModal: false
     };
   }
+  setDay = async (d) => {
+    this.setState({day: d})
+  }
+  pickDropoff = v => {
+    this.setState({showConfirmModal: true, selectedDropoff: v})
+  }
+  handleConfirm = async () => {
+    const { success } = await requestDropoff(this.state.selectedDropoff.id);
+    if(success) {
+      this.props.history.push('/dashboard');
+    } else {
+      this.setState({selectedDropoff: null, showConfirmModal: false});
+      alert('error!');
+    }
+  }
   componentDidMount = async () => {
+    const res = await getAvailableDropoffs();
+    console.log(res)
+    this.setState({...res});
+    console.log(this.state);
   }
   render() {
+    console.log(this.props.auth.loaded);
     if (!this.props.auth.loaded || this.state.success === null) {
+      console.log('spinner');
       return (
         <div style={{width: '100%'}} className='text-center'>
           <Spinner animation='border' role='status'/>
@@ -130,17 +161,30 @@ export default class Scheduler extends Component {
       <Container>
         <Row className='justify-content-center'>
           <Col md={6}>
-            <Alert variant='info'>
+            <Alert variant='primary'>
               <p className='lead mb-0'>
-                A new kiosk location will be opening at Latimer Hall.
-                When you are scheduling your next appointment,
-                please make sure you notice which location you
-                are choosing.
+                To choose a dropoff location for your at home tube,
+                select a date that works for you, and then select the
+                location that is most convenient. You can come to the
+                dropoff location anytime in the specified time range.
               </p>
             </Alert>
           </Col>
         </Row>
-        <Calendar days={this.state.days} day={this.state.day} setDay={d => this.setState({day: d})}/>
+        <Calendar days={this.state.days} day={this.state.day} setDay={d => this.setDay(d)}/>
+        {this.state.day?
+          <>
+            <div className='text-center'>
+              {
+                this.state.available.filter(v => {console.log(v.date); return v.date === this.state.day.format('YYYY-MM-DD')}).map(v => (
+                  <Button key={v.location} className='m-2' onClick={e => this.pickDropoff(v)}>{v.Dropoff.name} between {moment(v.starttime).format('h:mm A')} and {moment(v.endtime).format('h:mm A')}</Button>
+                ))
+              }
+            </div>
+          </>
+          :
+          <></>}
+        <ConfirmModal show={this.state.showConfirmModal} onClose={() => this.setState({showConfirmModal: false, selectedDropoff: null})} dropoff={this.state.selectedDropoff} handleConfirm={this.handleConfirm}></ConfirmModal>
       </Container>
     );
   }
