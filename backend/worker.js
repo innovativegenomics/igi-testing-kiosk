@@ -508,6 +508,32 @@ day at igi-fast.berkeley.edu. If you have any questions, please email igi-fast@b
       helpers.logger.error(err);
     }
   },
+  customCancellation: async (payload, helpers) => {
+    const { email, name, phone, subject, message } = payload;
+    try {
+      await sgMail.send({
+        to: email,
+        from: config.sendgrid.from,
+        replyTo: config.sendgrid.replyTo,
+        templateId: 'd-65aa5455dbda4449ac2b04079f1d7b14',
+        dynamicTemplateData: {
+          name,
+          subject,
+          message
+        }
+      });
+      await twilio.messages.create({
+        body: `${message}. Because of this, your current IGI FAST appointment has been cancelled. You can schedule a new appointment for a different 
+day at igi-fast.berkeley.edu. If you have any questions, please email igi-fast@berkeley.edu.`,
+        to:phone,
+        from: config.twilio.sender
+      });
+      helpers.logger.info('Sent email and text');
+    } catch(err) {
+      helpers.logger.error(`Could not send email`);
+      helpers.logger.error(err);
+    }
+  },
 };
 
 module.exports.startWorker = async () => {
@@ -643,4 +669,14 @@ module.exports.scheduleLabCapacityCancellation = async (params = { email, name, 
     await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-text`]);
   });
   await workerUtils.addJob('labCapacityCancellation', params);
+}
+
+module.exports.scheduleCustomCancellation = async (params = { email, name, phone, calnetid, subject, message }) => {
+  await workerUtils.withPgClient(async pgClient => {
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.email}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.phone}`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-email`]);
+    await pgClient.query('select graphile_worker.remove_job($1)', [`${params.calnetid}-reminder-text`]);
+  });
+  await workerUtils.addJob('customCancellation', params);
 }

@@ -8,7 +8,7 @@ const { Sequelize, sequelize, Admin, Slot, User, Day, Settings, ExternalUser, Op
 const Op = Sequelize.Op;
 
 const cas = require('../../cas');
-const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail, scheduleAirQualityCancellation, scheduleLabCapacityCancellation } = require('../../worker');
+const { scheduleNewAdminEmail, scheduleExternalUserApproveEmail, scheduleExternalUserRejectEmail, scheduleAirQualityCancellation, scheduleCustomCancellation, scheduleLabCapacityCancellation } = require('../../worker');
 const { request } = require('express');
 
 /**
@@ -624,14 +624,18 @@ router.delete('/settings/day', cas.block, async (request, response) => {
   const level = (await Admin.findOne({where: {calnetid: calnetid}, logging: (msg) => request.log.info(msg)})).level;
   if(!!level && level >= 30) {
     try {
-      const date = moment(request.query.date);
+      const subject = request.query.subject;
+      const message = request.query.message;
+      const starttime = request.query.starttime ? moment(request.query.starttime) : moment(request.query.date).startOf('date');
+      const endtime = request.query.endtime ? moment(request.query.endtime) : moment(request.query.date).endOf('date');
       const location = request.query.location;
 
       const toBeDeleted = await OpenTime.findAll({
         where: {
-          date: date.toDate(),
           starttime: {
-            [Op.gte]: moment().toDate()
+            [Op.gte]: moment().toDate(),
+            [Op.gte]: starttime.toDate(),
+            [Op.lt]: endtime.toDate()
           },
           location: location
         },
@@ -685,6 +689,8 @@ router.delete('/settings/day', cas.block, async (request, response) => {
           await scheduleAirQualityCancellation({name: i[0], email: i[1], phone: i[2], calnetid: i[3]});
         } else if(request.query.reason === 'lab_capacity') {
           await scheduleLabCapacityCancellation({name: i[0], email: i[1], phone: i[2], calnetid: i[3]});
+        } else if(request.query.reason === 'custom') {
+          await scheduleCustomCancellation({name: i[0], email: i[1], phone: i[2], calnetid: i[3], subject, message});
         }
       }
 
