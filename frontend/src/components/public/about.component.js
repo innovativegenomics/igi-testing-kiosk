@@ -35,15 +35,6 @@ export default class About extends Component {
             For more information and to enroll, see <TrackedLink ext to='https://igi-fast.berkeley.edu' action='fast home 1'>igi-fast.berkeley.edu</TrackedLink> or contact the study
             coordinator at <TrackedLink ext to='mailto:igi-fast@berkeley.edu' action='igi email 1'>igi-fast@berkeley.edu</TrackedLink>.
           </p>
-          <p className='lead'><b>How do I enroll?</b></p>
-          <p>
-            Enrollment occurs on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' action='fast home 1'>igi-fast.berkeley.edu</TrackedLink>). You will need to log in with
-            your CalNet ID and answer a few questions.
-            If you are a UC Berkeley employee, log in with your CalNet ID. If
-            you are a contractor, or other individual approved for regular work on the UC Berkeley
-            campus, please email <TrackedLink ext to='mailto:igi-fast@berkeley.edu' action='igi email 2'>igi-fast@berkeley.edu</TrackedLink> to check your eligibility and get log in
-            information.
-          </p>
           <p className='lead'><b>How do I schedule my tests?</b></p>
           <p>
             All test scheduling will be done on this website (<TrackedLink ext to='https://igi-fast.berkeley.edu' action='fast home 2'>igi-fast.berkeley.edu</TrackedLink>). You will be
