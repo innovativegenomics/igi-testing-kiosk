@@ -67,15 +67,6 @@ export default class Dashboard extends Component {
               <>
                 <Row className='justify-content-center'>
                   <Col md={6}>
-                    <Alert variant='success'>
-                      <p className='lead mb-0'>
-                        Thanks for completing your appointment!
-                        You will be able to schedule your next
-                        appointment starting this sunday. If you
-                        have any more questions, please email the
-                        study coordinator, Alex Ehrenberg, at <TrackedLink ext to='mailto:igi-fast@berkeley.edu'>igi-fast@berkeley.edu</TrackedLink>.
-                      </p>
-                    </Alert>
                   </Col>
                 </Row>
               </>
@@ -124,10 +115,21 @@ export default class Dashboard extends Component {
         <Row className='justify-content-center mt-3'>
           <Col md='6'>
             <Alert variant='info'>
-              <p className='lead'>
-              We suggest testing once every two weeks as a part of IGI FAST,
-              however you are welcome to schedule an appointment off this cadence.
-              Please note that you can only have one appointment scheduled at a time.
+              <p className='lead m-0'>
+                Please take 10-15 minutes to complete a confidential survey.
+                Your responses will help guide the future of COVID-19 testing
+                programs on the UC Berkeley campus. The survey will be
+                available until 10/30/2020. Survey link: <TrackedLink ext to='https://berkeley.qualtrics.com/jfe/form/SV_ex1NggCkV4I99aJ'>https://berkeley.qualtrics.com/jfe/form/SV_ex1NggCkV4I99aJ</TrackedLink>
+              </p>
+            </Alert>
+            <Alert variant='warning'>
+              <p className='p-0 m-0 lead'>
+                The IGI FAST study will stop testing on 10/29/2020 and is no longer enrolling participants. If you
+                are a UC Berkeley student, staff, or faculty, you are eligible for free asymptomatic COVID-19
+                testing through University Health Services. Please see <TrackedLink to='https://uhs.berkeley.edu/coronavirus/testing-covid-19' ext>https://uhs.berkeley.edu/coronavirus/testing-covid-19</TrackedLink> for more information.
+                <br />
+                <br />
+                See our <TrackedLink ext to={`${process.env.PUBLIC_URL}/pdfs/transitionRequestFeedback.pdf`}>letter to participants</TrackedLink> for more details.
               </p>
             </Alert>
           </Col>

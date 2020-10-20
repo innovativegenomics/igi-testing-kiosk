@@ -164,6 +164,8 @@ export default class NewUser extends Component {
     this.setState({ showToS: false, showDeclineTerms: true });
   }
   render() {
+    return <Redirect to='/rampdown' />;
+
     if (!this.props.auth.loaded) {
       return (
         <div style={{width: '100%'}} className='text-center'>

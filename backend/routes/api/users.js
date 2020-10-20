@@ -44,7 +44,7 @@ router.get('/login', cas.bounce, async (request, response) => {
       } else {
 
         request.session.usertype='patient';
-        response.redirect('/newuser');
+        response.redirect('/rampdown');
       }
     }
     await t.commit();
@@ -148,78 +148,78 @@ router.get('/profile', cas.block, async (request, response) => {
  * response format:
  * {success: true|false}
  */
-router.post('/profile', cas.block, async (request, response) => {
-  const calnetid = request.session.cas_user;
-  const t1 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
-  const count = await User.count({ where: { calnetid: calnetid }, transaction: t1, logging: (msg) => request.log.info(msg) });
-  request.log.info(`User count for ${calnetid}: ${count}`);
-  if (count > 0) {
-    response.send({ success: false, error: 'USER_EXISTS' });
-    await t1.commit();
-  } else {
-    try {
-      const user = await User.create({
-        firstname: request.body.firstname, //
-        middlename: request.body.middlename, //
-        lastname: request.body.lastname, //
-        calnetid: calnetid,
-        dob: moment.utc(request.body.dob).format('YYYY-MM-DD'), //
-        street: request.body.street, //
-        city: request.body.city, //
-        state: request.body.state, //
-        county: request.body.county, //
-        zip: request.body.zip, //
-        sex: request.body.sex, //
-        pbuilding: request.body.pbuilding, //
-        email: request.body.email, //
-        phone: request.body.phone, //
-        affiliation: request.body.affiliation, //
-        housing: request.body.housing,
-        residents: request.body.residents,
-        questions: request.body.questions, //
-        reconsented: true,
-        availableStart: moment().startOf('week').toDate(),
-        availableEnd: null,
-      }, { transaction: t1, logging: (msg) => request.log.info(msg) });
-      await t1.commit();
-      response.send({ success: true });
-    } catch (err) {
-      request.log.error(`error creating user profile for ${calnetid}`);
-      request.log.error(err);
-      await t1.rollback();
-      response.send({ success: false, error: 'SERVER_ERROR' });
-    }
+// router.post('/profile', cas.block, async (request, response) => {
+//   const calnetid = request.session.cas_user;
+//   const t1 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
+//   const count = await User.count({ where: { calnetid: calnetid }, transaction: t1, logging: (msg) => request.log.info(msg) });
+//   request.log.info(`User count for ${calnetid}: ${count}`);
+//   if (count > 0) {
+//     response.send({ success: false, error: 'USER_EXISTS' });
+//     await t1.commit();
+//   } else {
+//     try {
+//       const user = await User.create({
+//         firstname: request.body.firstname, //
+//         middlename: request.body.middlename, //
+//         lastname: request.body.lastname, //
+//         calnetid: calnetid,
+//         dob: moment.utc(request.body.dob).format('YYYY-MM-DD'), //
+//         street: request.body.street, //
+//         city: request.body.city, //
+//         state: request.body.state, //
+//         county: request.body.county, //
+//         zip: request.body.zip, //
+//         sex: request.body.sex, //
+//         pbuilding: request.body.pbuilding, //
+//         email: request.body.email, //
+//         phone: request.body.phone, //
+//         affiliation: request.body.affiliation, //
+//         housing: request.body.housing,
+//         residents: request.body.residents,
+//         questions: request.body.questions, //
+//         reconsented: true,
+//         availableStart: moment().startOf('week').toDate(),
+//         availableEnd: null,
+//       }, { transaction: t1, logging: (msg) => request.log.info(msg) });
+//       await t1.commit();
+//       response.send({ success: true });
+//     } catch (err) {
+//       request.log.error(`error creating user profile for ${calnetid}`);
+//       request.log.error(err);
+//       await t1.rollback();
+//       response.send({ success: false, error: 'SERVER_ERROR' });
+//     }
     
-    try {
-      await scheduleSignupEmail({
-        calnetid: calnetid
-      });
-    } catch (err) {
-      request.log.error(`Coundn't schedule signup email for user ${calnetid}`);
-      request.log.error(err);
-    }
+//     try {
+//       await scheduleSignupEmail({
+//         calnetid: calnetid
+//       });
+//     } catch (err) {
+//       request.log.error(`Coundn't schedule signup email for user ${calnetid}`);
+//       request.log.error(err);
+//     }
 
-    const t2 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
-    const settings = await Settings.findOne({transaction: t2, logging: (msg) => request.log.info(msg)});
-    try {
-      const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken, request.log);
-      if (res.accesstoken) {
-        settings.accesstoken = res.accesstoken;
-        await settings.save();
-      }
-      if(res.patient_id) {
-        const user = await User.findOne({where: {calnetid: calnetid}, transaction: t2, logging: (msg) => request.log.info(msg)});
-        user.patientid = res.patient_id;
-        await user.save();
-      }
-      await t2.commit();
-    } catch (err) {
-      request.log.error('Can not add new LIMs patient');
-      request.log.error(err);
-      await t2.rollback();
-    }
-  }
-});
+//     const t2 = await sequelize.transaction({logging: (msg) => request.log.info(msg)});
+//     const settings = await Settings.findOne({transaction: t2, logging: (msg) => request.log.info(msg)});
+//     try {
+//       const res = await newPatient(request.body, settings.accesstoken, settings.refreshtoken, request.log);
+//       if (res.accesstoken) {
+//         settings.accesstoken = res.accesstoken;
+//         await settings.save();
+//       }
+//       if(res.patient_id) {
+//         const user = await User.findOne({where: {calnetid: calnetid}, transaction: t2, logging: (msg) => request.log.info(msg)});
+//         user.patientid = res.patient_id;
+//         await user.save();
+//       }
+//       await t2.commit();
+//     } catch (err) {
+//       request.log.error('Can not add new LIMs patient');
+//       request.log.error(err);
+//       await t2.rollback();
+//     }
+//   }
+// });
 
 router.post('/reconsent', cas.block, async (request, response) => {
   const calnetid = request.session.cas_user;

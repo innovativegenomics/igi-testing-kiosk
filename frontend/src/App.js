@@ -14,6 +14,7 @@ import Create from './components/public/create.component';
 import ExtLogin from './components/public/extlogin.component';
 import Forgot from './components/public/forgot.component';
 import Reset from './components/public/reset.component';
+import Rampdown from './components/public/rampdown.component';
 
 import NewUser from './components/private/newuser.component';
 import Dashboard from './components/private/dashboard.component';
@@ -61,6 +62,7 @@ export default class App extends Component {
     this.extlogin = withTracker(ExtLogin);
     this.forgot = withTracker(Forgot);
     this.reset = withTracker(Reset);
+    this.rampdown = withTracker(Rampdown);
 
     this.newUser = withTracker(NewUser);
     this.dashboard = withTracker(Dashboard);
@@ -132,6 +134,9 @@ export default class App extends Component {
               )} />
               <Route path='/reset' render={props => (
                 <this.reset {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
+              )} />
+              <Route path='/rampdown' render={props => (
+                <this.rampdown {...props} auth={this.state.auth} siteKey={this.state.siteKey} />
               )} />
 
               <Route path='/newuser' render={props => (
